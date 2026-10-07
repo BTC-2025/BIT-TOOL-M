@@ -23,7 +23,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _profileEmail = 'ravikumar123@bnxmail.com';
   String _profilePhone = '+1 (555) 019-2834';
   String _profileCompany = 'BNX Inc.';
-  
+
   // Settings preferences state
   bool _enableNotifications = true;
   bool _enableCloudBackup = false;
@@ -41,11 +41,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'email': 'admin@bnxecosystem.org',
       'avatar': 'A',
     },
-    {
-      'name': 'Developer Account',
-      'email': 'dev@bnxmail.com',
-      'avatar': 'D',
-    },
+    {'name': 'Developer Account', 'email': 'dev@bnxmail.com', 'avatar': 'D'},
   ];
 
   void _showAccountSwitcher() {
@@ -83,7 +79,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         SnackBar(content: Text('Switched to ${acc['name']}')),
                       );
                     },
-                    color: isCurrent ? Theme.of(context).primaryColor.withOpacity(0.1) : null,
+                    color: isCurrent
+                        ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                        : null,
                     child: Row(
                       children: [
                         CircleAvatar(
@@ -91,7 +89,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           backgroundColor: Theme.of(context).primaryColor,
                           child: Text(
                             acc['avatar']!,
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -99,13 +101,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(acc['name']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                              Text(acc['email']!, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                              Text(
+                                acc['name']!,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              Text(
+                                acc['email']!,
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 11,
+                                ),
+                              ),
                             ],
                           ),
                         ),
                         if (isCurrent)
-                          Icon(Icons.check_circle_rounded, color: Theme.of(context).primaryColor, size: 20),
+                          Icon(
+                            Icons.check_circle_rounded,
+                            color: Theme.of(context).primaryColor,
+                            size: 20,
+                          ),
                       ],
                     ),
                   ),
@@ -127,9 +145,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: const Text('Update Profile Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          title: const Text(
+            'Update Profile Details',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -166,11 +189,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 });
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Profile details updated successfully')),
+                  const SnackBar(
+                    content: Text('Profile details updated successfully'),
+                  ),
                 );
               },
               color: Theme.of(context).primaryColor,
-              child: const Text('Save', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Save',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         );
@@ -185,14 +216,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              title: const Text('Advanced Preferences', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              title: const Text(
+                'Advanced Preferences',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   CheckboxListTile(
-                    title: const Text('System Notifications', style: TextStyle(fontSize: 14)),
+                    title: const Text(
+                      'System Notifications',
+                      style: TextStyle(fontSize: 14),
+                    ),
                     value: _enableNotifications,
                     activeColor: Theme.of(context).primaryColor,
                     onChanged: (val) {
@@ -203,7 +242,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     },
                   ),
                   CheckboxListTile(
-                    title: const Text('Cloud Backup & Sync', style: TextStyle(fontSize: 14)),
+                    title: const Text(
+                      'Cloud Backup & Sync',
+                      style: TextStyle(fontSize: 14),
+                    ),
                     value: _enableCloudBackup,
                     activeColor: Theme.of(context).primaryColor,
                     onChanged: (val) {
@@ -215,10 +257,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    value: _syncInterval,
-                    decoration: const InputDecoration(labelText: 'Data Sync Interval'),
-                    items: ['5 minutes', '15 minutes', '1 hour', 'Daily'].map((interval) {
-                      return DropdownMenuItem(value: interval, child: Text(interval));
+                    initialValue: _syncInterval,
+                    decoration: const InputDecoration(
+                      labelText: 'Data Sync Interval',
+                    ),
+                    items: ['5 minutes', '15 minutes', '1 hour', 'Daily'].map((
+                      interval,
+                    ) {
+                      return DropdownMenuItem(
+                        value: interval,
+                        child: Text(interval),
+                      );
                     }).toList(),
                     onChanged: (val) {
                       if (val != null) {
@@ -231,10 +280,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               actions: [
                 NeumorphicButton(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   onPressed: () => Navigator.pop(context),
                   color: Theme.of(context).primaryColor,
-                  child: const Text('Done', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Done',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             );
@@ -249,10 +307,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: const Text('Confirm Logout', style: TextStyle(fontWeight: FontWeight.bold)),
-          content: const Text('Are you sure you want to end this active dev session?'),
+          title: const Text(
+            'Confirm Logout',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text(
+            'Are you sure you want to end this active dev session?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -268,7 +333,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 );
               },
               color: Colors.red,
-              child: const Text('Logout', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Logout',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         );
@@ -278,7 +349,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final avatarLetter = _profileName.isNotEmpty ? _profileName[0].toUpperCase() : 'R';
+    final avatarLetter = _profileName.isNotEmpty
+        ? _profileName[0].toUpperCase()
+        : 'R';
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -294,13 +367,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   backgroundColor: Theme.of(context).primaryColor,
                   child: Text(
                     avatarLetter,
-                    style: const TextStyle(fontSize: 36, color: Colors.white, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 36,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 14),
                 Text(
                   _profileName,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: -0.5),
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -322,10 +403,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   CircleAvatar(
                     radius: 18,
-                    backgroundColor: Theme.of(context).primaryColor.withOpacity(0.15),
+                    backgroundColor: Theme.of(
+                      context,
+                    ).primaryColor.withValues(alpha: 0.15),
                     child: Text(
                       avatarLetter,
-                      style: TextStyle(fontSize: 14, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -333,12 +420,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(_profileName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                        Text(_profileEmail, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                        Text(
+                          _profileName,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          _profileEmail,
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 11,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  const Icon(Icons.swap_horiz_rounded, color: Colors.grey, size: 20),
+                  const Icon(
+                    Icons.swap_horiz_rounded,
+                    color: Colors.grey,
+                    size: 20,
+                  ),
                 ],
               ),
             ),
@@ -348,7 +451,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // Quick statistics to fill the gaps
           const Text(
             'Session Analytics',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: -0.2),
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.2,
+            ),
           ),
           const SizedBox(height: 10),
           Row(
@@ -361,27 +468,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     children: [
                       Text(
                         '12',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor,
+                        ),
                       ),
                       const SizedBox(height: 4),
-                      const Text('Total Tools', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                      const Text(
+                        'Total Tools',
+                        style: TextStyle(fontSize: 11, color: Colors.grey),
+                      ),
                     ],
                   ),
                 ),
               ),
               const SizedBox(width: 12),
-              Expanded(
+              const Expanded(
                 child: NeumorphicCard(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(12),
                   borderRadius: 14,
                   child: Column(
                     children: [
-                      const Text(
+                      Text(
                         'Active',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
                       ),
-                      const SizedBox(height: 4),
-                      const Text('Sync Status', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                      SizedBox(height: 4),
+                      Text(
+                        'Sync Status',
+                        style: TextStyle(fontSize: 11, color: Colors.grey),
+                      ),
                     ],
                   ),
                 ),
@@ -393,7 +514,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // Actions / Menu Items
           const Text(
             'Settings & Actions',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: -0.2),
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.2,
+            ),
           ),
           const SizedBox(height: 10),
 
@@ -404,7 +529,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             description: 'Restricted account configurations',
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Account management is currently restricted')),
+                const SnackBar(
+                  content: Text('Account management is currently restricted'),
+                ),
               );
             },
           ),
@@ -435,25 +562,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: Colors.blue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.nightlight_outlined, color: Colors.blue, size: 18),
+                  child: const Icon(
+                    Icons.nightlight_outlined,
+                    color: Colors.blue,
+                    size: 18,
+                  ),
                 ),
                 const SizedBox(width: 14),
                 const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Dark Mode', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                      Text('Toggle client visuals', style: TextStyle(color: Colors.grey, fontSize: 11)),
+                      Text(
+                        'Dark Mode',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Toggle client visuals',
+                        style: TextStyle(color: Colors.grey, fontSize: 11),
+                      ),
                     ],
                   ),
                 ),
                 Switch(
                   value: widget.isDark,
                   onChanged: widget.onThemeChanged,
-                  activeColor: Colors.blue,
+                  activeThumbColor: Colors.blue,
                 ),
               ],
             ),
@@ -468,7 +608,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildMenuItem(BuildContext context, IconData icon, String title, {required String description, VoidCallback? onTap}) {
+  Widget _buildMenuItem(
+    BuildContext context,
+    IconData icon,
+    String title, {
+    required String description,
+    VoidCallback? onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: NeumorphicCard(
@@ -479,7 +625,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: Colors.blue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: Colors.blue, size: 18),
@@ -489,8 +635,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                  Text(description, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    description,
+                    style: const TextStyle(color: Colors.grey, fontSize: 11),
+                  ),
                 ],
               ),
             ),
@@ -512,18 +667,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.logout_rounded, color: Colors.red, size: 18),
+              child: const Icon(
+                Icons.logout_rounded,
+                color: Colors.red,
+                size: 18,
+              ),
             ),
             const SizedBox(width: 14),
             const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Logout', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.red)),
-                  Text('End the current dev session', style: TextStyle(color: Colors.grey, fontSize: 11)),
+                  Text(
+                    'Logout',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
+                  ),
+                  Text(
+                    'End the current dev session',
+                    style: TextStyle(color: Colors.grey, fontSize: 11),
+                  ),
                 ],
               ),
             ),

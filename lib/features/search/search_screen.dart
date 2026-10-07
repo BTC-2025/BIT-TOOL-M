@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../core/providers/session_provider.dart';
 import '../../core/widgets/neumorphic_widgets.dart';
 import '../../core/theme/app_spacing.dart';
 
@@ -77,13 +75,17 @@ class _SearchScreenState extends State<SearchScreen> {
                         Icon(
                           Icons.manage_search_rounded,
                           size: 64,
-                          color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+                          color: isDark
+                              ? Colors.grey.shade700
+                              : Colors.grey.shade300,
                         ),
                         const SizedBox(height: 12),
                         Text(
                           'Search for any module to navigate instantly',
                           style: TextStyle(
-                            color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
+                            color: isDark
+                                ? Colors.grey.shade500
+                                : Colors.grey.shade500,
                             fontSize: 14,
                           ),
                         ),
@@ -93,7 +95,11 @@ class _SearchScreenState extends State<SearchScreen> {
                 : Builder(
                     builder: (context) {
                       final filteredModules = _modules
-                          .where((m) => m['title'].toString().toLowerCase().contains(_searchQuery.toLowerCase()))
+                          .where(
+                            (m) => m['title'].toString().toLowerCase().contains(
+                              _searchQuery.toLowerCase(),
+                            ),
+                          )
                           .toList();
 
                       if (filteredModules.isEmpty) {
@@ -112,7 +118,10 @@ class _SearchScreenState extends State<SearchScreen> {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 12),
                             child: NeumorphicButton(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
                               borderRadius: 16,
                               onPressed: () => widget.onNavigate(mod['index']),
                               child: Row(
@@ -120,7 +129,9 @@ class _SearchScreenState extends State<SearchScreen> {
                                   Container(
                                     padding: const EdgeInsets.all(10),
                                     decoration: BoxDecoration(
-                                      color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                      color: Theme.of(
+                                        context,
+                                      ).primaryColor.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Icon(
@@ -132,20 +143,31 @@ class _SearchScreenState extends State<SearchScreen> {
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           mod['title'],
-                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
                                         ),
                                         Text(
                                           'Navigate to ${mod['title']} module',
-                                          style: const TextStyle(color: Colors.grey, fontSize: 12),
+                                          style: const TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 12,
+                                          ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
+                                  const Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    size: 16,
+                                    color: Colors.grey,
+                                  ),
                                 ],
                               ),
                             ),

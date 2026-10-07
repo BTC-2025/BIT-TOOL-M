@@ -29,17 +29,45 @@ class MailScreen extends StatelessWidget {
           if (width >= 600)
             Row(
               children: [
-                Expanded(child: _buildMetricCard(context, 'Sync Status', 'ONLINE', Icons.cloud_done_rounded, Colors.green)),
+                Expanded(
+                  child: _buildMetricCard(
+                    context,
+                    'Sync Status',
+                    'ONLINE',
+                    Icons.cloud_done_rounded,
+                    Colors.green,
+                  ),
+                ),
                 const SizedBox(width: 16),
-                Expanded(child: _buildMetricCard(context, 'Total Mail Sessions', '48 logs', Icons.history_rounded, Colors.blue)),
+                Expanded(
+                  child: _buildMetricCard(
+                    context,
+                    'Total Mail Sessions',
+                    '48 logs',
+                    Icons.history_rounded,
+                    Colors.blue,
+                  ),
+                ),
               ],
             )
           else
             Column(
               children: [
-                _buildMetricCard(context, 'Sync Status', 'ONLINE', Icons.cloud_done_rounded, Colors.green),
+                _buildMetricCard(
+                  context,
+                  'Sync Status',
+                  'ONLINE',
+                  Icons.cloud_done_rounded,
+                  Colors.green,
+                ),
                 const SizedBox(height: 16),
-                _buildMetricCard(context, 'Total Mail Sessions', '48 logs', Icons.history_rounded, Colors.blue),
+                _buildMetricCard(
+                  context,
+                  'Total Mail Sessions',
+                  '48 logs',
+                  Icons.history_rounded,
+                  Colors.blue,
+                ),
               ],
             ),
 
@@ -55,7 +83,9 @@ class MailScreen extends StatelessWidget {
           Consumer<SessionProvider>(
             builder: (context, sessionProvider, child) {
               final mailActivities = sessionProvider.activities
-                  .where((act) => act.module == 'BNX Mail' || act.category == 'Mail')
+                  .where(
+                    (act) => act.module == 'BNX Mail' || act.category == 'Mail',
+                  )
                   .toList();
 
               if (mailActivities.isEmpty) {
@@ -91,7 +121,11 @@ class MailScreen extends StatelessWidget {
                               inset: true,
                               borderRadius: 50,
                             ),
-                            child: Icon(Icons.mail_outline_rounded, color: Theme.of(context).primaryColor, size: 20),
+                            child: Icon(
+                              Icons.mail_outline_rounded,
+                              color: Theme.of(context).primaryColor,
+                              size: 20,
+                            ),
                           ),
                           const SizedBox(width: 14),
                           Expanded(
@@ -99,19 +133,26 @@ class MailScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Expanded(
                                       child: Text(
                                         act.description,
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
                                       '${act.timestamp.hour}:${act.timestamp.minute.toString().padLeft(2, '0')}',
-                                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -119,14 +160,23 @@ class MailScreen extends StatelessWidget {
                                 Row(
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 3,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                        color: Theme.of(
+                                          context,
+                                        ).primaryColor.withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
                                         act.device,
-                                        style: TextStyle(fontSize: 9, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
+                                        style: TextStyle(
+                                          fontSize: 9,
+                                          color: Theme.of(context).primaryColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(width: 8),
@@ -134,7 +184,9 @@ class MailScreen extends StatelessWidget {
                                       'Status: ${act.status}',
                                       style: TextStyle(
                                         fontSize: 11,
-                                        color: act.status == 'Success' ? Colors.green : Colors.red,
+                                        color: act.status == 'Success'
+                                            ? Colors.green
+                                            : Colors.red,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -156,7 +208,13 @@ class MailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricCard(BuildContext context, String title, String val, IconData icon, Color color) {
+  Widget _buildMetricCard(
+    BuildContext context,
+    String title,
+    String val,
+    IconData icon,
+    Color color,
+  ) {
     return NeumorphicCard(
       padding: const EdgeInsets.all(16),
       borderRadius: 20,
@@ -169,12 +227,19 @@ class MailScreen extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
                 val,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),

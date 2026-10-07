@@ -37,7 +37,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       title: 'Calculator',
       icon: Icons.calculate_outlined,
       index: 4,
-      description: 'Perform advanced mathematical operations and calculations instantly.',
+      description:
+          'Perform advanced mathematical operations and calculations instantly.',
       gradientColors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
       category: 'UTILITY',
     ),
@@ -45,7 +46,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       title: 'Calendar',
       icon: Icons.calendar_today_rounded,
       index: 3,
-      description: 'Organize your schedule, track meetings, and plan your workdays.',
+      description:
+          'Organize your schedule, track meetings, and plan your workdays.',
       gradientColors: [Color(0xFF0EA5E9), Color(0xFF2563EB)],
       category: 'PRODUCTIVITY',
     ),
@@ -53,7 +55,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       title: 'Contacts',
       icon: Icons.people_outline_rounded,
       index: 5,
-      description: 'Access directory records, manage clients, and coordinate teams.',
+      description:
+          'Access directory records, manage clients, and coordinate teams.',
       gradientColors: [Color(0xFF10B981), Color(0xFF059669)],
       category: 'ORGANIZATION',
     ),
@@ -61,7 +64,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       title: 'Translator',
       icon: Icons.translate_rounded,
       index: 14,
-      description: 'Instantly translate text and phrases across dynamic global languages.',
+      description:
+          'Instantly translate text and phrases across dynamic global languages.',
       gradientColors: [Color(0xFF8B5CF6), Color(0xFF7C3AED)],
       category: 'COMMUNICATION',
     ),
@@ -69,7 +73,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       title: 'Lens',
       icon: Icons.camera_alt_outlined,
       index: 15,
-      description: 'Analyze objects, scan text, and capture details using your camera.',
+      description:
+          'Analyze objects, scan text, and capture details using your camera.',
       gradientColors: [Color(0xFFEC4899), Color(0xFFDB2777)],
       category: 'VISION AI',
     ),
@@ -77,7 +82,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       title: 'Weather',
       icon: Icons.cloud_outlined,
       index: 16,
-      description: 'Stay updated with live meteorological conditions and local forecasts.',
+      description:
+          'Stay updated with live meteorological conditions and local forecasts.',
       gradientColors: [Color(0xFF06B6D4), Color(0xFF0891B2)],
       category: 'METRIC',
     ),
@@ -85,7 +91,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       title: 'News Feed',
       icon: Icons.newspaper_rounded,
       index: 12,
-      description: 'Browse global headlines, technology news, and personalized feeds.',
+      description:
+          'Browse global headlines, technology news, and personalized feeds.',
       gradientColors: [Color(0xFFF43F5E), Color(0xFFE11D48)],
       category: 'INFORMATION',
     ),
@@ -93,7 +100,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       title: 'Keyboard',
       icon: Icons.keyboard_outlined,
       index: 13,
-      description: 'Configure layout mapping and speed diagnostics for your inputs.',
+      description:
+          'Configure layout mapping and speed diagnostics for your inputs.',
       gradientColors: [Color(0xFFF59E0B), Color(0xFFD97706)],
       category: 'SYSTEM',
     ),
@@ -161,7 +169,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 24),
-          
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -184,7 +192,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       'Welcome back to your premium workspace.',
                       style: TextStyle(
                         fontSize: 14,
-                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
                         letterSpacing: 0.1,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -199,10 +209,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           // Resource Snapshot Grid
           Text(
-            'Resource Snapshot', 
+            'Resource Snapshot',
             style: TextStyle(
-              fontSize: 16, 
-              fontWeight: FontWeight.w700, 
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
               letterSpacing: -0.2,
               color: isDark ? Colors.grey.shade300 : const Color(0xFF1E293B),
             ),
@@ -216,11 +226,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisSpacing: AppSpacing.md,
             childAspectRatio: 1.0,
             children: [
-              _buildKpiCard(context, 'Today Sessions', '24', Icons.history_toggle_off, Colors.indigoAccent),
-              _buildKpiCard(context, 'Active Devices', '2', Icons.devices, Colors.green),
-              _buildKpiCard(context, 'Mail Sent Today', '12', Icons.send_rounded, Colors.orangeAccent),
-              _buildKpiCard(context, 'Pending Alerts', '1', Icons.warning_amber_rounded, Colors.redAccent),
-              _buildKpiCard(context, 'Total Contacts', '42', Icons.people_outline_rounded, Colors.purple),
+              _buildKpiCard(
+                context,
+                'Today Sessions',
+                '24',
+                Icons.history_toggle_off,
+                Colors.indigoAccent,
+              ),
+              _buildKpiCard(
+                context,
+                'Active Devices',
+                '2',
+                Icons.devices,
+                Colors.green,
+              ),
+              _buildKpiCard(
+                context,
+                'Mail Sent Today',
+                '12',
+                Icons.send_rounded,
+                Colors.orangeAccent,
+              ),
+              _buildKpiCard(
+                context,
+                'Pending Alerts',
+                '1',
+                Icons.warning_amber_rounded,
+                Colors.redAccent,
+              ),
+              _buildKpiCard(
+                context,
+                'Total Contacts',
+                '42',
+                Icons.people_outline_rounded,
+                Colors.purple,
+              ),
             ],
           ),
 
@@ -234,12 +274,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Workspaces & Modules', 
+                    'Workspaces & Modules',
                     style: TextStyle(
-                      fontSize: 16, 
-                      fontWeight: FontWeight.w700, 
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
                       letterSpacing: -0.2,
-                      color: isDark ? Colors.grey.shade300 : const Color(0xFF1E293B),
+                      color: isDark
+                          ? Colors.grey.shade300
+                          : const Color(0xFF1E293B),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -247,7 +289,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     'Touch a module to open it',
                     style: TextStyle(
                       fontSize: 12,
-                      color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
+                      color: isDark
+                          ? Colors.grey.shade500
+                          : Colors.grey.shade500,
                     ),
                   ),
                 ],
@@ -280,7 +324,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: AppSpacing.md),
 
           // Interactive Premium Carousel
@@ -296,9 +340,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
               itemBuilder: (context, index) {
                 final item = _modules[index];
-                
+
                 return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 8,
+                  ),
                   child: NeumorphicButton(
                     padding: EdgeInsets.zero,
                     borderRadius: 24,
@@ -308,7 +355,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('${item.title} module is coming soon!'),
+                            content: Text(
+                              '${item.title} module is coming soon!',
+                            ),
                             behavior: SnackBarBehavior.floating,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -329,8 +378,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    item.gradientColors[0].withOpacity(isDark ? 0.15 : 0.08),
-                                    item.gradientColors[1].withOpacity(isDark ? 0.04 : 0.02),
+                                    item.gradientColors[0].withValues(
+                                      alpha: isDark ? 0.15 : 0.08,
+                                    ),
+                                    item.gradientColors[1].withValues(
+                                      alpha: isDark ? 0.04 : 0.02,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -347,7 +400,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: item.gradientColors[0].withOpacity(0.12),
+                                    color: item.gradientColors[0].withValues(
+                                      alpha: 0.12,
+                                    ),
                                     blurRadius: 40,
                                     spreadRadius: 20,
                                   ),
@@ -362,13 +417,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     // Category chip
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: item.gradientColors[0].withOpacity(0.15),
+                                        color: item.gradientColors[0]
+                                            .withValues(alpha: 0.15),
                                         borderRadius: BorderRadius.circular(20),
                                       ),
                                       child: Text(
@@ -385,14 +445,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: isDark ? Colors.grey.shade900 : Colors.white,
+                                        color: isDark
+                                            ? Colors.grey.shade900
+                                            : Colors.white,
                                         borderRadius: BorderRadius.circular(14),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: item.gradientColors[0].withOpacity(0.2),
+                                            color: item.gradientColors[0]
+                                                .withValues(alpha: 0.2),
                                             blurRadius: 10,
                                             offset: const Offset(0, 4),
-                                          )
+                                          ),
                                         ],
                                       ),
                                       child: Icon(
@@ -412,7 +475,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         fontSize: 20,
                                         fontWeight: FontWeight.w900,
                                         letterSpacing: -0.5,
-                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                        color: isDark
+                                            ? Colors.white
+                                            : const Color(0xFF0F172A),
                                       ),
                                     ),
                                     const SizedBox(height: 6),
@@ -421,7 +486,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       style: TextStyle(
                                         fontSize: 12,
                                         height: 1.4,
-                                        color: isDark ? Colors.grey.shade400 : const Color(0xFF475569),
+                                        color: isDark
+                                            ? Colors.grey.shade400
+                                            : const Color(0xFF475569),
                                       ),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
@@ -429,21 +496,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   ],
                                 ),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Row(
                                       children: List.generate(
                                         _modules.length,
                                         (dotIndex) => AnimatedContainer(
-                                          duration: const Duration(milliseconds: 200),
-                                          margin: const EdgeInsets.only(right: 4),
+                                          duration: const Duration(
+                                            milliseconds: 200,
+                                          ),
+                                          margin: const EdgeInsets.only(
+                                            right: 4,
+                                          ),
                                           width: dotIndex == index ? 16 : 4,
                                           height: 4,
                                           decoration: BoxDecoration(
                                             color: dotIndex == index
                                                 ? item.gradientColors[0]
-                                                : (isDark ? Colors.grey.shade800 : Colors.grey.shade300),
-                                            borderRadius: BorderRadius.circular(2),
+                                                : (isDark
+                                                      ? Colors.grey.shade800
+                                                      : Colors.grey.shade300),
+                                            borderRadius: BorderRadius.circular(
+                                              2,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -486,9 +562,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildKpiCard(BuildContext context, String title, String val, IconData icon, Color color) {
+  Widget _buildKpiCard(
+    BuildContext context,
+    String title,
+    String val,
+    IconData icon,
+    Color color,
+  ) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return NeumorphicCard(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       borderRadius: 20,
@@ -499,7 +581,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Container(
             padding: const EdgeInsets.all(5),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: color, size: 18),
@@ -508,10 +590,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              val, 
+              val,
               style: TextStyle(
-                fontSize: 22, 
-                fontWeight: FontWeight.w900, 
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
                 letterSpacing: -1.0,
                 color: isDark ? Colors.white : const Color(0xFF0F172A),
               ),
@@ -521,8 +603,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Text(
             title,
             style: TextStyle(
-              fontSize: 10, 
-              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, 
+              fontSize: 10,
+              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
               fontWeight: FontWeight.w600,
             ),
             overflow: TextOverflow.ellipsis,

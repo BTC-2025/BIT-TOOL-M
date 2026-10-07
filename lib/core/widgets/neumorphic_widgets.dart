@@ -10,11 +10,17 @@ class NeumorphicDecoration {
     Color? color,
   }) {
     final bool isAppDark = Theme.of(context).brightness == Brightness.dark;
-    final Color bg = color ?? (isAppDark ? NeumorphicTheme.darkCard : NeumorphicTheme.lightCard);
-    
+    final Color bg =
+        color ??
+        (isAppDark ? NeumorphicTheme.darkCard : NeumorphicTheme.lightCard);
+
     // Derived shadow colors
-    final Color darkShadow = isAppDark ? NeumorphicTheme.darkDarkShadow : NeumorphicTheme.lightDarkShadow;
-    final Color lightShadow = isAppDark ? NeumorphicTheme.darkLightShadow : NeumorphicTheme.lightLightShadow;
+    final Color darkShadow = isAppDark
+        ? NeumorphicTheme.darkDarkShadow
+        : NeumorphicTheme.lightDarkShadow;
+    final Color lightShadow = isAppDark
+        ? NeumorphicTheme.darkLightShadow
+        : NeumorphicTheme.lightLightShadow;
 
     // Linear gradient for premium surface light reflection
     final LinearGradient surfaceGradient = inset
@@ -22,7 +28,7 @@ class NeumorphicDecoration {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              darkShadow.withOpacity(isAppDark ? 0.3 : 0.15),
+              darkShadow.withValues(alpha: isAppDark ? 0.3 : 0.15),
               bg,
             ],
           )
@@ -30,9 +36,9 @@ class NeumorphicDecoration {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              lightShadow.withOpacity(isAppDark ? 0.05 : 0.9),
+              lightShadow.withValues(alpha: isAppDark ? 0.05 : 0.9),
               bg,
-              darkShadow.withOpacity(isAppDark ? 0.05 : 0.05),
+              darkShadow.withValues(alpha: isAppDark ? 0.05 : 0.05),
             ],
             stops: const [0.0, 0.5, 1.0],
           );
@@ -45,14 +51,14 @@ class NeumorphicDecoration {
         boxShadow: [
           // Top-left dark shadow (receding)
           BoxShadow(
-            color: darkShadow.withOpacity(isAppDark ? 0.8 : 0.4),
+            color: darkShadow.withValues(alpha: isAppDark ? 0.8 : 0.4),
             offset: const Offset(2, 2),
             blurRadius: 4,
             spreadRadius: -1,
           ),
           // Bottom-right light highlight
           BoxShadow(
-            color: lightShadow.withOpacity(isAppDark ? 0.1 : 0.9),
+            color: lightShadow.withValues(alpha: isAppDark ? 0.1 : 0.9),
             offset: const Offset(-2, -2),
             blurRadius: 4,
             spreadRadius: -1,
@@ -65,20 +71,22 @@ class NeumorphicDecoration {
         gradient: surfaceGradient,
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
-          color: isAppDark ? Colors.white.withOpacity(0.02) : Colors.white.withOpacity(0.4),
+          color: isAppDark
+              ? Colors.white.withValues(alpha: 0.02)
+              : Colors.white.withValues(alpha: 0.4),
           width: 1,
         ),
         boxShadow: [
           // Main drop shadow
           BoxShadow(
-            color: darkShadow.withOpacity(isAppDark ? 0.6 : 0.35),
+            color: darkShadow.withValues(alpha: isAppDark ? 0.6 : 0.35),
             offset: const Offset(6, 6),
             blurRadius: 16,
             spreadRadius: 0,
           ),
           // Ambient back light
           BoxShadow(
-            color: lightShadow.withOpacity(isAppDark ? 0.08 : 0.9),
+            color: lightShadow.withValues(alpha: isAppDark ? 0.08 : 0.9),
             offset: const Offset(-6, -6),
             blurRadius: 16,
             spreadRadius: 0,
@@ -143,7 +151,8 @@ class NeumorphicButton extends StatefulWidget {
   State<NeumorphicButton> createState() => _NeumorphicButtonState();
 }
 
-class _NeumorphicButtonState extends State<NeumorphicButton> with SingleTickerProviderStateMixin {
+class _NeumorphicButtonState extends State<NeumorphicButton>
+    with SingleTickerProviderStateMixin {
   bool _isPressed = false;
   late AnimationController _animationController;
 
@@ -247,13 +256,17 @@ class NeumorphicTextField extends StatelessWidget {
           border: InputBorder.none,
           hintText: hintText,
           hintStyle: TextStyle(
-            color: (isDark ? NeumorphicTheme.darkText : NeumorphicTheme.lightText).withOpacity(0.4),
+            color:
+                (isDark ? NeumorphicTheme.darkText : NeumorphicTheme.lightText)
+                    .withValues(alpha: 0.4),
             fontSize: 15,
           ),
           icon: prefixIcon != null
               ? Icon(
                   prefixIcon,
-                  color: (isDark ? NeumorphicTheme.darkAccent : NeumorphicTheme.lightAccent),
+                  color: (isDark
+                      ? NeumorphicTheme.darkAccent
+                      : NeumorphicTheme.lightAccent),
                   size: 20,
                 )
               : null,

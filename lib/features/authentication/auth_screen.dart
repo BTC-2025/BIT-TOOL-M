@@ -36,7 +36,11 @@ class AuthScreen extends StatelessWidget {
                   children: [
                     Text(
                       '${authProvider.riskScore}/100',
-                      style: const TextStyle(fontSize: 40, fontWeight: FontWeight.w900, color: Colors.green),
+                      style: const TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.green,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     const Expanded(
@@ -45,7 +49,10 @@ class AuthScreen extends StatelessWidget {
                         children: [
                           Text(
                             'Profile Status: LOW RISK',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
@@ -65,7 +72,10 @@ class AuthScreen extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Action Triggers
-          const Text('Trigger Auth Simulations', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          const Text(
+            'Trigger Auth Simulations',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -75,7 +85,11 @@ class AuthScreen extends StatelessWidget {
                   onPressed: () {
                     authProvider.triggerBiometricAuth();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Simulated Biometrics Request dispatched!')),
+                      const SnackBar(
+                        content: Text(
+                          'Simulated Biometrics Request dispatched!',
+                        ),
+                      ),
                     );
                   },
                   child: const Text(
@@ -92,7 +106,9 @@ class AuthScreen extends StatelessWidget {
                   onPressed: () {
                     authProvider.triggerOTPRequest();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Simulated OTP SMS Dispatch triggered!')),
+                      const SnackBar(
+                        content: Text('Simulated OTP SMS Dispatch triggered!'),
+                      ),
                     );
                   },
                   child: const Text(
@@ -108,18 +124,36 @@ class AuthScreen extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Security Events
-          const Text('Recent Auth Activity Log', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          const Text(
+            'Recent Auth Activity Log',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 12),
           NeumorphicCard(
             borderRadius: 16,
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Column(
               children: [
-                _buildLogTile('Password Changed Successfully', '12m ago', Icons.key, Colors.green),
+                _buildLogTile(
+                  'Password Changed Successfully',
+                  '12m ago',
+                  Icons.key,
+                  Colors.green,
+                ),
                 const Divider(height: 1),
-                _buildLogTile('New Token Refresh Token Exchange', '1h ago', Icons.refresh, Colors.blue),
+                _buildLogTile(
+                  'New Token Refresh Token Exchange',
+                  '1h ago',
+                  Icons.refresh,
+                  Colors.blue,
+                ),
                 const Divider(height: 1),
-                _buildLogTile('Device Registered: Chrome Windows', '4h ago', Icons.check_circle_outline, Colors.grey),
+                _buildLogTile(
+                  'Device Registered: Chrome Windows',
+                  '4h ago',
+                  Icons.check_circle_outline,
+                  Colors.grey,
+                ),
               ],
             ),
           ),

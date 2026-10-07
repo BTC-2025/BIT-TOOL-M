@@ -4,7 +4,14 @@ import '../../core/widgets/neumorphic_widgets.dart';
 class NewsScreen extends StatelessWidget {
   const NewsScreen({super.key});
 
-  void _showNewsDetail(BuildContext context, String title, String category, String fullContent, IconData icon, Color color) {
+  void _showNewsDetail(
+    BuildContext context,
+    String title,
+    String category,
+    String fullContent,
+    IconData icon,
+    Color color,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -37,7 +44,7 @@ class NewsScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.1),
+                          color: color.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(icon, color: color, size: 28),
@@ -48,9 +55,16 @@ class NewsScreen extends StatelessWidget {
                         children: [
                           Text(
                             category.toUpperCase(),
-                            style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12),
+                            style: TextStyle(
+                              color: color,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
                           ),
-                          const Text('Detailed Report', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                          const Text(
+                            'Detailed Report',
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          ),
                         ],
                       ),
                     ],
@@ -58,7 +72,11 @@ class NewsScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                   Text(
                     title,
-                    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, height: 1.2),
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      height: 1.2,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   const Divider(),
@@ -68,23 +86,33 @@ class NewsScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       height: 1.6,
-                      color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.8),
+                      color: Theme.of(
+                        context,
+                      ).textTheme.bodyLarge?.color?.withValues(alpha: 0.8),
                     ),
                   ),
                   const SizedBox(height: 32),
                   NeumorphicCard(
                     borderRadius: 16,
-                    color: Theme.of(context).primaryColor.withOpacity(0.05),
+                    color: Theme.of(
+                      context,
+                    ).primaryColor.withValues(alpha: 0.05),
                     child: const Column(
                       children: [
                         ListTile(
                           leading: Icon(Icons.link),
-                          title: Text('Related Documentation', style: TextStyle(fontWeight: FontWeight.bold)),
+                          title: Text(
+                            'Related Documentation',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           subtitle: Text('Review official BNX whitepapers'),
                         ),
                         ListTile(
                           leading: Icon(Icons.share),
-                          title: Text('Share with Team', style: TextStyle(fontWeight: FontWeight.bold)),
+                          title: Text(
+                            'Share with Team',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           subtitle: Text('Distribute security advisory'),
                         ),
                       ],
@@ -93,7 +121,10 @@ class NewsScreen extends StatelessWidget {
                   const SizedBox(height: 40),
                   NeumorphicButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Back to Feed', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      'Back to Feed',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ],
               ),
@@ -193,7 +224,7 @@ class NewsScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: color, size: 20),
@@ -202,12 +233,16 @@ class NewsScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Colors.grey.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
                   category.toUpperCase(),
-                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey),
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey,
+                  ),
                 ),
               ),
               const Spacer(),
@@ -225,17 +260,31 @@ class NewsScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             snippet,
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 14, height: 1.4),
+            style: TextStyle(
+              color: Colors.grey.shade600,
+              fontSize: 14,
+              height: 1.4,
+            ),
           ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
-                onPressed: () => _showNewsDetail(context, title, category, fullContent, icon, color),
+                onPressed: () => _showNewsDetail(
+                  context,
+                  title,
+                  category,
+                  fullContent,
+                  icon,
+                  color,
+                ),
                 child: const Row(
                   children: [
-                    Text('Read More', style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(
+                      'Read More',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     SizedBox(width: 4),
                     Icon(Icons.arrow_forward, size: 16),
                   ],

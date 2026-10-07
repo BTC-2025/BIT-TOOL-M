@@ -110,7 +110,8 @@ class MailProvider extends ChangeNotifier {
         time: now.subtract(const Duration(minutes: 10)),
         priority: 'High',
         attachments: [],
-        body: 'We detected a new login from a device registered in London, UK. Please check your active sessions panel.',
+        body:
+            'We detected a new login from a device registered in London, UK. Please check your active sessions panel.',
         status: 'Unread',
         category: 'Inbox',
         tags: ['Security', 'Alert'],
@@ -124,7 +125,8 @@ class MailProvider extends ChangeNotifier {
         time: now.subtract(const Duration(hours: 3)),
         priority: 'Medium',
         attachments: ['eval_template.pdf'],
-        body: 'Hi Team, please complete your self evaluations by Friday. Find the template attached.',
+        body:
+            'Hi Team, please complete your self evaluations by Friday. Find the template attached.',
         status: 'Read',
         category: 'Inbox',
         tags: ['Work', 'HR'],
@@ -138,7 +140,8 @@ class MailProvider extends ChangeNotifier {
         time: now.subtract(const Duration(days: 1)),
         priority: 'Low',
         attachments: [],
-        body: 'Learn how to construct elegant frontend layouts using Neumorphic principles and providers.',
+        body:
+            'Learn how to construct elegant frontend layouts using Neumorphic principles and providers.',
         status: 'Read',
         category: 'Inbox',
         tags: ['Tech'],
@@ -196,7 +199,8 @@ class CalendarProvider extends ChangeNotifier {
       CalendarEvent(
         id: 'e1',
         title: 'Weekly Sync with B2Auth Dev Team',
-        description: 'Review API integration timelines for session tracking module.',
+        description:
+            'Review API integration timelines for session tracking module.',
         startTime: DateTime(now.year, now.month, now.day, 10, 0),
         endTime: DateTime(now.year, now.month, now.day, 11, 0),
         isRecurring: true,
@@ -234,7 +238,8 @@ class CalendarProvider extends ChangeNotifier {
         CalendarEvent(
           id: 'gov_h1_$yr',
           title: 'New Year\'s Day',
-          description: 'Official Government Holiday welcoming the new calendar year.',
+          description:
+              'Official Government Holiday welcoming the new calendar year.',
           startTime: DateTime(yr, 1, 1, 9, 0),
           endTime: DateTime(yr, 1, 1, 17, 0),
           isRecurring: false,
@@ -256,7 +261,8 @@ class CalendarProvider extends ChangeNotifier {
         CalendarEvent(
           id: 'gov_h2_$yr',
           title: 'Republic Day',
-          description: 'Commemorating the adoption of the Constitution of India in 1950.',
+          description:
+              'Commemorating the adoption of the Constitution of India in 1950.',
           startTime: DateTime(yr, 1, 26, 9, 0),
           endTime: DateTime(yr, 1, 26, 17, 0),
           isRecurring: false,
@@ -278,7 +284,8 @@ class CalendarProvider extends ChangeNotifier {
         CalendarEvent(
           id: 'gov_h3_$yr',
           title: 'Ambedkar Jayanti',
-          description: 'Celebrating the birth anniversary of Dr. B.R. Ambedkar.',
+          description:
+              'Celebrating the birth anniversary of Dr. B.R. Ambedkar.',
           startTime: DateTime(yr, 4, 14, 9, 0),
           endTime: DateTime(yr, 4, 14, 17, 0),
           isRecurring: false,
@@ -300,7 +307,8 @@ class CalendarProvider extends ChangeNotifier {
         CalendarEvent(
           id: 'gov_h5_$yr',
           title: 'Gandhi Jayanti',
-          description: 'Observing the birthday of Mahatma Gandhi, leader of the nation.',
+          description:
+              'Observing the birthday of Mahatma Gandhi, leader of the nation.',
           startTime: DateTime(yr, 10, 2, 9, 0),
           endTime: DateTime(yr, 10, 2, 17, 0),
           isRecurring: false,
@@ -311,7 +319,8 @@ class CalendarProvider extends ChangeNotifier {
         CalendarEvent(
           id: 'gov_h_diwali_$yr',
           title: 'Diwali',
-          description: 'Festival of lights, signifying victory of light over darkness.',
+          description:
+              'Festival of lights, signifying victory of light over darkness.',
           startTime: DateTime(yr, 11, 1, 9, 0),
           endTime: DateTime(yr, 11, 1, 17, 0),
           isRecurring: false,
@@ -322,7 +331,8 @@ class CalendarProvider extends ChangeNotifier {
         CalendarEvent(
           id: 'gov_h6_$yr',
           title: 'Christmas Day',
-          description: 'Annual festival commemorating the birth of Jesus Christ.',
+          description:
+              'Annual festival commemorating the birth of Jesus Christ.',
           startTime: DateTime(yr, 12, 25, 9, 0),
           endTime: DateTime(yr, 12, 25, 17, 0),
           isRecurring: false,
@@ -398,7 +408,9 @@ class CalculatorProvider extends ChangeNotifier {
       if (_currentInput == '0') {
         _currentInput = char;
       } else {
-        if (_currentInput.replaceAll('.', '').length >= 12) return; // digit limit
+        if (_currentInput.replaceAll('.', '').length >= 12) {
+          return; // digit limit
+        }
         _currentInput += char;
       }
     }
@@ -425,13 +437,15 @@ class CalculatorProvider extends ChangeNotifier {
       // First entry becomes the base amount
       _runningTotal = value;
       _hasBase = true;
-      _tapeEntries.add(TapeEntry(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        operator: '=',
-        value: value,
-        runningTotal: _runningTotal,
-        isBase: true,
-      ));
+      _tapeEntries.add(
+        TapeEntry(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          operator: '=',
+          value: value,
+          runningTotal: _runningTotal,
+          isBase: true,
+        ),
+      );
       sessionProvider.logActivity(
         iconName: 'calculate',
         device: 'Current Device',
@@ -455,32 +469,38 @@ class CalculatorProvider extends ChangeNotifier {
         newTotal = _runningTotal / value;
       }
       _runningTotal = newTotal;
-      _tapeEntries.add(TapeEntry(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        operator: _pendingOperator,
-        value: value,
-        runningTotal: _runningTotal,
-      ));
+      _tapeEntries.add(
+        TapeEntry(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          operator: _pendingOperator,
+          value: value,
+          runningTotal: _runningTotal,
+        ),
+      );
       sessionProvider.logActivity(
         iconName: 'calculate',
         device: 'Current Device',
         module: 'Calculator',
         duration: '180ms',
         status: 'Success',
-        description: 'Beta Calc: ${_pendingOperator} ${_formatNumber(value)} = ${_formatNumber(_runningTotal)}',
+        description:
+            'Beta Calc: $_pendingOperator ${_formatNumber(value)} = ${_formatNumber(_runningTotal)}',
         category: 'Utility',
       );
     }
 
     // Record in legacy history
-    _history.insert(0, '$_pendingOperator $_currentInput = ${_formatNumber(_runningTotal)}');
+    _history.insert(
+      0,
+      '$_pendingOperator $_currentInput = ${_formatNumber(_runningTotal)}',
+    );
 
     // Reset input for next entry
     _currentInput = '0';
     _pendingOperator = '+';
     _display = '0';
     _equation = '';
-    
+
     saveCurrentToHistory(); // Auto-save after commit
     notifyListeners();
   }
@@ -494,13 +514,15 @@ class CalculatorProvider extends ChangeNotifier {
     _tapeEntries.clear();
     _runningTotal = value;
     _hasBase = true;
-    _tapeEntries.add(TapeEntry(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      operator: '=',
-      value: value,
-      runningTotal: _runningTotal,
-      isBase: true,
-    ));
+    _tapeEntries.add(
+      TapeEntry(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        operator: '=',
+        value: value,
+        runningTotal: _runningTotal,
+        isBase: true,
+      ),
+    );
     _setBaseValue = '0';
     _currentInput = '0';
     _pendingOperator = '+';
@@ -577,7 +599,8 @@ class CalculatorProvider extends ChangeNotifier {
 
   // --- History Management ---
   final List<HistorySection> _historySections = [];
-  List<HistorySection> get historySections => List.unmodifiable(_historySections);
+  List<HistorySection> get historySections =>
+      List.unmodifiable(_historySections);
 
   void saveCurrentToHistory() {
     HistorySection? newSection;
@@ -588,7 +611,10 @@ class CalculatorProvider extends ChangeNotifier {
         timestamp: DateTime.now(),
         comparisonRows: List.from(_comparisonRows),
         type: CalculationType.comparison,
-        totalValue: _comparisonRows.fold(0.0, (sum, row) => sum + row.finalA + row.finalB),
+        totalValue: _comparisonRows.fold(
+          0.0,
+          (sum, row) => sum + row.finalA + row.finalB,
+        ),
       );
     } else {
       if (_tapeEntries.isEmpty) return;
@@ -604,7 +630,8 @@ class CalculatorProvider extends ChangeNotifier {
     // Deduplication: Don't save if it's identical to the last entry
     if (_historySections.isNotEmpty) {
       final last = _historySections.first;
-      if (last.type == newSection.type && last.totalValue == newSection.totalValue) {
+      if (last.type == newSection.type &&
+          last.totalValue == newSection.totalValue) {
         // Further deep check could be added here if needed, but totalValue + type is a good start
         return;
       }
@@ -639,18 +666,26 @@ class CalculatorProvider extends ChangeNotifier {
     final section = _historySections.firstWhere((s) => s.id == id);
     final buffer = StringBuffer();
     buffer.writeln('# BETA CALC LOG — ${section.timestamp}');
-    buffer.writeln('Type: ${section.type == CalculationType.comparison ? "Comparison" : "Calculation"}');
-    buffer.writeln('Total: ${getCurrencySymbol()}${section.totalValue.toStringAsFixed(2)}');
+    buffer.writeln(
+      'Type: ${section.type == CalculationType.comparison ? "Comparison" : "Calculation"}',
+    );
+    buffer.writeln(
+      'Total: ${getCurrencySymbol()}${section.totalValue.toStringAsFixed(2)}',
+    );
     buffer.writeln('------------------------');
-    
+
     if (section.type == CalculationType.comparison) {
       for (var row in section.comparisonRows!) {
-        buffer.writeln('${row.description}: ${getCurrencySymbol()}${row.finalA.toStringAsFixed(2)} vs ${getCurrencySymbol()}${row.finalB.toStringAsFixed(2)}');
+        buffer.writeln(
+          '${row.description}: ${getCurrencySymbol()}${row.finalA.toStringAsFixed(2)} vs ${getCurrencySymbol()}${row.finalB.toStringAsFixed(2)}',
+        );
       }
     } else {
       for (var entry in section.tapeEntries!) {
         final prefix = entry.isBase ? 'BASE' : entry.operator;
-        buffer.writeln('$prefix ${entry.value.toStringAsFixed(2)} → ${getCurrencySymbol()}${entry.runningTotal.toStringAsFixed(2)}');
+        buffer.writeln(
+          '$prefix ${entry.value.toStringAsFixed(2)} → ${getCurrencySymbol()}${entry.runningTotal.toStringAsFixed(2)}',
+        );
       }
     }
     return buffer.toString();
@@ -713,20 +748,23 @@ class CalculatorProvider extends ChangeNotifier {
     if (!_hasBase || _runningTotal == 0) return;
     final gstAmount = _runningTotal * (percentage / 100.0);
     _runningTotal += gstAmount;
-    _tapeEntries.add(TapeEntry(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      operator: '+',
-      value: gstAmount,
-      runningTotal: _runningTotal,
-      presetTag: '${percentage.toInt()}% GST',
-    ));
+    _tapeEntries.add(
+      TapeEntry(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        operator: '+',
+        value: gstAmount,
+        runningTotal: _runningTotal,
+        presetTag: '${percentage.toInt()}% GST',
+      ),
+    );
     sessionProvider.logActivity(
       iconName: 'calculate',
       device: 'Current Device',
       module: 'Calculator',
       duration: '150ms',
       status: 'Success',
-      description: 'Beta Calc: Applied +${percentage.toInt()}% GST (${_formatNumber(gstAmount)})',
+      description:
+          'Beta Calc: Applied +${percentage.toInt()}% GST (${_formatNumber(gstAmount)})',
       category: 'Utility',
     );
     notifyListeners();
@@ -737,20 +775,23 @@ class CalculatorProvider extends ChangeNotifier {
     if (!_hasBase || _runningTotal == 0) return;
     final discountAmount = _runningTotal * (percentage / 100.0);
     _runningTotal -= discountAmount;
-    _tapeEntries.add(TapeEntry(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      operator: '-',
-      value: discountAmount,
-      runningTotal: _runningTotal,
-      presetTag: '${percentage.toInt()}% Discount',
-    ));
+    _tapeEntries.add(
+      TapeEntry(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        operator: '-',
+        value: discountAmount,
+        runningTotal: _runningTotal,
+        presetTag: '${percentage.toInt()}% Discount',
+      ),
+    );
     sessionProvider.logActivity(
       iconName: 'calculate',
       device: 'Current Device',
       module: 'Calculator',
       duration: '150ms',
       status: 'Success',
-      description: 'Beta Calc: Applied -${percentage.toInt()}% Discount (${_formatNumber(discountAmount)})',
+      description:
+          'Beta Calc: Applied -${percentage.toInt()}% Discount (${_formatNumber(discountAmount)})',
       category: 'Utility',
     );
     notifyListeners();
@@ -758,7 +799,9 @@ class CalculatorProvider extends ChangeNotifier {
 
   // --- Currency toggle ---
   void toggleCurrency() {
-    _currencyType = _currencyType == CurrencyType.inr ? CurrencyType.usd : CurrencyType.inr;
+    _currencyType = _currencyType == CurrencyType.inr
+        ? CurrencyType.usd
+        : CurrencyType.inr;
     notifyListeners();
   }
 
@@ -790,7 +833,8 @@ class CalculatorProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateComparisonRow(int index, {
+  void updateComparisonRow(
+    int index, {
     String? description,
     double? valueA,
     double? valueB,
@@ -863,9 +907,12 @@ class CalculatorProvider extends ChangeNotifier {
 
   // --- Legacy: calculate for scientific expressions ---
   void calculate() {
-    if (_currentInput.contains('sin') || _currentInput.contains('cos') ||
-        _currentInput.contains('tan') || _currentInput.contains('log') ||
-        _currentInput.contains('ln') || _currentInput.contains('^') ||
+    if (_currentInput.contains('sin') ||
+        _currentInput.contains('cos') ||
+        _currentInput.contains('tan') ||
+        _currentInput.contains('log') ||
+        _currentInput.contains('ln') ||
+        _currentInput.contains('^') ||
         _currentInput.contains('(')) {
       // Scientific expression — evaluate inline
       try {
@@ -934,7 +981,9 @@ class CalculatorProvider extends ChangeNotifier {
       final label = entry.label != null ? ' (${entry.label})' : '';
       final tag = entry.presetTag != null ? ' [${entry.presetTag}]' : '';
       final prefix = entry.isBase ? 'BASE' : entry.operator;
-      buffer.writeln('$prefix ${_formatNumber(entry.value)}$label$tag → ${getCurrencySymbol()}${_formatNumber(entry.runningTotal)}');
+      buffer.writeln(
+        '$prefix ${_formatNumber(entry.value)}$label$tag → ${getCurrencySymbol()}${_formatNumber(entry.runningTotal)}',
+      );
     }
     buffer.writeln('------------------------');
     buffer.writeln('TOTAL: ${getFormattedTotal()}');
@@ -953,9 +1002,12 @@ class CalculatorProvider extends ChangeNotifier {
   String _evaluate(String input) {
     try {
       String clean = input.replaceAll('x', '*').replaceAll('÷', '/');
-      
+
       // Process percentages
-      clean = clean.replaceAllMapped(RegExp(r'(\d+\.?\d*)%'), (match) => '(${match.group(1)}/100)');
+      clean = clean.replaceAllMapped(
+        RegExp(r'(\d+\.?\d*)%'),
+        (match) => '(${match.group(1)}/100)',
+      );
 
       // Inject constants
       clean = clean.replaceAll('π', '3.1415926535');
@@ -969,7 +1021,7 @@ class CalculatorProvider extends ChangeNotifier {
       // Tokenize
       final tokens = <String>[];
       String currentNum = '';
-      
+
       for (int i = 0; i < clean.length; i++) {
         final char = clean[i];
         if ('+-*/'.contains(char)) {
@@ -1002,7 +1054,7 @@ class CalculatorProvider extends ChangeNotifier {
           final prevNum = double.tryParse(tempTokens.removeLast());
           final nextNum = double.tryParse(tokens[i + 1]);
           if (prevNum == null || nextNum == null) return 'Error';
-          
+
           double res = 0.0;
           if (token == '*') {
             res = prevNum * nextNum;
@@ -1028,7 +1080,7 @@ class CalculatorProvider extends ChangeNotifier {
         if (j + 1 >= tempTokens.length) return 'Error';
         final nextNum = double.tryParse(tempTokens[j + 1]);
         if (nextNum == null) return 'Error';
-        
+
         if (op == '+') {
           result += nextNum;
         } else if (op == '-') {
@@ -1042,10 +1094,12 @@ class CalculatorProvider extends ChangeNotifier {
       if (result.isInfinite || result.isNaN) {
         return 'Error';
       }
-      
+
       double precisionResult = double.parse(result.toStringAsFixed(10));
-      
-      final formattedResult = precisionResult == precisionResult.toInt() ? precisionResult.toInt().toString() : precisionResult.toString();
+
+      final formattedResult = precisionResult == precisionResult.toInt()
+          ? precisionResult.toInt().toString()
+          : precisionResult.toString();
       return formattedResult;
     } catch (e) {
       return 'Error';
@@ -1301,7 +1355,7 @@ class MessagesProvider extends ChangeNotifier {
 // --- AUTH PROVIDER ---
 class AuthProvider extends ChangeNotifier {
   final SessionProvider sessionProvider;
-  int _riskScore = 15; // out of 100
+  final int _riskScore = 15; // out of 100
 
   AuthProvider(this.sessionProvider);
 

@@ -14,7 +14,7 @@ class WeatherScreen extends StatefulWidget {
 
 class _WeatherScreenState extends State<WeatherScreen> {
   final TextEditingController _searchController = TextEditingController();
-  
+
   // Weather state variables
   String _activeCity = 'Detecting Location...';
   String _activeCountry = '';
@@ -68,15 +68,26 @@ class _WeatherScreenState extends State<WeatherScreen> {
       String countryName = '';
 
       try {
-        List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
         if (placemarks.isNotEmpty) {
           Placemark place = placemarks[0];
-          String? city = place.locality ?? place.subLocality ?? place.subAdministrativeArea ?? place.administrativeArea;
+          String? city =
+              place.locality ??
+              place.subLocality ??
+              place.subAdministrativeArea ??
+              place.administrativeArea;
           String? postcode = place.postalCode;
           if (city != null && city.isNotEmpty) {
-            cityName = (postcode != null && postcode.isNotEmpty) ? "$city, $postcode" : city;
+            cityName = (postcode != null && postcode.isNotEmpty)
+                ? "$city, $postcode"
+                : city;
           } else {
-            cityName = (postcode != null && postcode.isNotEmpty) ? postcode : 'My Location';
+            cityName = (postcode != null && postcode.isNotEmpty)
+                ? postcode
+                : 'My Location';
           }
           countryName = place.country ?? '';
         } else {
@@ -86,12 +97,19 @@ class _WeatherScreenState extends State<WeatherScreen> {
         final geoUrl = Uri.parse(
           'https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.latitude}&lon=${position.longitude}&zoom=18&addressdetails=1',
         );
-        final geoResponse = await http.get(geoUrl, headers: {'User-Agent': 'BitToolsApp/1.0'});
+        final geoResponse = await http.get(
+          geoUrl,
+          headers: {'User-Agent': 'BitToolsApp/1.0'},
+        );
         if (geoResponse.statusCode == 200) {
           final geoData = json.decode(geoResponse.body);
           final address = geoData['address'];
           if (address != null) {
-            final city = address['city'] ?? address['town'] ?? address['village'] ?? address['suburb'];
+            final city =
+                address['city'] ??
+                address['town'] ??
+                address['village'] ??
+                address['suburb'];
             final postcode = address['postcode'];
             if (city != null && postcode != null) {
               cityName = "$city, $postcode";
@@ -108,24 +126,33 @@ class _WeatherScreenState extends State<WeatherScreen> {
       }
 
       // 3. Fetch Weather from Open-Meteo
-      await _fetchWeatherFromCoordinates(position.latitude, position.longitude, cityName, countryName);
-
+      await _fetchWeatherFromCoordinates(
+        position.latitude,
+        position.longitude,
+        cityName,
+        countryName,
+      );
     } catch (e) {
       _loadFallbackCity('Failed to retrieve location weather.');
     }
   }
 
-  void _loadFallbackCity(String SnackBarMsg) {
+  void _loadFallbackCity(String snackBarMsg) {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$SnackBarMsg Loading Bengaluru fallback.')),
+        SnackBar(content: Text('$snackBarMsg Loading Bengaluru fallback.')),
       );
     }
     // Fallback coordinates for Bengaluru, India
     _fetchWeatherFromCoordinates(12.9716, 77.5946, 'Bengaluru', 'India');
   }
 
-  Future<void> _fetchWeatherFromCoordinates(double lat, double lon, String city, String country) async {
+  Future<void> _fetchWeatherFromCoordinates(
+    double lat,
+    double lon,
+    String city,
+    String country,
+  ) async {
     try {
       final weatherUrl = Uri.parse(
         'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current_weather=true&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,uv_index&daily=temperature_2m_max,weather_code&timezone=auto',
@@ -142,11 +169,17 @@ class _WeatherScreenState extends State<WeatherScreen> {
         // WMO Weather interpretation codes (https://open-meteo.com/en/docs)
         int code = current['weathercode'];
         String cond = 'Cloudy';
-        if (code <= 1) cond = 'Sunny';
-        else if (code == 2 || code == 3) cond = 'Cloudy';
-        else if (code >= 51 && code <= 67) cond = 'Rainy';
-        else if (code >= 71 && code <= 86) cond = 'Cloudy'; // Snow/showers
-        else if (code >= 95) cond = 'Stormy';
+        if (code <= 1) {
+          cond = 'Sunny';
+        } else if (code == 2 || code == 3) {
+          cond = 'Cloudy';
+        } else if (code >= 51 && code <= 67) {
+          cond = 'Rainy';
+        } else if (code >= 71 && code <= 86) {
+          cond = 'Cloudy'; // Snow/showers
+        } else if (code >= 95) {
+          cond = 'Stormy';
+        }
 
         // Retrieve current hour index
         int currentHourIdx = DateTime.now().hour;
@@ -166,7 +199,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
         // Build Hourly Forecast array
         List<Map<String, dynamic>> tempHourly = [];
         if (hourly != null) {
-          final times = hourly['time'];
           final temps = hourly['temperature_2m'];
           for (int i = 0; i < 6; i++) {
             int futureIdx = (currentHourIdx + i * 2) % 24;
@@ -184,15 +216,28 @@ class _WeatherScreenState extends State<WeatherScreen> {
         if (daily != null) {
           final maxTemps = daily['temperature_2m_max'];
           final weatherCodes = daily['weather_code'];
-          final weekdays = ['Today', 'Tomorrow', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday'];
+          final weekdays = [
+            'Today',
+            'Tomorrow',
+            'Thursday',
+            'Friday',
+            'Saturday',
+            'Sunday',
+            'Monday',
+          ];
           for (int i = 0; i < 5; i++) {
             if (maxTemps != null && maxTemps.length > i) {
               int dailyCode = weatherCodes != null ? weatherCodes[i] : 0;
               String dailyCond = 'Cloudy';
-              if (dailyCode <= 1) dailyCond = 'Sunny';
-              else if (dailyCode == 2 || dailyCode == 3) dailyCond = 'Cloudy';
-              else if (dailyCode >= 51 && dailyCode <= 67) dailyCond = 'Rainy';
-              else if (dailyCode >= 95) dailyCond = 'Stormy';
+              if (dailyCode <= 1) {
+                dailyCond = 'Sunny';
+              } else if (dailyCode == 2 || dailyCode == 3) {
+                dailyCond = 'Cloudy';
+              } else if (dailyCode >= 51 && dailyCode <= 67) {
+                dailyCond = 'Rainy';
+              } else if (dailyCode >= 95) {
+                dailyCond = 'Stormy';
+              }
 
               tempDaily.add({
                 'day': weekdays[i],
@@ -216,7 +261,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
           _dailyForecast = tempDaily;
           _isLoading = false;
         });
-
       } else {
         throw Exception('Open-Meteo status error');
       }
@@ -242,16 +286,24 @@ class _WeatherScreenState extends State<WeatherScreen> {
         'https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(query)}&format=json&limit=1&addressdetails=1',
       );
 
-      final response = await http.get(searchUrl, headers: {'User-Agent': 'BitToolsApp/1.0'});
+      final response = await http.get(
+        searchUrl,
+        headers: {'User-Agent': 'BitToolsApp/1.0'},
+      );
       if (response.statusCode == 200) {
         final results = json.decode(response.body);
         if (results.isNotEmpty) {
           final res = results[0];
           double lat = double.parse(res['lat']);
           double lon = double.parse(res['lon']);
-          
+
           final address = res['address'];
-          String city = address['city'] ?? address['town'] ?? address['village'] ?? address['state'] ?? query;
+          String city =
+              address['city'] ??
+              address['town'] ??
+              address['village'] ??
+              address['state'] ??
+              query;
           String country = address['country'] ?? '';
 
           await _fetchWeatherFromCoordinates(lat, lon, city, country);
@@ -259,31 +311,37 @@ class _WeatherScreenState extends State<WeatherScreen> {
           setState(() {
             _isLoading = false;
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('City not found. Please try another name.')),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('City not found. Please try another name.'),
+              ),
+            );
+          }
         }
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Search request failed.')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Search request failed.')));
+      }
     }
   }
 
   Color _getWeatherThemeColor() {
     switch (_condition) {
       case 'Sunny':
-        return Colors.orangeAccent.withOpacity(0.08);
+        return Colors.orangeAccent.withValues(alpha: 0.08);
       case 'Rainy':
-        return Colors.blueAccent.withOpacity(0.08);
+        return Colors.blueAccent.withValues(alpha: 0.08);
       case 'Cloudy':
-        return Colors.blueGrey.withOpacity(0.08);
+        return Colors.blueGrey.withValues(alpha: 0.08);
       case 'Stormy':
-        return Colors.purpleAccent.withOpacity(0.08);
+        return Colors.purpleAccent.withValues(alpha: 0.08);
       default:
         return Colors.transparent;
     }
@@ -349,7 +407,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
                       children: [
                         CircularProgressIndicator(),
                         SizedBox(height: 16),
-                        Text('Fetching live meteorological reports...', style: TextStyle(color: Colors.grey, fontSize: 13)),
+                        Text(
+                          'Fetching live meteorological reports...',
+                          style: TextStyle(color: Colors.grey, fontSize: 13),
+                        ),
                       ],
                     ),
                   ),
@@ -369,14 +430,20 @@ class _WeatherScreenState extends State<WeatherScreen> {
                               children: [
                                 Text(
                                   _activeCity,
-                                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 if (_activeCountry.isNotEmpty)
                                   Text(
                                     _activeCountry,
-                                    style: const TextStyle(color: Colors.grey, fontSize: 13),
+                                    style: const TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 13,
+                                    ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -384,18 +451,30 @@ class _WeatherScreenState extends State<WeatherScreen> {
                             ),
                           ),
                           const SizedBox(width: 16),
-                          Icon(_getWeatherIcon(_condition), color: Colors.orange, size: 40),
+                          Icon(
+                            _getWeatherIcon(_condition),
+                            color: Colors.orange,
+                            size: 40,
+                          ),
                         ],
                       ),
                       const SizedBox(height: 16),
                       Text(
                         '${_temp.toStringAsFixed(1)}°C',
-                        style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, letterSpacing: -1),
+                        style: const TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -1,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         _condition,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
@@ -413,16 +492,31 @@ class _WeatherScreenState extends State<WeatherScreen> {
               childAspectRatio: 1.6,
               children: [
                 _buildMetricCard(Icons.opacity, 'Humidity', '$_humidity%'),
-                _buildMetricCard(Icons.air, 'Wind', '${_wind.toStringAsFixed(1)} km/h'),
-                _buildMetricCard(Icons.wb_sunny_outlined, 'UV Index', '$_uvIndex'),
-                _buildMetricCard(Icons.eco_outlined, 'Air Quality', _airQuality),
+                _buildMetricCard(
+                  Icons.air,
+                  'Wind',
+                  '${_wind.toStringAsFixed(1)} km/h',
+                ),
+                _buildMetricCard(
+                  Icons.wb_sunny_outlined,
+                  'UV Index',
+                  '$_uvIndex',
+                ),
+                _buildMetricCard(
+                  Icons.eco_outlined,
+                  'Air Quality',
+                  _airQuality,
+                ),
               ],
             ),
             const SizedBox(height: 24),
 
             // Hourly Forecast list
             if (_hourlyForecast.isNotEmpty) ...[
-              const Text('Hourly Forecast', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              const Text(
+                'Hourly Forecast',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              ),
               const SizedBox(height: 12),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -431,15 +525,34 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     return Padding(
                       padding: const EdgeInsets.only(right: 12.0),
                       child: NeumorphicCard(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
                         borderRadius: 14,
                         child: Column(
                           children: [
-                            Text(fc['hour'], style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                            Text(
+                              fc['hour'],
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey,
+                              ),
+                            ),
                             const SizedBox(height: 8),
-                            Icon(_getWeatherIcon(_condition), size: 18, color: Colors.blueGrey),
+                            Icon(
+                              _getWeatherIcon(_condition),
+                              size: 18,
+                              color: Colors.blueGrey,
+                            ),
                             const SizedBox(height: 8),
-                            Text('${(fc['temp'] as num).toStringAsFixed(1)}°', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                            Text(
+                              '${(fc['temp'] as num).toStringAsFixed(1)}°',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -452,7 +565,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
             // 7-day forecast
             if (_dailyForecast.isNotEmpty) ...[
-              const Text('Daily Forecast', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              const Text(
+                'Daily Forecast',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              ),
               const SizedBox(height: 12),
               ListView.builder(
                 shrinkWrap: true,
@@ -463,17 +579,36 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10.0),
                     child: NeumorphicCard(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       borderRadius: 14,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(fc['day'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                          Text(
+                            fc['day'],
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
                           Row(
                             children: [
-                              Icon(_getWeatherIcon(fc['condition']), size: 16, color: Colors.blueGrey),
+                              Icon(
+                                _getWeatherIcon(fc['condition']),
+                                size: 16,
+                                color: Colors.blueGrey,
+                              ),
                               const SizedBox(width: 16),
-                              Text('${(fc['temp'] as num).toStringAsFixed(1)}°C', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                              Text(
+                                '${(fc['temp'] as num).toStringAsFixed(1)}°C',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
                             ],
                           ),
                         ],
@@ -498,7 +633,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withOpacity(0.1),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: Theme.of(context).primaryColor, size: 18),
@@ -509,9 +644,19 @@ class _WeatherScreenState extends State<WeatherScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(title, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                Text(
+                  title,
+                  style: const TextStyle(fontSize: 10, color: Colors.grey),
+                ),
                 const SizedBox(height: 2),
-                Text(val, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13), overflow: TextOverflow.ellipsis),
+                Text(
+                  val,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
             ),
           ),

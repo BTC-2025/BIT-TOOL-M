@@ -27,13 +27,25 @@ class _ContactsScreenState extends State<ContactsScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                NeumorphicTextField(controller: _nameController, hintText: 'Name'),
+                NeumorphicTextField(
+                  controller: _nameController,
+                  hintText: 'Name',
+                ),
                 const SizedBox(height: 12),
-                NeumorphicTextField(controller: _compController, hintText: 'Company'),
+                NeumorphicTextField(
+                  controller: _compController,
+                  hintText: 'Company',
+                ),
                 const SizedBox(height: 12),
-                NeumorphicTextField(controller: _phoneController, hintText: 'Phone'),
+                NeumorphicTextField(
+                  controller: _phoneController,
+                  hintText: 'Phone',
+                ),
                 const SizedBox(height: 12),
-                NeumorphicTextField(controller: _emailController, hintText: 'Email'),
+                NeumorphicTextField(
+                  controller: _emailController,
+                  hintText: 'Email',
+                ),
               ],
             ),
           ),
@@ -92,7 +104,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
               ),
               const SizedBox(width: 8),
               NeumorphicButton(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 onPressed: _showAddContactDialog,
                 color: Theme.of(context).primaryColor,
                 child: const Row(
@@ -100,7 +115,14 @@ class _ContactsScreenState extends State<ContactsScreen> {
                   children: [
                     Icon(Icons.person_add, color: Colors.white, size: 16),
                     SizedBox(width: 6),
-                    Text('Add', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                    Text(
+                      'Add',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -108,10 +130,12 @@ class _ContactsScreenState extends State<ContactsScreen> {
           ),
           const SizedBox(height: 20),
           contactsProvider.contacts.isEmpty
-              ? const Center(child: Padding(
-                  padding: EdgeInsets.all(40.0),
-                  child: Text('No contacts registered.'),
-                ))
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(40.0),
+                    child: Text('No contacts registered.'),
+                  ),
+                )
               : ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -128,8 +152,16 @@ class _ContactsScreenState extends State<ContactsScreen> {
                           children: [
                             CircleAvatar(
                               radius: 24,
-                              backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-                              child: Text(contact.name[0], style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
+                              backgroundColor: Theme.of(
+                                context,
+                              ).primaryColor.withValues(alpha: 0.1),
+                              child: Text(
+                                contact.name[0],
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                             const SizedBox(width: 14),
                             Expanded(
@@ -138,55 +170,86 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                 children: [
                                   Text(
                                     contact.name,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     '${contact.designation} • ${contact.company}',
-                                    style: const TextStyle(color: Colors.grey, fontSize: 12),
+                                    style: const TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 12,
+                                    ),
                                   ),
                                   const SizedBox(height: 10),
                                   // Action buttons aligned horizontally under text to prevent side squeezing
                                   Row(
                                     children: [
                                       GestureDetector(
-                                        onTap: () => contactsProvider.toggleFavorite(contact.id),
+                                        onTap: () => contactsProvider
+                                            .toggleFavorite(contact.id),
                                         child: Container(
                                           padding: const EdgeInsets.all(6),
                                           decoration: BoxDecoration(
-                                            color: contact.isFavorite ? Colors.red.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                                            color: contact.isFavorite
+                                                ? Colors.red.withValues(
+                                                    alpha: 0.1,
+                                                  )
+                                                : Colors.grey.withValues(
+                                                    alpha: 0.1,
+                                                  ),
                                             shape: BoxShape.circle,
                                           ),
                                           child: Icon(
-                                            contact.isFavorite ? Icons.favorite : Icons.favorite_border,
+                                            contact.isFavorite
+                                                ? Icons.favorite
+                                                : Icons.favorite_border,
                                             size: 16,
-                                            color: contact.isFavorite ? Colors.red : Colors.grey,
+                                            color: contact.isFavorite
+                                                ? Colors.red
+                                                : Colors.grey,
                                           ),
                                         ),
                                       ),
                                       const SizedBox(width: 12),
                                       GestureDetector(
-                                        onTap: () => contactsProvider.toggleBlocked(contact.id),
+                                        onTap: () => contactsProvider
+                                            .toggleBlocked(contact.id),
                                         child: Container(
                                           padding: const EdgeInsets.all(6),
                                           decoration: BoxDecoration(
-                                            color: contact.isBlocked ? Colors.red.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                                            color: contact.isBlocked
+                                                ? Colors.red.withValues(
+                                                    alpha: 0.1,
+                                                  )
+                                                : Colors.grey.withValues(
+                                                    alpha: 0.1,
+                                                  ),
                                             shape: BoxShape.circle,
                                           ),
                                           child: Icon(
-                                            contact.isBlocked ? Icons.block : Icons.check_circle_outline,
+                                            contact.isBlocked
+                                                ? Icons.block
+                                                : Icons.check_circle_outline,
                                             size: 16,
-                                            color: contact.isBlocked ? Colors.red : Colors.grey,
+                                            color: contact.isBlocked
+                                                ? Colors.red
+                                                : Colors.grey,
                                           ),
                                         ),
                                       ),
                                       const SizedBox(width: 12),
                                       GestureDetector(
-                                        onTap: () => contactsProvider.deleteContact(contact.id),
+                                        onTap: () => contactsProvider
+                                            .deleteContact(contact.id),
                                         child: Container(
                                           padding: const EdgeInsets.all(6),
                                           decoration: BoxDecoration(
-                                            color: Colors.red.withOpacity(0.1),
+                                            color: Colors.red.withValues(
+                                              alpha: 0.1,
+                                            ),
                                             shape: BoxShape.circle,
                                           ),
                                           child: const Icon(

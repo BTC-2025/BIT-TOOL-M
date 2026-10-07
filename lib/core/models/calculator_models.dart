@@ -1,4 +1,5 @@
 /// Data models for Beta Calc — tape-style business calculator.
+library;
 
 /// Represents a single line on the calculation tape.
 class TapeEntry {
@@ -99,7 +100,8 @@ class HistorySection {
   final List<TapeEntry>? tapeEntries;
   final List<ComparisonRow>? comparisonRows;
   final CalculationType type;
-  final double totalValue; // Sum total for tape, or distinct value for identification
+  final double
+  totalValue; // Sum total for tape, or distinct value for identification
 
   HistorySection({
     required this.id,

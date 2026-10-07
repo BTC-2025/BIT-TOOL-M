@@ -110,7 +110,8 @@ class FileItem {
   final String id;
   final String name;
   final String size;
-  final String category; // Recent, Uploaded, Downloaded, Shared, Deleted, Favorite
+  final String
+  category; // Recent, Uploaded, Downloaded, Shared, Deleted, Favorite
   final String fileType; // PDF, CSV, PNG, DOCX
   final DateTime lastModified;
 

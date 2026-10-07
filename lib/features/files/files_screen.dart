@@ -37,14 +37,16 @@ class _FilesScreenState extends State<FilesScreen> {
               onPressed: () {
                 if (_fileNameController.text.isNotEmpty) {
                   context.read<FilesProvider>().uploadFile(
-                        _fileNameController.text,
-                        '12 KB',
-                        'TXT',
-                      );
+                    _fileNameController.text,
+                    '12 KB',
+                    'TXT',
+                  );
                   _fileNameController.clear();
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('File uploaded successfully!')),
+                    const SnackBar(
+                      content: Text('File uploaded successfully!'),
+                    ),
                   );
                 }
               },
@@ -77,7 +79,13 @@ class _FilesScreenState extends State<FilesScreen> {
                 children: [
                   Icon(Icons.cloud_upload, color: Colors.white, size: 18),
                   SizedBox(width: 8),
-                  Text('Upload File', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  Text(
+                    'Upload File',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -89,12 +97,15 @@ class _FilesScreenState extends State<FilesScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Storage Usage (1.2 GB of 10 GB)', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                'Storage Usage (1.2 GB of 10 GB)',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
               LinearProgressIndicator(
                 value: 0.12,
                 color: Theme.of(context).primaryColor,
-                backgroundColor: Colors.grey.withOpacity(0.2),
+                backgroundColor: Colors.grey.withValues(alpha: 0.2),
               ),
             ],
           ),
@@ -111,8 +122,13 @@ class _FilesScreenState extends State<FilesScreen> {
                   borderRadius: 12,
                   child: ListTile(
                     leading: const Icon(Icons.insert_drive_file, size: 30),
-                    title: Text(file.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text('Type: ${file.fileType} • Size: ${file.size}'),
+                    title: Text(
+                      file.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      'Type: ${file.fileType} • Size: ${file.size}',
+                    ),
                     trailing: Text(
                       '${file.lastModified.day}/${file.lastModified.month}',
                       style: const TextStyle(color: Colors.grey, fontSize: 12),

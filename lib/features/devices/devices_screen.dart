@@ -46,7 +46,10 @@ class DevicesScreen extends StatelessWidget {
                         ),
                         const Divider(),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
                           child: Wrap(
                             alignment: WrapAlignment.spaceBetween,
                             crossAxisAlignment: WrapCrossAlignment.center,
@@ -58,28 +61,47 @@ class DevicesScreen extends StatelessWidget {
                                 children: [
                                   Text(
                                     'IP Address: ${device['ip']}',
-                                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   Text(
                                     'Location: ${device['location']}',
-                                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ),
                               NeumorphicButton(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                color: Colors.red.withOpacity(0.1),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                color: Colors.red.withValues(alpha: 0.1),
                                 onPressed: () {
-                                  devicesProvider.removeDevice(device['id'] ?? '');
+                                  devicesProvider.removeDevice(
+                                    device['id'] ?? '',
+                                  );
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Revoked session for ${device['name']}')),
+                                    SnackBar(
+                                      content: Text(
+                                        'Revoked session for ${device['name']}',
+                                      ),
+                                    ),
                                   );
                                 },
                                 child: const Text(
                                   'Revoke session',
-                                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12),
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ),
                             ],

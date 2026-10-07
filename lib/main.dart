@@ -28,20 +28,28 @@ class BITToolApp extends StatelessWidget {
           update: (_, session, previous) => previous ?? MailProvider(session),
         ),
         ChangeNotifierProxyProvider<SessionProvider, CalendarProvider>(
-          create: (context) => CalendarProvider(context.read<SessionProvider>()),
-          update: (_, session, previous) => previous ?? CalendarProvider(session),
+          create: (context) =>
+              CalendarProvider(context.read<SessionProvider>()),
+          update: (_, session, previous) =>
+              previous ?? CalendarProvider(session),
         ),
         ChangeNotifierProxyProvider<SessionProvider, CalculatorProvider>(
-          create: (context) => CalculatorProvider(context.read<SessionProvider>()),
-          update: (_, session, previous) => previous ?? CalculatorProvider(session),
+          create: (context) =>
+              CalculatorProvider(context.read<SessionProvider>()),
+          update: (_, session, previous) =>
+              previous ?? CalculatorProvider(session),
         ),
         ChangeNotifierProxyProvider<SessionProvider, ContactsProvider>(
-          create: (context) => ContactsProvider(context.read<SessionProvider>()),
-          update: (_, session, previous) => previous ?? ContactsProvider(session),
+          create: (context) =>
+              ContactsProvider(context.read<SessionProvider>()),
+          update: (_, session, previous) =>
+              previous ?? ContactsProvider(session),
         ),
         ChangeNotifierProxyProvider<SessionProvider, MessagesProvider>(
-          create: (context) => MessagesProvider(context.read<SessionProvider>()),
-          update: (_, session, previous) => previous ?? MessagesProvider(session),
+          create: (context) =>
+              MessagesProvider(context.read<SessionProvider>()),
+          update: (_, session, previous) =>
+              previous ?? MessagesProvider(session),
         ),
         ChangeNotifierProxyProvider<SessionProvider, AuthProvider>(
           create: (context) => AuthProvider(context.read<SessionProvider>()),
@@ -49,7 +57,8 @@ class BITToolApp extends StatelessWidget {
         ),
         ChangeNotifierProxyProvider<SessionProvider, DevicesProvider>(
           create: (context) => DevicesProvider(context.read<SessionProvider>()),
-          update: (_, session, previous) => previous ?? DevicesProvider(session),
+          update: (_, session, previous) =>
+              previous ?? DevicesProvider(session),
         ),
         ChangeNotifierProxyProvider<SessionProvider, FilesProvider>(
           create: (context) => FilesProvider(context.read<SessionProvider>()),
@@ -57,7 +66,8 @@ class BITToolApp extends StatelessWidget {
         ),
         ChangeNotifierProxyProvider<SessionProvider, ReportsProvider>(
           create: (context) => ReportsProvider(context.read<SessionProvider>()),
-          update: (_, session, previous) => previous ?? ReportsProvider(session),
+          update: (_, session, previous) =>
+              previous ?? ReportsProvider(session),
         ),
       ],
       child: MaterialApp(
@@ -65,7 +75,8 @@ class BITToolApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: NeumorphicTheme.lightTheme,
         darkTheme: NeumorphicTheme.darkTheme,
-        themeMode: ThemeMode.light, // Handled internally by ResponsiveShell dynamic theme injection
+        themeMode: ThemeMode
+            .light, // Handled internally by ResponsiveShell dynamic theme injection
         home: const ResponsiveShell(),
       ),
     );

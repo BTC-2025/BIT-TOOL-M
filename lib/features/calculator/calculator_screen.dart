@@ -59,13 +59,23 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   const SizedBox(height: 24),
 
                   // ── History Sections (Togglable) ──
-                  if (_showHistoryList && calcProvider.historySections.isNotEmpty) ...[
+                  if (_showHistoryList &&
+                      calcProvider.historySections.isNotEmpty) ...[
                     const Text(
                       'Calculation Logs',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: -0.2),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.2,
+                      ),
                     ),
                     const SizedBox(height: 12),
-                    _buildHistorySectionsList(context, calcProvider, isDark, primaryColor),
+                    _buildHistorySectionsList(
+                      context,
+                      calcProvider,
+                      isDark,
+                      primaryColor,
+                    ),
                     const SizedBox(height: 24),
                     const Divider(),
                     const SizedBox(height: 24),
@@ -73,7 +83,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
                   // ── SET BASE ──
                   if (!calcProvider.hasBase) ...[
-                    _buildSetBase(context, calcProvider, isDark, primaryColor, onSurface),
+                    _buildSetBase(
+                      context,
+                      calcProvider,
+                      isDark,
+                      primaryColor,
+                      onSurface,
+                    ),
                     const SizedBox(height: 12),
                   ],
 
@@ -85,7 +101,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
                   // ── CONTINUE section ──
                   if (calcProvider.hasBase)
-                    _buildContinueSection(context, calcProvider, isDark, onSurface),
+                    _buildContinueSection(
+                      context,
+                      calcProvider,
+                      isDark,
+                      onSurface,
+                    ),
 
                   const SizedBox(height: 12),
 
@@ -95,12 +116,23 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   const SizedBox(height: 8),
 
                   // ── Mode-specific content ──
-                  _buildModeContent(context, calcProvider, isDark, primaryColor),
+                  _buildModeContent(
+                    context,
+                    calcProvider,
+                    isDark,
+                    primaryColor,
+                  ),
 
                   const SizedBox(height: 12),
 
                   // ── Number Pad ──
-                  _buildNumberPad(context, calcProvider, isDark, primaryColor, onSurface),
+                  _buildNumberPad(
+                    context,
+                    calcProvider,
+                    isDark,
+                    primaryColor,
+                    onSurface,
+                  ),
 
                   const SizedBox(height: 12),
 
@@ -111,7 +143,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   const SizedBox(height: AppSpacing.lg),
                   const Text(
                     'Ecosystem Sessions',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: -0.2),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.2,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   _buildEcosystemSessionsList(),
@@ -128,7 +164,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   // ═══════════════════════════════════════════════════════════
   // HEADER — ✦ BETA CALC  [↻] [⤴] [🗑] [✕]
   // ═══════════════════════════════════════════════════════════
-  Widget _buildHeader(BuildContext context, CalculatorProvider calc, bool isDark, Color primary) {
+  Widget _buildHeader(
+    BuildContext context,
+    CalculatorProvider calc,
+    bool isDark,
+    Color primary,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
       child: Row(
@@ -152,13 +193,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             );
           }),
           _headerAction(
-            _showHistoryList ? Icons.history_toggle_off_rounded : Icons.history_rounded, 
-            'Toggle Logs', 
+            _showHistoryList
+                ? Icons.history_toggle_off_rounded
+                : Icons.history_rounded,
+            'Toggle Logs',
             () {
               setState(() {
                 _showHistoryList = !_showHistoryList;
               });
-            }
+            },
           ),
           _headerAction(Icons.share_outlined, 'Share', () {
             final summary = calc.copyTapeSummary();
@@ -190,7 +233,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   // ═══════════════════════════════════════════════════════════
   // SET BASE — input field with "SET BASE" label
   // ═══════════════════════════════════════════════════════════
-  Widget _buildSetBase(BuildContext context, CalculatorProvider calc, bool isDark, Color primary, Color onSurface) {
+  Widget _buildSetBase(
+    BuildContext context,
+    CalculatorProvider calc,
+    bool isDark,
+    Color primary,
+    Color onSurface,
+  ) {
     return NeumorphicCard(
       borderRadius: 16,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -222,14 +271,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   // ═══════════════════════════════════════════════════════════
   // HISTORY SECTIONS — Groups of past calculations/comparisons
   // ═══════════════════════════════════════════════════════════
-  Widget _buildHistorySectionsList(BuildContext context, CalculatorProvider calc, bool isDark, Color primary) {
+  Widget _buildHistorySectionsList(
+    BuildContext context,
+    CalculatorProvider calc,
+    bool isDark,
+    Color primary,
+  ) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: calc.historySections.length,
       itemBuilder: (context, i) {
         final section = calc.historySections[i];
-        final timeStr = '${section.timestamp.hour.toString().padLeft(2, '0')}:${section.timestamp.minute.toString().padLeft(2, '0')}:${section.timestamp.second.toString().padLeft(2, '0')} ${section.timestamp.hour >= 12 ? 'PM' : 'AM'}';
+        final timeStr =
+            '${section.timestamp.hour.toString().padLeft(2, '0')}:${section.timestamp.minute.toString().padLeft(2, '0')}:${section.timestamp.second.toString().padLeft(2, '0')} ${section.timestamp.hour >= 12 ? 'PM' : 'AM'}';
         final isComparison = section.type == CalculationType.comparison;
 
         return Padding(
@@ -245,17 +300,31 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(isComparison ? Icons.compare_arrows_rounded : Icons.history_rounded, size: 14, color: Colors.grey),
+                        Icon(
+                          isComparison
+                              ? Icons.compare_arrows_rounded
+                              : Icons.history_rounded,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           timeStr,
-                          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
                         ),
                       ],
                     ),
                     Text(
                       '${isComparison ? section.comparisonRows!.length : section.tapeEntries!.length} Items',
-                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: primary),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: primary,
+                      ),
                     ),
                   ],
                 ),
@@ -267,23 +336,43 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            isComparison ? 'PRICE COMPARISON LOG' : 'CALCULATED LOG',
-                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.grey),
+                            isComparison
+                                ? 'PRICE COMPARISON LOG'
+                                : 'CALCULATED LOG',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.grey,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             '${calc.getCurrencySymbol()}${section.totalValue.toStringAsFixed(2)}',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primary),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: primary,
+                            ),
                           ),
                         ],
                       ),
                     ),
                     NeumorphicButton(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       borderRadius: 8,
                       color: Colors.teal.shade400,
                       onPressed: () => calc.restoreHistorySection(section.id),
-                      child: const Text('RESTORE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white)),
+                      child: const Text(
+                        'RESTORE',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     GestureDetector(
@@ -291,7 +380,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         final summary = calc.copySectionSummary(section.id);
                         Clipboard.setData(ClipboardData(text: summary));
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Log copied to clipboard')),
+                          const SnackBar(
+                            content: Text('Log copied to clipboard'),
+                          ),
                         );
                       },
                       child: Container(
@@ -300,7 +391,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                           color: Colors.blue.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Icon(Icons.share_rounded, size: 16, color: Colors.blue),
+                        child: const Icon(
+                          Icons.share_rounded,
+                          size: 16,
+                          color: Colors.blue,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -312,7 +407,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                           color: Colors.red.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Icon(Icons.delete_outline_rounded, size: 16, color: Colors.red),
+                        child: const Icon(
+                          Icons.delete_outline_rounded,
+                          size: 16,
+                          color: Colors.red,
+                        ),
                       ),
                     ),
                   ],
@@ -328,7 +427,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   // ═══════════════════════════════════════════════════════════
   // TAPE LIST — scrollable list of tape entries
   // ═══════════════════════════════════════════════════════════
-  Widget _buildTapeList(BuildContext context, CalculatorProvider calc, bool isDark, Color primary) {
+  Widget _buildTapeList(
+    BuildContext context,
+    CalculatorProvider calc,
+    bool isDark,
+    Color primary,
+  ) {
     _scrollTapeToBottom();
     return ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 200),
@@ -338,13 +442,27 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         itemCount: calc.tapeEntries.length,
         itemBuilder: (context, i) {
           final entry = calc.tapeEntries[i];
-          return _buildTapeEntryWidget(context, calc, entry, i, isDark, primary);
+          return _buildTapeEntryWidget(
+            context,
+            calc,
+            entry,
+            i,
+            isDark,
+            primary,
+          );
         },
       ),
     );
   }
 
-  Widget _buildTapeEntryWidget(BuildContext context, CalculatorProvider calc, TapeEntry entry, int index, bool isDark, Color primary) {
+  Widget _buildTapeEntryWidget(
+    BuildContext context,
+    CalculatorProvider calc,
+    TapeEntry entry,
+    int index,
+    bool isDark,
+    Color primary,
+  ) {
     final currencySymbol = calc.getCurrencySymbol();
     final displayTotal = calc.currencyType == CurrencyType.usd
         ? entry.runningTotal / calc.simulatedUsdRate
@@ -362,7 +480,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               // BASE chip or operator
               if (entry.isBase) ...[
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF16A34A),
                     borderRadius: BorderRadius.circular(4),
@@ -391,11 +512,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     children: [
                       if (entry.presetTag != null) ...[
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
-                            color: entry.operator == '+' 
-                                ? const Color(0xFF16A34A).withOpacity(0.1)
-                                : Colors.red.withOpacity(0.1),
+                            color: entry.operator == '+'
+                                ? const Color(0xFF16A34A).withValues(alpha: 0.1)
+                                : Colors.red.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -403,7 +527,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             style: TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.w700,
-                              color: entry.operator == '+' ? const Color(0xFF16A34A) : Colors.red,
+                              color: entry.operator == '+'
+                                  ? const Color(0xFF16A34A)
+                                  : Colors.red,
                             ),
                           ),
                         ),
@@ -463,7 +589,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   onTap: () => calc.removeTapeEntry(index),
                   child: Padding(
                     padding: const EdgeInsets.all(4.0),
-                    child: Icon(Icons.close, size: 14, color: Colors.red.shade400),
+                    child: Icon(
+                      Icons.close,
+                      size: 14,
+                      color: Colors.red.shade400,
+                    ),
                   ),
                 ),
               ],
@@ -476,13 +606,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             child: _buildLabelRow(context, calc, entry, index, isDark),
           ),
 
-          Divider(height: 1, color: Colors.grey.withOpacity(0.15)),
+          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.15)),
         ],
       ),
     );
   }
 
-  Widget _buildLabelRow(BuildContext context, CalculatorProvider calc, TapeEntry entry, int index, bool isDark) {
+  Widget _buildLabelRow(
+    BuildContext context,
+    CalculatorProvider calc,
+    TapeEntry entry,
+    int index,
+    bool isDark,
+  ) {
     if (entry.label != null && entry.label!.isNotEmpty) {
       return Row(
         children: [
@@ -490,7 +626,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           const SizedBox(width: 4),
           Text(
             entry.label!,
-            style: TextStyle(fontSize: 11, color: Colors.grey.shade500, fontStyle: FontStyle.italic),
+            style: TextStyle(
+              fontSize: 11,
+              color: Colors.grey.shade500,
+              fontStyle: FontStyle.italic,
+            ),
           ),
           const Spacer(),
           InkWell(
@@ -516,19 +656,32 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  void _showLabelDialog(BuildContext context, CalculatorProvider calc, int index) {
+  void _showLabelDialog(
+    BuildContext context,
+    CalculatorProvider calc,
+    int index,
+  ) {
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add Label', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Add Label',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(hintText: 'Enter label...', border: OutlineInputBorder()),
+          decoration: const InputDecoration(
+            hintText: 'Enter label...',
+            border: OutlineInputBorder(),
+          ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () {
               calc.addLabel(index, controller.text);
@@ -544,7 +697,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   // ═══════════════════════════════════════════════════════════
   // CONTINUE SECTION — shows current input being built
   // ═══════════════════════════════════════════════════════════
-  Widget _buildContinueSection(BuildContext context, CalculatorProvider calc, bool isDark, Color onSurface) {
+  Widget _buildContinueSection(
+    BuildContext context,
+    CalculatorProvider calc,
+    bool isDark,
+    Color onSurface,
+  ) {
     return NeumorphicCard(
       borderRadius: 14,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -565,7 +723,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             children: [
               Text(
                 calc.pendingOperator,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey.shade500),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade500,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -592,11 +754,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   // ═══════════════════════════════════════════════════════════
   // MODE TABS — GST | Discount | USD/INR | Compare
   // ═══════════════════════════════════════════════════════════
-  Widget _buildModeTabs(BuildContext context, CalculatorProvider calc, bool isDark, Color primary) {
+  Widget _buildModeTabs(
+    BuildContext context,
+    CalculatorProvider calc,
+    bool isDark,
+    Color primary,
+  ) {
     return Row(
       children: [
         _modeTab(
-          context, calc,
+          context,
+          calc,
           CalcMode.gst,
           '% GST',
           Icons.percent,
@@ -605,7 +773,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         ),
         const SizedBox(width: 6),
         _modeTab(
-          context, calc,
+          context,
+          calc,
           CalcMode.discount,
           'Discount',
           Icons.local_offer_outlined,
@@ -614,16 +783,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         ),
         const SizedBox(width: 6),
         _modeTab(
-          context, calc,
+          context,
+          calc,
           CalcMode.currency,
           calc.currencyType == CurrencyType.inr ? 'INR' : 'USD',
-          calc.currencyType == CurrencyType.inr ? Icons.currency_rupee : Icons.attach_money,
+          calc.currencyType == CurrencyType.inr
+              ? Icons.currency_rupee
+              : Icons.attach_money,
           primary,
           isDark,
         ),
         const SizedBox(width: 6),
         _modeTab(
-          context, calc,
+          context,
+          calc,
           CalcMode.compare,
           'Compare',
           Icons.compare_arrows,
@@ -634,7 +807,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  Widget _modeTab(BuildContext context, CalculatorProvider calc, CalcMode mode, String label, IconData icon, Color activeColor, bool isDark) {
+  Widget _modeTab(
+    BuildContext context,
+    CalculatorProvider calc,
+    CalcMode mode,
+    String label,
+    IconData icon,
+    Color activeColor,
+    bool isDark,
+  ) {
     final isActive = calc.activeMode == mode;
     return Expanded(
       child: GestureDetector(
@@ -649,8 +830,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             color: isActive
-                ? (mode == CalcMode.discount ? const Color(0xFFEA580C) : activeColor)
-                : (isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade200),
+                ? (mode == CalcMode.discount
+                      ? const Color(0xFFEA580C)
+                      : activeColor)
+                : (isDark
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.grey.shade200),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
@@ -683,30 +868,45 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   // ═══════════════════════════════════════════════════════════
   // MODE CONTENT — contextual presets / comparison table
   // ═══════════════════════════════════════════════════════════
-  Widget _buildModeContent(BuildContext context, CalculatorProvider calc, bool isDark, Color primary) {
+  Widget _buildModeContent(
+    BuildContext context,
+    CalculatorProvider calc,
+    bool isDark,
+    Color primary,
+  ) {
     switch (calc.activeMode) {
       case CalcMode.gst:
         return _buildPresetRow(
-          context, calc,
+          context,
+          calc,
           presets: [5, 12, 18, 28],
           isGst: true,
           color: const Color(0xFF16A34A),
         );
       case CalcMode.discount:
         return _buildPresetRow(
-          context, calc,
+          context,
+          calc,
           presets: [5, 10, 20, 50],
           isGst: false,
           color: Colors.red.shade600,
         );
       case CalcMode.currency:
-        return const SizedBox(height: 4); // Currency mode just toggles the total display
+        return const SizedBox(
+          height: 4,
+        ); // Currency mode just toggles the total display
       case CalcMode.compare:
         return _buildComparisonTable(context, calc, isDark, primary);
     }
   }
 
-  Widget _buildPresetRow(BuildContext context, CalculatorProvider calc, {required List<int> presets, required bool isGst, required Color color}) {
+  Widget _buildPresetRow(
+    BuildContext context,
+    CalculatorProvider calc, {
+    required List<int> presets,
+    required bool isGst,
+    required Color color,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -725,9 +925,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: color.withOpacity(0.3)),
+                    border: Border.all(color: color.withValues(alpha: 0.3)),
                   ),
                   child: Center(
                     child: Text(
@@ -751,7 +951,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   // ═══════════════════════════════════════════════════════════
   // PRICE COMPARISON TABLE
   // ═══════════════════════════════════════════════════════════
-  Widget _buildComparisonTable(BuildContext context, CalculatorProvider calc, bool isDark, Color primary) {
+  Widget _buildComparisonTable(
+    BuildContext context,
+    CalculatorProvider calc,
+    bool isDark,
+    Color primary,
+  ) {
     return NeumorphicCard(
       borderRadius: 14,
       padding: const EdgeInsets.all(10),
@@ -797,12 +1002,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   String analysisMsg = '';
                   Color bannerColor = Colors.grey.shade400;
                   if (totalA < totalB && totalA > 0) {
-                    final percent = ((totalB - totalA) / totalB * 100).toStringAsFixed(0);
-                    analysisMsg = 'Side A is cheaper by $percent% (A: ${_formatDisplay(totalA)} vs B: ${_formatDisplay(totalB)})';
+                    final percent = ((totalB - totalA) / totalB * 100)
+                        .toStringAsFixed(0);
+                    analysisMsg =
+                        'Side A is cheaper by $percent% (A: ${_formatDisplay(totalA)} vs B: ${_formatDisplay(totalB)})';
                     bannerColor = const Color(0xFF16A34A);
                   } else if (totalB < totalA && totalB > 0) {
-                    final percent = ((totalA - totalB) / totalA * 100).toStringAsFixed(0);
-                    analysisMsg = 'Side B is cheaper by $percent% (B: ${_formatDisplay(totalB)} vs A: ${_formatDisplay(totalA)})';
+                    final percent = ((totalA - totalB) / totalA * 100)
+                        .toStringAsFixed(0);
+                    analysisMsg =
+                        'Side B is cheaper by $percent% (B: ${_formatDisplay(totalB)} vs A: ${_formatDisplay(totalA)})';
                     bannerColor = const Color(0xFF16A34A);
                   } else if (totalA == totalB && totalA > 0) {
                     analysisMsg = 'Both Side A and Side B are equal';
@@ -813,15 +1022,24 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: bannerColor.withOpacity(0.12),
+                      color: bannerColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: bannerColor.withOpacity(0.3)),
+                      border: Border.all(
+                        color: bannerColor.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Text(
                       analysisMsg,
-                      style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: bannerColor),
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.bold,
+                        color: bannerColor,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   );
@@ -836,19 +1054,42 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             children: [
               Expanded(
                 flex: 3,
-                child: Text('Description', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.grey.shade500)),
+                child: Text(
+                  'Description',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
               ),
               Expanded(
                 flex: 2,
-                child: Text('Side A', textAlign: TextAlign.center, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.grey.shade500)),
+                child: Text(
+                  'Side A',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
               ),
               Expanded(
                 flex: 2,
-                child: Text('Side B', textAlign: TextAlign.center, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.grey.shade500)),
+                child: Text(
+                  'Side B',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
               ),
             ],
           ),
-          Divider(color: Colors.grey.withOpacity(0.2)),
+          Divider(color: Colors.grey.withValues(alpha: 0.2)),
 
           // Rows
           if (calc.comparisonRows.isEmpty)
@@ -868,8 +1109,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               final row = e.value;
               final finalValA = row.finalA;
               final finalValB = row.finalB;
-              final isACheaper = row.valueA != null && row.valueB != null && finalValA < finalValB;
-              final isBCheaper = row.valueA != null && row.valueB != null && finalValB < finalValA;
+              final isACheaper =
+                  row.valueA != null &&
+                  row.valueB != null &&
+                  finalValA < finalValB;
+              final isBCheaper =
+                  row.valueA != null &&
+                  row.valueB != null &&
+                  finalValB < finalValA;
               return Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Row(
@@ -881,11 +1128,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         children: [
                           Text(
                             row.description.isEmpty ? '—' : row.description,
-                            style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           Text(
                             'Qty: A:${row.qtyA.toInt()} B:${row.qtyB.toInt()} | Disc: A:${row.discountA.toInt()}% B:${row.discountB.toInt()}%',
-                            style: TextStyle(fontSize: 8.5, color: Colors.grey.shade500),
+                            style: TextStyle(
+                              fontSize: 8.5,
+                              color: Colors.grey.shade500,
+                            ),
                           ),
                         ],
                       ),
@@ -897,7 +1151,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 11,
-                          fontWeight: isACheaper ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: isACheaper
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                           color: isACheaper ? const Color(0xFF16A34A) : null,
                         ),
                       ),
@@ -909,14 +1165,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 11,
-                          fontWeight: isBCheaper ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: isBCheaper
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                           color: isBCheaper ? const Color(0xFF16A34A) : null,
                         ),
                       ),
                     ),
                     InkWell(
                       onTap: () => calc.removeComparisonRow(idx),
-                      child: Icon(Icons.close, size: 14, color: Colors.red.shade400),
+                      child: Icon(
+                        Icons.close,
+                        size: 14,
+                        color: Colors.red.shade400,
+                      ),
                     ),
                   ],
                 ),
@@ -924,7 +1186,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             }),
 
           const SizedBox(height: 6),
-          Divider(color: Colors.grey.withOpacity(0.3)),
+          Divider(color: Colors.grey.withValues(alpha: 0.3)),
           // Totals sum row
           Builder(
             builder: (context) {
@@ -936,7 +1198,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               }
               final isATotalCheaper = totalA < totalB && totalA > 0;
               final isBTotalCheaper = totalB < totalA && totalB > 0;
-              
+
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(
@@ -945,7 +1207,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       flex: 3,
                       child: Text(
                         'Total Sum',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     Expanded(
@@ -956,7 +1221,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: isATotalCheaper ? const Color(0xFF16A34A) : null,
+                          color: isATotalCheaper
+                              ? const Color(0xFF16A34A)
+                              : null,
                         ),
                       ),
                     ),
@@ -968,7 +1235,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: isBTotalCheaper ? const Color(0xFF16A34A) : null,
+                          color: isBTotalCheaper
+                              ? const Color(0xFF16A34A)
+                              : null,
                         ),
                       ),
                     ),
@@ -990,7 +1259,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   // ═══════════════════════════════════════════════════════════
   // NUMBER PAD — matches image layout
   // ═══════════════════════════════════════════════════════════
-  Widget _buildNumberPad(BuildContext context, CalculatorProvider calc, bool isDark, Color primary, Color onSurface) {
+  Widget _buildNumberPad(
+    BuildContext context,
+    CalculatorProvider calc,
+    bool isDark,
+    Color primary,
+    Color onSurface,
+  ) {
     if (calc.showScientific) {
       return _buildScientificPad(context, calc, isDark, primary, onSurface);
     }
@@ -1000,30 +1275,108 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         // Row 1: ↺  ⌫  /  ×
         Row(
           children: [
-            _padButton(context, calc, label: '↺', textColor: const Color(0xFFEA580C), onTap: () => calc.clearAll(), onSurface: onSurface),
-            _padButton(context, calc, icon: Icons.backspace_outlined, textColor: Colors.grey.shade600, onTap: () => calc.backspace(), onSurface: onSurface),
-            _padButton(context, calc, label: '/', textColor: primary, onTap: () => calc.setOperator('÷'), onSurface: onSurface),
-            _padButton(context, calc, label: '×', textColor: Colors.red, onTap: () => calc.setOperator('×'), onSurface: onSurface),
+            _padButton(
+              context,
+              calc,
+              label: '↺',
+              textColor: const Color(0xFFEA580C),
+              onTap: () => calc.clearAll(),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              icon: Icons.backspace_outlined,
+              textColor: Colors.grey.shade600,
+              onTap: () => calc.backspace(),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '/',
+              textColor: primary,
+              onTap: () => calc.setOperator('÷'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '×',
+              textColor: Colors.red,
+              onTap: () => calc.setOperator('×'),
+              onSurface: onSurface,
+            ),
           ],
         ),
         const SizedBox(height: 8),
         // Row 2: 7 8 9 -
         Row(
           children: [
-            _padButton(context, calc, label: '7', onTap: () => calc.enterDigit('7'), onSurface: onSurface),
-            _padButton(context, calc, label: '8', onTap: () => calc.enterDigit('8'), onSurface: onSurface),
-            _padButton(context, calc, label: '9', onTap: () => calc.enterDigit('9'), onSurface: onSurface),
-            _padButton(context, calc, label: '-', textColor: primary, onTap: () => calc.setOperator('-'), onSurface: onSurface),
+            _padButton(
+              context,
+              calc,
+              label: '7',
+              onTap: () => calc.enterDigit('7'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '8',
+              onTap: () => calc.enterDigit('8'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '9',
+              onTap: () => calc.enterDigit('9'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '-',
+              textColor: primary,
+              onTap: () => calc.setOperator('-'),
+              onSurface: onSurface,
+            ),
           ],
         ),
         const SizedBox(height: 8),
         // Row 3: 4 5 6 +
         Row(
           children: [
-            _padButton(context, calc, label: '4', onTap: () => calc.enterDigit('4'), onSurface: onSurface),
-            _padButton(context, calc, label: '5', onTap: () => calc.enterDigit('5'), onSurface: onSurface),
-            _padButton(context, calc, label: '6', onTap: () => calc.enterDigit('6'), onSurface: onSurface),
-            _padButton(context, calc, label: '+', textColor: const Color(0xFF16A34A), onTap: () => calc.setOperator('+'), onSurface: onSurface),
+            _padButton(
+              context,
+              calc,
+              label: '4',
+              onTap: () => calc.enterDigit('4'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '5',
+              onTap: () => calc.enterDigit('5'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '6',
+              onTap: () => calc.enterDigit('6'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '+',
+              textColor: const Color(0xFF16A34A),
+              onTap: () => calc.setOperator('+'),
+              onSurface: onSurface,
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -1038,17 +1391,60 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 children: [
                   Row(
                     children: [
-                      _padButton(context, calc, label: '1', onTap: () => calc.enterDigit('1'), flex: 1, onSurface: onSurface),
-                      _padButton(context, calc, label: '2', onTap: () => calc.enterDigit('2'), flex: 1, onSurface: onSurface),
-                      _padButton(context, calc, label: '3', onTap: () => calc.enterDigit('3'), flex: 1, onSurface: onSurface),
+                      _padButton(
+                        context,
+                        calc,
+                        label: '1',
+                        onTap: () => calc.enterDigit('1'),
+                        flex: 1,
+                        onSurface: onSurface,
+                      ),
+                      _padButton(
+                        context,
+                        calc,
+                        label: '2',
+                        onTap: () => calc.enterDigit('2'),
+                        flex: 1,
+                        onSurface: onSurface,
+                      ),
+                      _padButton(
+                        context,
+                        calc,
+                        label: '3',
+                        onTap: () => calc.enterDigit('3'),
+                        flex: 1,
+                        onSurface: onSurface,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      _padButton(context, calc, label: 'SCI', textColor: primary, onTap: () => calc.toggleScientific(), flex: 1, onSurface: onSurface),
-                      _padButton(context, calc, label: '0', onTap: () => calc.enterDigit('0'), flex: 1, onSurface: onSurface),
-                      _padButton(context, calc, label: '.', onTap: () => calc.enterDigit('.'), flex: 1, onSurface: onSurface),
+                      _padButton(
+                        context,
+                        calc,
+                        label: 'SCI',
+                        textColor: primary,
+                        onTap: () => calc.toggleScientific(),
+                        flex: 1,
+                        onSurface: onSurface,
+                      ),
+                      _padButton(
+                        context,
+                        calc,
+                        label: '0',
+                        onTap: () => calc.enterDigit('0'),
+                        flex: 1,
+                        onSurface: onSurface,
+                      ),
+                      _padButton(
+                        context,
+                        calc,
+                        label: '.',
+                        onTap: () => calc.enterDigit('.'),
+                        flex: 1,
+                        onSurface: onSurface,
+                      ),
                     ],
                   ),
                 ],
@@ -1065,7 +1461,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   borderRadius: 14,
                   color: const Color(0xFF16A34A),
                   onPressed: () => calc.calculate(),
-                  child: const Icon(Icons.drag_handle, color: Colors.white, size: 28),
+                  child: const Icon(
+                    Icons.drag_handle,
+                    color: Colors.white,
+                    size: 28,
+                  ),
                 ),
               ),
             ),
@@ -1078,61 +1478,201 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   // ═══════════════════════════════════════════════════════════
   // SCIENTIFIC PAD — shown when SCI is toggled
   // ═══════════════════════════════════════════════════════════
-  Widget _buildScientificPad(BuildContext context, CalculatorProvider calc, bool isDark, Color primary, Color onSurface) {
+  Widget _buildScientificPad(
+    BuildContext context,
+    CalculatorProvider calc,
+    bool isDark,
+    Color primary,
+    Color onSurface,
+  ) {
     return Column(
       children: [
         // Scientific functions row 1
         Row(
           children: [
-            _padButton(context, calc, label: 'sin', textColor: primary, onTap: () => calc.append('sin'), onSurface: onSurface),
-            _padButton(context, calc, label: 'cos', textColor: primary, onTap: () => calc.append('cos'), onSurface: onSurface),
-            _padButton(context, calc, label: 'tan', textColor: primary, onTap: () => calc.append('tan'), onSurface: onSurface),
-            _padButton(context, calc, label: 'log', textColor: primary, onTap: () => calc.append('log'), onSurface: onSurface),
+            _padButton(
+              context,
+              calc,
+              label: 'sin',
+              textColor: primary,
+              onTap: () => calc.append('sin'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: 'cos',
+              textColor: primary,
+              onTap: () => calc.append('cos'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: 'tan',
+              textColor: primary,
+              onTap: () => calc.append('tan'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: 'log',
+              textColor: primary,
+              onTap: () => calc.append('log'),
+              onSurface: onSurface,
+            ),
           ],
         ),
         const SizedBox(height: 8),
         // Scientific functions row 2
         Row(
           children: [
-            _padButton(context, calc, label: 'ln', textColor: primary, onTap: () => calc.append('ln'), onSurface: onSurface),
-            _padButton(context, calc, label: '^', textColor: primary, onTap: () => calc.append('^'), onSurface: onSurface),
-            _padButton(context, calc, label: 'π', textColor: primary, onTap: () => calc.append('π'), onSurface: onSurface),
-            _padButton(context, calc, label: '( )', textColor: primary, onTap: () {
-              // Auto-determine open/close paren
-              final openCount = calc.currentInput.split('(').length - 1;
-              final closeCount = calc.currentInput.split(')').length - 1;
-              calc.append(openCount > closeCount ? ')' : '(');
-            }, onSurface: onSurface),
+            _padButton(
+              context,
+              calc,
+              label: 'ln',
+              textColor: primary,
+              onTap: () => calc.append('ln'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '^',
+              textColor: primary,
+              onTap: () => calc.append('^'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: 'π',
+              textColor: primary,
+              onTap: () => calc.append('π'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '( )',
+              textColor: primary,
+              onTap: () {
+                // Auto-determine open/close paren
+                final openCount = calc.currentInput.split('(').length - 1;
+                final closeCount = calc.currentInput.split(')').length - 1;
+                calc.append(openCount > closeCount ? ')' : '(');
+              },
+              onSurface: onSurface,
+            ),
           ],
         ),
         const SizedBox(height: 8),
         // Row: ↺  ⌫  /  ×
         Row(
           children: [
-            _padButton(context, calc, label: '↺', textColor: const Color(0xFFEA580C), onTap: () => calc.clearAll(), onSurface: onSurface),
-            _padButton(context, calc, icon: Icons.backspace_outlined, textColor: Colors.grey.shade600, onTap: () => calc.backspace(), onSurface: onSurface),
-            _padButton(context, calc, label: '/', textColor: primary, onTap: () => calc.setOperator('÷'), onSurface: onSurface),
-            _padButton(context, calc, label: '×', textColor: Colors.red, onTap: () => calc.setOperator('×'), onSurface: onSurface),
+            _padButton(
+              context,
+              calc,
+              label: '↺',
+              textColor: const Color(0xFFEA580C),
+              onTap: () => calc.clearAll(),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              icon: Icons.backspace_outlined,
+              textColor: Colors.grey.shade600,
+              onTap: () => calc.backspace(),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '/',
+              textColor: primary,
+              onTap: () => calc.setOperator('÷'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '×',
+              textColor: Colors.red,
+              onTap: () => calc.setOperator('×'),
+              onSurface: onSurface,
+            ),
           ],
         ),
         const SizedBox(height: 8),
         // 7 8 9 -
         Row(
           children: [
-            _padButton(context, calc, label: '7', onTap: () => calc.enterDigit('7'), onSurface: onSurface),
-            _padButton(context, calc, label: '8', onTap: () => calc.enterDigit('8'), onSurface: onSurface),
-            _padButton(context, calc, label: '9', onTap: () => calc.enterDigit('9'), onSurface: onSurface),
-            _padButton(context, calc, label: '-', textColor: primary, onTap: () => calc.setOperator('-'), onSurface: onSurface),
+            _padButton(
+              context,
+              calc,
+              label: '7',
+              onTap: () => calc.enterDigit('7'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '8',
+              onTap: () => calc.enterDigit('8'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '9',
+              onTap: () => calc.enterDigit('9'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '-',
+              textColor: primary,
+              onTap: () => calc.setOperator('-'),
+              onSurface: onSurface,
+            ),
           ],
         ),
         const SizedBox(height: 8),
         // 4 5 6 +
         Row(
           children: [
-            _padButton(context, calc, label: '4', onTap: () => calc.enterDigit('4'), onSurface: onSurface),
-            _padButton(context, calc, label: '5', onTap: () => calc.enterDigit('5'), onSurface: onSurface),
-            _padButton(context, calc, label: '6', onTap: () => calc.enterDigit('6'), onSurface: onSurface),
-            _padButton(context, calc, label: '+', textColor: const Color(0xFF16A34A), onTap: () => calc.setOperator('+'), onSurface: onSurface),
+            _padButton(
+              context,
+              calc,
+              label: '4',
+              onTap: () => calc.enterDigit('4'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '5',
+              onTap: () => calc.enterDigit('5'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '6',
+              onTap: () => calc.enterDigit('6'),
+              onSurface: onSurface,
+            ),
+            _padButton(
+              context,
+              calc,
+              label: '+',
+              textColor: const Color(0xFF16A34A),
+              onTap: () => calc.setOperator('+'),
+              onSurface: onSurface,
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -1146,17 +1686,60 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 children: [
                   Row(
                     children: [
-                      _padButton(context, calc, label: '1', onTap: () => calc.enterDigit('1'), flex: 1, onSurface: onSurface),
-                      _padButton(context, calc, label: '2', onTap: () => calc.enterDigit('2'), flex: 1, onSurface: onSurface),
-                      _padButton(context, calc, label: '3', onTap: () => calc.enterDigit('3'), flex: 1, onSurface: onSurface),
+                      _padButton(
+                        context,
+                        calc,
+                        label: '1',
+                        onTap: () => calc.enterDigit('1'),
+                        flex: 1,
+                        onSurface: onSurface,
+                      ),
+                      _padButton(
+                        context,
+                        calc,
+                        label: '2',
+                        onTap: () => calc.enterDigit('2'),
+                        flex: 1,
+                        onSurface: onSurface,
+                      ),
+                      _padButton(
+                        context,
+                        calc,
+                        label: '3',
+                        onTap: () => calc.enterDigit('3'),
+                        flex: 1,
+                        onSurface: onSurface,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      _padButton(context, calc, label: 'SCI', textColor: const Color(0xFFEA580C), onTap: () => calc.toggleScientific(), flex: 1, onSurface: onSurface),
-                      _padButton(context, calc, label: '0', onTap: () => calc.enterDigit('0'), flex: 1, onSurface: onSurface),
-                      _padButton(context, calc, label: '.', onTap: () => calc.enterDigit('.'), flex: 1, onSurface: onSurface),
+                      _padButton(
+                        context,
+                        calc,
+                        label: 'SCI',
+                        textColor: const Color(0xFFEA580C),
+                        onTap: () => calc.toggleScientific(),
+                        flex: 1,
+                        onSurface: onSurface,
+                      ),
+                      _padButton(
+                        context,
+                        calc,
+                        label: '0',
+                        onTap: () => calc.enterDigit('0'),
+                        flex: 1,
+                        onSurface: onSurface,
+                      ),
+                      _padButton(
+                        context,
+                        calc,
+                        label: '.',
+                        onTap: () => calc.enterDigit('.'),
+                        flex: 1,
+                        onSurface: onSurface,
+                      ),
                     ],
                   ),
                 ],
@@ -1172,7 +1755,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   borderRadius: 14,
                   color: const Color(0xFF16A34A),
                   onPressed: () => calc.calculate(),
-                  child: const Icon(Icons.drag_handle, color: Colors.white, size: 28),
+                  child: const Icon(
+                    Icons.drag_handle,
+                    color: Colors.white,
+                    size: 28,
+                  ),
                 ),
               ),
             ),
@@ -1219,7 +1806,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   // ═══════════════════════════════════════════════════════════
   // TOTAL BAR — bottom bar showing running total
   // ═══════════════════════════════════════════════════════════
-  Widget _buildTotalBar(BuildContext context, CalculatorProvider calc, bool isDark, Color primary) {
+  Widget _buildTotalBar(
+    BuildContext context,
+    CalculatorProvider calc,
+    bool isDark,
+    Color primary,
+  ) {
     final isUsd = calc.currencyType == CurrencyType.usd;
     final total = calc.getTotalInCurrency();
     final symbol = calc.getCurrencySymbol();
@@ -1238,7 +1830,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w700,
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
               letterSpacing: 0.5,
             ),
           ),
@@ -1269,7 +1861,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                     ),
                   ),
                 ),
@@ -1279,7 +1871,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white.withOpacity(0.4),
+                    color: Colors.white.withValues(alpha: 0.4),
                   ),
                 ),
             ],
@@ -1303,7 +1895,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           return const Center(
             child: Padding(
               padding: EdgeInsets.all(20.0),
-              child: Text('No ecosystem logs found.', style: TextStyle(fontSize: 13, color: Colors.grey)),
+              child: Text(
+                'No ecosystem logs found.',
+                style: TextStyle(fontSize: 13, color: Colors.grey),
+              ),
             ),
           );
         }
@@ -1328,7 +1923,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         inset: true,
                         borderRadius: 12,
                       ),
-                      child: Icon(Icons.calculate_outlined, color: Theme.of(context).primaryColor, size: 22),
+                      child: Icon(
+                        Icons.calculate_outlined,
+                        color: Theme.of(context).primaryColor,
+                        size: 22,
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -1340,11 +1939,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             children: [
                               Text(
                                 _extractEcosystem(act.description),
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
                               ),
                               Text(
                                 '${act.timestamp.hour}:${act.timestamp.minute.toString().padLeft(2, '0')}',
-                                style: const TextStyle(fontSize: 10, color: Colors.grey),
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey,
+                                ),
                               ),
                             ],
                           ),
@@ -1356,16 +1961,28 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                           const SizedBox(height: 6),
                           Row(
                             children: [
-                              Icon(Icons.devices, size: 12, color: Colors.grey.shade500),
+                              Icon(
+                                Icons.devices,
+                                size: 12,
+                                color: Colors.grey.shade500,
+                              ),
                               const SizedBox(width: 4),
-                              Text(act.device, style: TextStyle(fontSize: 10, color: Colors.grey.shade500)),
+                              Text(
+                                act.device,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
                               const Spacer(),
                               Text(
                                 act.status,
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
-                                  color: act.status == 'Success' ? Colors.green : Colors.red,
+                                  color: act.status == 'Success'
+                                      ? Colors.green
+                                      : Colors.red,
                                 ),
                               ),
                             ],
@@ -1384,10 +2001,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   String _extractEcosystem(String description) {
-    if (description.toLowerCase().contains('bnx mail')) return 'BNX Mail';
-    if (description.toLowerCase().contains('clicksbusiness')) return 'ClicksBusiness';
-    if (description.toLowerCase().contains('clicks')) return 'Clicks';
-    if (description.toLowerCase().contains('b2auth')) return 'B2Auth';
+    if (description.toLowerCase().contains('bnx mail')) {
+      return 'BNX Mail';
+    }
+    if (description.toLowerCase().contains('clicksbusiness')) {
+      return 'ClicksBusiness';
+    }
+    if (description.toLowerCase().contains('clicks')) {
+      return 'Clicks';
+    }
+    if (description.toLowerCase().contains('b2auth')) {
+      return 'B2Auth';
+    }
     return 'BNX Ecosystem';
   }
 
@@ -1449,9 +2074,18 @@ class _ComparisonAddRowState extends State<_ComparisonAddRow> {
                   style: const TextStyle(fontSize: 11),
                   decoration: InputDecoration(
                     hintText: 'Description',
-                    hintStyle: TextStyle(fontSize: 10, color: Colors.grey.shade400),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
+                    hintStyle: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey.shade400,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
                     isDense: true,
                   ),
                 ),
@@ -1468,9 +2102,18 @@ class _ComparisonAddRowState extends State<_ComparisonAddRow> {
                   style: const TextStyle(fontSize: 11),
                   decoration: InputDecoration(
                     hintText: 'Price A',
-                    hintStyle: TextStyle(fontSize: 10, color: Colors.grey.shade400),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
+                    hintStyle: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey.shade400,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
                     isDense: true,
                   ),
                 ),
@@ -1487,9 +2130,18 @@ class _ComparisonAddRowState extends State<_ComparisonAddRow> {
                   style: const TextStyle(fontSize: 11),
                   decoration: InputDecoration(
                     hintText: 'Price B',
-                    hintStyle: TextStyle(fontSize: 10, color: Colors.grey.shade400),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
+                    hintStyle: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey.shade400,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
                     isDense: true,
                   ),
                 ),
@@ -1543,8 +2195,13 @@ class _ComparisonAddRowState extends State<_ComparisonAddRow> {
                   decoration: InputDecoration(
                     labelText: 'Qty A',
                     labelStyle: const TextStyle(fontSize: 8.5),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 4,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                     isDense: true,
                   ),
                 ),
@@ -1561,8 +2218,13 @@ class _ComparisonAddRowState extends State<_ComparisonAddRow> {
                   decoration: InputDecoration(
                     labelText: 'Disc A %',
                     labelStyle: const TextStyle(fontSize: 8.5),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 4,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                     isDense: true,
                   ),
                 ),
@@ -1579,8 +2241,13 @@ class _ComparisonAddRowState extends State<_ComparisonAddRow> {
                   decoration: InputDecoration(
                     labelText: 'Qty B',
                     labelStyle: const TextStyle(fontSize: 8.5),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 4,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                     isDense: true,
                   ),
                 ),
@@ -1597,8 +2264,13 @@ class _ComparisonAddRowState extends State<_ComparisonAddRow> {
                   decoration: InputDecoration(
                     labelText: 'Disc B %',
                     labelStyle: const TextStyle(fontSize: 8.5),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 4,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                     isDense: true,
                   ),
                 ),

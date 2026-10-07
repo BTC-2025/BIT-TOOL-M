@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../features/dashboard/dashboard_screen.dart';
 import '../../features/sessions/sessions_screen.dart';
 import '../../features/mail/mail_screen.dart';
@@ -18,7 +17,6 @@ import '../../features/translator/translator_screen.dart';
 import '../../features/lens/lens_screen.dart';
 import '../../features/weather/weather_screen.dart';
 import '../../features/keyboard/keyboard_screen.dart';
-import '../providers/session_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_spacing.dart';
 import 'neumorphic_widgets.dart';
@@ -33,8 +31,6 @@ class ResponsiveShell extends StatefulWidget {
 class _ResponsiveShellState extends State<ResponsiveShell> {
   int _currentIndex = 0;
   bool _isDark = false;
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
 
   final List<String> _titles = [
     'Home',
@@ -151,78 +147,6 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
     }
   }
 
-  void _showSearchDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return Dialog(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              child: NeumorphicCard(
-                borderRadius: 20,
-                padding: const EdgeInsets.all(20),
-                child: SizedBox(
-                  width: 500,
-                  height: 400,
-                  child: Column(
-                    children: [
-                      NeumorphicTextField(
-                        controller: _searchController,
-                        hintText: 'Search across mail, sessions, contacts...',
-                        prefixIcon: Icons.search,
-                        onChanged: (val) {
-                          setDialogState(() {
-                            _searchQuery = val;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      Expanded(
-                        child: _searchQuery.isEmpty
-                            ? const Center(child: Text('Type to search...'))
-                            : Consumer<SessionProvider>(
-                                builder: (context, sessionProvider, child) {
-                                  final results = sessionProvider.activities
-                                      .where((act) =>
-                                          act.description.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                                          act.module.toLowerCase().contains(_searchQuery.toLowerCase()))
-                                      .toList();
-                                  if (results.isEmpty) {
-                                    return const Center(child: Text('No matching records found.'));
-                                  }
-                                  return ListView.builder(
-                                    itemCount: results.length,
-                                    itemBuilder: (context, i) {
-                                      final item = results[i];
-                                      return ListTile(
-                                        leading: const Icon(Icons.history),
-                                        title: Text(item.module),
-                                        subtitle: Text(item.description),
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                          setState(() {
-                                            _currentIndex = 1; // Go to Activities
-                                          });
-                                        },
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
   void _showNotificationsPanel() {
     showModalBottomSheet(
       context: context,
@@ -244,21 +168,29 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: const Text('Mark All Read'),
-                  )
+                  ),
                 ],
               ),
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.security, color: Colors.red),
                 title: const Text('Suspicious login blocked'),
-                subtitle: const Text('B2Auth flagged a high-risk access attempt.'),
-                trailing: Text('Just now', style: Theme.of(context).textTheme.bodySmall),
+                subtitle: const Text(
+                  'B2Auth flagged a high-risk access attempt.',
+                ),
+                trailing: Text(
+                  'Just now',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ),
               ListTile(
                 leading: const Icon(Icons.mail, color: Colors.blue),
                 title: const Text('New client registration draft'),
                 subtitle: const Text('HR team uploaded new evaluation sheets.'),
-                trailing: Text('10m ago', style: Theme.of(context).textTheme.bodySmall),
+                trailing: Text(
+                  '10m ago',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ),
             ],
           ),
@@ -286,177 +218,222 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
           }
         },
         child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          automaticallyImplyLeading: false,
-          title: Row(
-            children: [
-              _currentIndex == 0
-                  ? ColorFiltered(
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.multiply,
-                      ),
-                      child: Image.asset(
-                        'assets/images/bit_tool_logo.png',
-                        height: 38,
-                        width: 38,
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(Icons.token_rounded, color: primaryColor, size: 28);
-                        },
-                      ),
-                    )
-                  : GestureDetector(
-                      onTap: () => setState(() => _currentIndex = 0),
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1565C0),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            automaticallyImplyLeading: false,
+            title: Row(
+              children: [
+                _currentIndex == 0
+                    ? ColorFiltered(
+                        colorFilter: const ColorFilter.mode(
+                          Colors.white,
+                          BlendMode.multiply,
                         ),
-                        child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 14),
-                      ),
-                    ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  _titles[_currentIndex],
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            NeumorphicButton(
-              padding: const EdgeInsets.all(8),
-              borderRadius: 50,
-              onPressed: () {
-                setState(() {
-                  _currentIndex = 17; // Navigate to Search Screen
-                });
-              },
-              child: const Icon(Icons.search, size: 20),
-            ),
-            const SizedBox(width: 10),
-            NeumorphicButton(
-              padding: const EdgeInsets.all(8),
-              borderRadius: 50,
-              onPressed: _showNotificationsPanel,
-              child: const Icon(Icons.notifications_active_outlined, size: 20),
-            ),
-            const SizedBox(width: 16),
-          ],
-        ),
-        body: Stack(
-          children: [
-            // ─── Main content ───────────────────────────────────────────────
-            isWide
-                ? Row(
-                    children: [
-                      // Sidebar navigation rail
-                      Container(
-                        width: 250,
-                        color: Colors.transparent,
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                        child: NeumorphicCard(
-                          borderRadius: 20,
-                          padding: const EdgeInsets.all(8),
-                          child: ListView.builder(
-                            itemCount: _titles.length,
-                            itemBuilder: (context, i) {
-                              final isSelected = _currentIndex == i;
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4),
-                                child: NeumorphicButton(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                  borderRadius: 12,
-                                  color: isSelected ? primaryColor.withOpacity(0.1) : null,
-                                  onPressed: () {
-                                    setState(() {
-                                      _currentIndex = i;
-                                    });
-                                  },
-                                  child: Row(
-                                    children: [
-                                      Icon(_icons[i], color: isSelected ? primaryColor : unselectedColor),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Text(
-                                          _titles[i],
-                                          style: TextStyle(
-                                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                            color: isSelected ? primaryColor : unselectedColor,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
+                        child: Image.asset(
+                          'assets/images/bit_tool_logo.png',
+                          height: 38,
+                          width: 38,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              Icons.token_rounded,
+                              color: primaryColor,
+                              size: 28,
+                            );
+                          },
+                        ),
+                      )
+                    : GestureDetector(
+                        onTap: () => setState(() => _currentIndex = 0),
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1565C0),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.2),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white,
+                            size: 14,
                           ),
                         ),
                       ),
-                      Expanded(
-                        child: Padding(
-                          padding: AppSpacing.screenPadding,
-                          child: _buildScreen(_currentIndex),
-                        ),
-                      ),
-                    ],
-                  )
-                : Column(
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: AppSpacing.screenHorizontal,
-                          child: _buildScreen(_currentIndex),
-                        ),
-                      ),
-                      // B2Auth Premium Bottom Navigation bar
-                      SafeArea(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    _titles[_currentIndex],
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 20,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              NeumorphicButton(
+                padding: const EdgeInsets.all(8),
+                borderRadius: 50,
+                onPressed: () {
+                  setState(() {
+                    _currentIndex = 17; // Navigate to Search Screen
+                  });
+                },
+                child: const Icon(Icons.search, size: 20),
+              ),
+              const SizedBox(width: 10),
+              NeumorphicButton(
+                padding: const EdgeInsets.all(8),
+                borderRadius: 50,
+                onPressed: _showNotificationsPanel,
+                child: const Icon(
+                  Icons.notifications_active_outlined,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 16),
+            ],
+          ),
+          body: Stack(
+            children: [
+              // ─── Main content ───────────────────────────────────────────────
+              isWide
+                  ? Row(
+                      children: [
+                        // Sidebar navigation rail
+                        Container(
+                          width: 250,
+                          color: Colors.transparent,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 16,
+                            horizontal: 12,
+                          ),
                           child: NeumorphicCard(
-                            borderRadius: 24,
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: SizedBox(
-                              height: 55,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  _buildBottomNavItem(0, 'Home', Icons.grid_view_rounded),
-                                  _buildBottomNavItem(1, 'Activities', Icons.bar_chart_rounded),
-                                  _buildBottomNavItem(11, 'Profile', Icons.person_outline_rounded),
-                                ],
+                            borderRadius: 20,
+                            padding: const EdgeInsets.all(8),
+                            child: ListView.builder(
+                              itemCount: _titles.length,
+                              itemBuilder: (context, i) {
+                                final isSelected = _currentIndex == i;
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 4,
+                                  ),
+                                  child: NeumorphicButton(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    borderRadius: 12,
+                                    color: isSelected
+                                        ? primaryColor.withValues(alpha: 0.1)
+                                        : null,
+                                    onPressed: () {
+                                      setState(() {
+                                        _currentIndex = i;
+                                      });
+                                    },
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          _icons[i],
+                                          color: isSelected
+                                              ? primaryColor
+                                              : unselectedColor,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            _titles[i],
+                                            style: TextStyle(
+                                              fontWeight: isSelected
+                                                  ? FontWeight.bold
+                                                  : FontWeight.normal,
+                                              color: isSelected
+                                                  ? primaryColor
+                                                  : unselectedColor,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: AppSpacing.screenPadding,
+                            child: _buildScreen(_currentIndex),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: AppSpacing.screenHorizontal,
+                            child: _buildScreen(_currentIndex),
+                          ),
+                        ),
+                        // B2Auth Premium Bottom Navigation bar
+                        SafeArea(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                            child: NeumorphicCard(
+                              borderRadius: 24,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: SizedBox(
+                                height: 55,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    _buildBottomNavItem(
+                                      0,
+                                      'Home',
+                                      Icons.grid_view_rounded,
+                                    ),
+                                    _buildBottomNavItem(
+                                      1,
+                                      'Activities',
+                                      Icons.bar_chart_rounded,
+                                    ),
+                                    _buildBottomNavItem(
+                                      11,
+                                      'Profile',
+                                      Icons.person_outline_rounded,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
 
-            // ─── Floating Back Button removed ────
-          ],
-        ),
+              // ─── Floating Back Button removed ────
+            ],
+          ),
         ),
       ),
     );
   }
-
 
   Widget _buildBottomNavItem(int index, String label, IconData icon) {
     final bool isSelected = _currentIndex == index;

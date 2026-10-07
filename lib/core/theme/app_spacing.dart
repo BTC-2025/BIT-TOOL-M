@@ -17,7 +17,11 @@ class AppSpacing {
   // EdgeInsets helpers
   static const EdgeInsets screenPadding = EdgeInsets.all(screenMargin);
   static const EdgeInsets defaultCardPadding = EdgeInsets.all(cardPadding);
-  
-  static const EdgeInsets screenHorizontal = EdgeInsets.symmetric(horizontal: screenMargin);
-  static const EdgeInsets screenVertical = EdgeInsets.symmetric(vertical: screenMargin);
+
+  static const EdgeInsets screenHorizontal = EdgeInsets.symmetric(
+    horizontal: screenMargin,
+  );
+  static const EdgeInsets screenVertical = EdgeInsets.symmetric(
+    vertical: screenMargin,
+  );
 }

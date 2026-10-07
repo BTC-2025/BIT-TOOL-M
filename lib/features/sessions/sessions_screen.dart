@@ -35,23 +35,45 @@ class _SessionsScreenState extends State<SessionsScreen> {
               Row(
                 children: [
                   NeumorphicButton(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('CSV Export Simulated Successfully!')),
+                        const SnackBar(
+                          content: Text('CSV Export Simulated Successfully!'),
+                        ),
                       );
                     },
-                    child: const Text('CSV', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      'CSV',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 8),
                   NeumorphicButton(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('PDF Export Simulated Successfully!')),
+                        const SnackBar(
+                          content: Text('PDF Export Simulated Successfully!'),
+                        ),
                       );
                     },
-                    child: const Text('PDF', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      'PDF',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -77,48 +99,70 @@ class _SessionsScreenState extends State<SessionsScreen> {
                     LineChartData(
                       lineTouchData: LineTouchData(
                         handleBuiltInTouches: true,
-                        getTouchedSpotIndicator: (LineChartBarData barData, List<int> spotIndexes) {
-                          return spotIndexes.map((index) {
-                            return TouchedSpotIndicatorData(
-                              FlLine(
-                                color: Theme.of(context).primaryColor.withOpacity(0.3),
-                                strokeWidth: 2,
-                                dashArray: [5, 5],
-                              ),
-                              FlDotData(
-                                show: true,
-                                getDotPainter: (spot, percent, barData, index) {
-                                  return FlDotCirclePainter(
-                                    radius: 6,
-                                    color: Theme.of(context).primaryColor,
-                                    strokeWidth: 2.5,
-                                    strokeColor: Theme.of(context).brightness == Brightness.dark
-                                        ? Colors.black
-                                        : Colors.white,
-                                  );
-                                },
-                              ),
-                            );
-                          }).toList();
-                        },
+                        getTouchedSpotIndicator:
+                            (LineChartBarData barData, List<int> spotIndexes) {
+                              return spotIndexes.map((index) {
+                                return TouchedSpotIndicatorData(
+                                  FlLine(
+                                    color: Theme.of(
+                                      context,
+                                    ).primaryColor.withValues(alpha: 0.3),
+                                    strokeWidth: 2,
+                                    dashArray: [5, 5],
+                                  ),
+                                  FlDotData(
+                                    show: true,
+                                    getDotPainter:
+                                        (spot, percent, barData, index) {
+                                          return FlDotCirclePainter(
+                                            radius: 6,
+                                            color: Theme.of(
+                                              context,
+                                            ).primaryColor,
+                                            strokeWidth: 2.5,
+                                            strokeColor:
+                                                Theme.of(context).brightness ==
+                                                    Brightness.dark
+                                                ? Colors.black
+                                                : Colors.white,
+                                          );
+                                        },
+                                  ),
+                                );
+                              }).toList();
+                            },
                         touchTooltipData: LineTouchTooltipData(
-                          getTooltipColor: (touchedSpot) => Theme.of(context).brightness == Brightness.dark
+                          getTooltipColor: (touchedSpot) =>
+                              Theme.of(context).brightness == Brightness.dark
                               ? const Color(0xFF1B2336)
                               : Colors.white,
                           tooltipBorder: BorderSide(
-                            color: Theme.of(context).primaryColor.withOpacity(0.2),
+                            color: Theme.of(
+                              context,
+                            ).primaryColor.withValues(alpha: 0.2),
                             width: 1,
                           ),
                           tooltipRoundedRadius: 10,
                           getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
                             return touchedBarSpots.map((barSpot) {
                               final flSpot = barSpot;
-                              const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                              final dayName = days[flSpot.x.toInt() % days.length];
+                              const days = [
+                                'Mon',
+                                'Tue',
+                                'Wed',
+                                'Thu',
+                                'Fri',
+                                'Sat',
+                                'Sun',
+                              ];
+                              final dayName =
+                                  days[flSpot.x.toInt() % days.length];
                               return LineTooltipItem(
                                 '$dayName\n${flSpot.y.toStringAsFixed(1)} hrs',
                                 TextStyle(
-                                  color: Theme.of(context).brightness == Brightness.dark
+                                  color:
+                                      Theme.of(context).brightness ==
+                                          Brightness.dark
                                       ? Colors.white
                                       : const Color(0xFF1E293B),
                                   fontWeight: FontWeight.bold,
@@ -131,8 +175,12 @@ class _SessionsScreenState extends State<SessionsScreen> {
                       ),
                       gridData: const FlGridData(show: false),
                       titlesData: const FlTitlesData(
-                        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        rightTitles: AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        topTitles: AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
                       ),
                       borderData: FlBorderData(show: false),
                       lineBarsData: [
@@ -151,7 +199,9 @@ class _SessionsScreenState extends State<SessionsScreen> {
                           color: Theme.of(context).primaryColor,
                           belowBarData: BarAreaData(
                             show: true,
-                            color: Theme.of(context).primaryColor.withOpacity(0.1),
+                            color: Theme.of(
+                              context,
+                            ).primaryColor.withValues(alpha: 0.1),
                           ),
                         ),
                       ],
@@ -173,7 +223,11 @@ class _SessionsScreenState extends State<SessionsScreen> {
           Consumer<SessionProvider>(
             builder: (context, sessionProvider, child) {
               final list = sessionProvider.activities
-                  .where((act) => act.module != 'Authentication' && act.module != 'BNX Mail')
+                  .where(
+                    (act) =>
+                        act.module != 'Authentication' &&
+                        act.module != 'BNX Mail',
+                  )
                   .take(3)
                   .toList();
               if (list.isEmpty) {
@@ -188,11 +242,17 @@ class _SessionsScreenState extends State<SessionsScreen> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: NeumorphicCard(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       borderRadius: 12,
                       child: Row(
                         children: [
-                          Icon(Icons.bolt_rounded, color: Theme.of(context).primaryColor),
+                          Icon(
+                            Icons.bolt_rounded,
+                            color: Theme.of(context).primaryColor,
+                          ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
@@ -200,12 +260,18 @@ class _SessionsScreenState extends State<SessionsScreen> {
                               children: [
                                 Text(
                                   act.description,
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 Text(
                                   '${act.module} • ${act.device}',
-                                  style: const TextStyle(color: Colors.grey, fontSize: 11),
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 11,
+                                  ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ],
@@ -215,7 +281,9 @@ class _SessionsScreenState extends State<SessionsScreen> {
                           Text(
                             act.status,
                             style: TextStyle(
-                              color: act.status == 'Success' ? Colors.green : Colors.red,
+                              color: act.status == 'Success'
+                                  ? Colors.green
+                                  : Colors.red,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),
@@ -244,29 +312,43 @@ class _SessionsScreenState extends State<SessionsScreen> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: ['All', 'Calendar', 'Contacts', 'Messages', 'Calculator'].map((module) {
-                final isSelected = _filterModule == module;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 16),
-                  child: NeumorphicButton(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    color: isSelected ? Theme.of(context).primaryColor.withOpacity(0.2) : null,
-                    onPressed: () {
-                      setState(() {
-                        _filterModule = module;
-                      });
+              children:
+                  ['All', 'Calendar', 'Contacts', 'Messages', 'Calculator'].map(
+                    (module) {
+                      final isSelected = _filterModule == module;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: NeumorphicButton(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                          color: isSelected
+                              ? Theme.of(
+                                  context,
+                                ).primaryColor.withValues(alpha: 0.2)
+                              : null,
+                          onPressed: () {
+                            setState(() {
+                              _filterModule = module;
+                            });
+                          },
+                          child: Text(
+                            module,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: isSelected
+                                  ? Theme.of(context).primaryColor
+                                  : null,
+                            ),
+                          ),
+                        ),
+                      );
                     },
-                    child: Text(
-                      module,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        color: isSelected ? Theme.of(context).primaryColor : null,
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
+                  ).toList(),
             ),
           ),
           const SizedBox(height: 16),
@@ -274,11 +356,20 @@ class _SessionsScreenState extends State<SessionsScreen> {
             builder: (context, sessionProvider, child) {
               final filtered = sessionProvider.activities.where((act) {
                 // Exclude Authentication and BNX Mail from the list entirely
-                if (act.module == 'Authentication' || act.module == 'BNX Mail') return false;
+                if (act.module == 'Authentication' ||
+                    act.module == 'BNX Mail') {
+                  return false;
+                }
 
-                final matchModule = _filterModule == 'All' || act.module == _filterModule;
-                final matchQuery = act.description.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                    act.module.toLowerCase().contains(_searchQuery.toLowerCase());
+                final matchModule =
+                    _filterModule == 'All' || act.module == _filterModule;
+                final matchQuery =
+                    act.description.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ) ||
+                    act.module.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    );
                 return matchModule && matchQuery;
               }).toList();
 
@@ -306,7 +397,11 @@ class _SessionsScreenState extends State<SessionsScreen> {
                               inset: true,
                               borderRadius: 50,
                             ),
-                            child: Icon(_getIcon(act.iconName), color: Theme.of(context).primaryColor, size: 20),
+                            child: Icon(
+                              _getIcon(act.iconName),
+                              color: Theme.of(context).primaryColor,
+                              size: 20,
+                            ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -314,18 +409,24 @@ class _SessionsScreenState extends State<SessionsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Expanded(
                                       child: Text(
                                         act.module,
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                        ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     Text(
                                       '${act.timestamp.hour}:${act.timestamp.minute.toString().padLeft(2, '0')}',
-                                      style: Theme.of(context).textTheme.bodySmall,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
                                     ),
                                   ],
                                 ),
@@ -340,7 +441,10 @@ class _SessionsScreenState extends State<SessionsScreen> {
                                   runSpacing: 4,
                                   children: [
                                     _buildMetaTag(context, act.device),
-                                    _buildMetaTag(context, 'Dur: ${act.duration}'),
+                                    _buildMetaTag(
+                                      context,
+                                      'Dur: ${act.duration}',
+                                    ),
                                     _buildStatusBadge(act.status),
                                   ],
                                 ),
@@ -387,12 +491,16 @@ class _SessionsScreenState extends State<SessionsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.1),
+        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         text,
-        style: TextStyle(fontSize: 9, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          fontSize: 9,
+          color: Theme.of(context).primaryColor,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -402,7 +510,9 @@ class _SessionsScreenState extends State<SessionsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        color: isSuccess ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+        color: isSuccess
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(

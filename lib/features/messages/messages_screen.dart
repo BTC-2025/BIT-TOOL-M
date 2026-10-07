@@ -41,34 +41,51 @@ class _MessagesScreenState extends State<MessagesScreen> {
                             final msg = messagesProvider.messages[i];
                             final isMe = msg.isSentByMe;
                             return Align(
-                              alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                              alignment: isMe
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
                               child: Container(
-                                margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                                margin: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                  horizontal: 12,
+                                ),
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: isMe ? Theme.of(context).primaryColor : Theme.of(context).cardColor,
+                                  color: isMe
+                                      ? Theme.of(context).primaryColor
+                                      : Theme.of(context).cardColor,
                                   borderRadius: BorderRadius.only(
                                     topLeft: const Radius.circular(12),
                                     topRight: const Radius.circular(12),
-                                    bottomLeft: isMe ? const Radius.circular(12) : Radius.zero,
-                                    bottomRight: isMe ? Radius.zero : const Radius.circular(12),
+                                    bottomLeft: isMe
+                                        ? const Radius.circular(12)
+                                        : Radius.zero,
+                                    bottomRight: isMe
+                                        ? Radius.zero
+                                        : const Radius.circular(12),
                                   ),
                                 ),
                                 child: Column(
-                                  crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                                  crossAxisAlignment: isMe
+                                      ? CrossAxisAlignment.end
+                                      : CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       msg.senderName,
                                       style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
-                                        color: isMe ? Colors.white70 : Colors.grey,
+                                        color: isMe
+                                            ? Colors.white70
+                                            : Colors.grey,
                                       ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       msg.messageText,
-                                      style: TextStyle(color: isMe ? Colors.white : null),
+                                      style: TextStyle(
+                                        color: isMe ? Colors.white : null,
+                                      ),
                                     ),
                                   ],
                                 ),

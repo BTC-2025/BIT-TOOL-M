@@ -147,7 +147,8 @@ class SessionProvider extends ChangeNotifier {
         module: 'Authentication',
         duration: '3.1s',
         status: 'Failed',
-        description: 'OTP Verification timeout - suspicious login flag triggered',
+        description:
+            'OTP Verification timeout - suspicious login flag triggered',
         category: 'Security Alerts',
       ),
     ]);

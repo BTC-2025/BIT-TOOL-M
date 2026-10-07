@@ -68,9 +68,9 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                RawKeyboardListener(
+                KeyboardListener(
                   focusNode: _focusNode,
-                  onKey: (event) {
+                  onKeyEvent: (event) {
                     setState(() {
                       _lastKey = event.logicalKey.keyLabel;
                     });
@@ -90,9 +90,19 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildMetricCard(context, 'Last Key Detected', _lastKey, Icons.fingerprint),
+                    _buildMetricCard(
+                      context,
+                      'Last Key Detected',
+                      _lastKey,
+                      Icons.fingerprint,
+                    ),
                     const SizedBox(width: 12),
-                    _buildMetricCard(context, 'Character Count', _charCount.toString(), Icons.abc),
+                    _buildMetricCard(
+                      context,
+                      'Character Count',
+                      _charCount.toString(),
+                      Icons.abc,
+                    ),
                   ],
                 ),
               ],
@@ -114,13 +124,33 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
           const SizedBox(height: AppSpacing.md),
           Column(
             children: [
-              _buildShortcutRow(context, 'Save Log', 'Ctrl + S', Icons.save_alt_rounded),
+              _buildShortcutRow(
+                context,
+                'Save Log',
+                'Ctrl + S',
+                Icons.save_alt_rounded,
+              ),
               const SizedBox(height: AppSpacing.elementSpacing),
-              _buildShortcutRow(context, 'Search Workspace', 'Ctrl + F', Icons.search),
+              _buildShortcutRow(
+                context,
+                'Search Workspace',
+                'Ctrl + F',
+                Icons.search,
+              ),
               const SizedBox(height: AppSpacing.elementSpacing),
-              _buildShortcutRow(context, 'Notifications Panel', 'Ctrl + N', Icons.notifications_active_outlined),
+              _buildShortcutRow(
+                context,
+                'Notifications Panel',
+                'Ctrl + N',
+                Icons.notifications_active_outlined,
+              ),
               const SizedBox(height: AppSpacing.elementSpacing),
-              _buildShortcutRow(context, 'Theme Switcher', 'Ctrl + T', Icons.dark_mode_outlined),
+              _buildShortcutRow(
+                context,
+                'Theme Switcher',
+                'Ctrl + T',
+                Icons.dark_mode_outlined,
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -129,7 +159,12 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
     );
   }
 
-  Widget _buildMetricCard(BuildContext context, String title, String val, IconData icon) {
+  Widget _buildMetricCard(
+    BuildContext context,
+    String title,
+    String val,
+    IconData icon,
+  ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Expanded(
       child: Container(
@@ -138,7 +173,9 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
           color: isDark ? Colors.grey.shade900 : Colors.white,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.04),
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.04)
+                : Colors.black.withValues(alpha: 0.04),
           ),
         ),
         child: Row(
@@ -151,7 +188,11 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -172,7 +213,12 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
     );
   }
 
-  Widget _buildShortcutRow(BuildContext context, String desc, String combo, IconData icon) {
+  Widget _buildShortcutRow(
+    BuildContext context,
+    String desc,
+    String combo,
+    IconData icon,
+  ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return NeumorphicCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -197,7 +243,9 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
               color: isDark ? Colors.grey.shade900 : Colors.white,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.black.withValues(alpha: 0.1),
               ),
             ),
             child: Text(

@@ -18,8 +18,20 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
   bool _isListening = false;
 
   final List<String> _languages = [
-    'English', 'Spanish', 'French', 'German', 'Hindi', 'Japanese', 'Chinese', 'Arabic',
-    'Italian', 'Korean', 'Russian', 'Portuguese', 'Turkish', 'Tamil'
+    'English',
+    'Spanish',
+    'French',
+    'German',
+    'Hindi',
+    'Japanese',
+    'Chinese',
+    'Arabic',
+    'Italian',
+    'Korean',
+    'Russian',
+    'Portuguese',
+    'Turkish',
+    'Tamil',
   ];
 
   // Translation dictionary for realistic live translation simulation
@@ -52,7 +64,8 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
       'Russian': 'Как дела? (Kak dela?)',
       'Portuguese': 'Como você está?',
       'Turkish': 'Nasılsın?',
-      'Tamil': 'நீங்கள் எப்படி இருக்கிறீர்கள்? (Neengal eppadi irukkireergall?)',
+      'Tamil':
+          'நீங்கள் எப்படி இருக்கிறீர்கள்? (Neengal eppadi irukkireergall?)',
     },
     'good morning': {
       'Spanish': 'Buenos días',
@@ -97,8 +110,9 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
       'Russian': 'Я люблю программировать (YA lyublyu programmirovat\')',
       'Portuguese': 'Eu amo programar',
       'Turkish': 'Kod yazmayı seviyorum',
-      'Tamil': 'எனக்கு குறியீட்டு முறை பிடிக்கும் (Enakku kuriyeettu murai pidikkum)',
-    }
+      'Tamil':
+          'எனக்கு குறியீட்டு முறை பிடிக்கும் (Enakku kuriyeettu murai pidikkum)',
+    },
   };
 
   void _translate() {
@@ -117,11 +131,15 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
       String translation = '';
       if (_sourceLang == _targetLang) {
         translation = _inputController.text.trim();
-      } else if (_dictionary.containsKey(text) && _dictionary[text]!.containsKey(_targetLang)) {
+      } else if (_dictionary.containsKey(text) &&
+          _dictionary[text]!.containsKey(_targetLang)) {
         translation = _dictionary[text]![_targetLang]!;
       } else {
         // Fallback pseudo-translation generator for any custom user input
-        translation = _generatePseudoTranslation(_inputController.text.trim(), _targetLang);
+        translation = _generatePseudoTranslation(
+          _inputController.text.trim(),
+          _targetLang,
+        );
       }
 
       setState(() {
@@ -137,7 +155,7 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
       case 'Spanish':
         return '${text}o de la traducción';
       case 'French':
-        return 'Le ${text}';
+        return 'Le $text';
       case 'German':
         return 'Das ${text}en';
       case 'Hindi':
@@ -206,12 +224,18 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
             children: [
               Expanded(
                 child: NeumorphicCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: _sourceLang,
                       isExpanded: true,
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
                       items: _languages.map((lang) {
                         return DropdownMenuItem(value: lang, child: Text(lang));
                       }).toList(),
@@ -233,12 +257,18 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
               ),
               Expanded(
                 child: NeumorphicCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: _targetLang,
                       isExpanded: true,
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
                       items: _languages.map((lang) {
                         return DropdownMenuItem(value: lang, child: Text(lang));
                       }).toList(),
@@ -268,7 +298,14 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(_sourceLang, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey)),
+                    Text(
+                      _sourceLang,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: Colors.grey,
+                      ),
+                    ),
                     if (_inputController.text.isNotEmpty)
                       IconButton(
                         icon: const Icon(Icons.clear, size: 18),
@@ -304,7 +341,11 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
                       },
                     ),
                     IconButton(
-                      icon: Icon(_isListening ? Icons.mic : Icons.mic_none, size: 18, color: _isListening ? Colors.red : null),
+                      icon: Icon(
+                        _isListening ? Icons.mic : Icons.mic_none,
+                        size: 18,
+                        color: _isListening ? Colors.red : null,
+                      ),
                       onPressed: _simulateVoiceInput,
                     ),
                   ],
@@ -325,7 +366,14 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(_targetLang, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Theme.of(context).primaryColor)),
+                    Text(
+                      _targetLang,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
                     if (_translatedText.isNotEmpty)
                       Row(
                         children: [
@@ -336,9 +384,15 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
                           IconButton(
                             icon: const Icon(Icons.copy_all, size: 18),
                             onPressed: () {
-                              Clipboard.setData(ClipboardData(text: _translatedText));
+                              Clipboard.setData(
+                                ClipboardData(text: _translatedText),
+                              );
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Copied translation to clipboard')),
+                                const SnackBar(
+                                  content: Text(
+                                    'Copied translation to clipboard',
+                                  ),
+                                ),
                               );
                             },
                           ),
@@ -348,12 +402,16 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
                 ),
                 const SizedBox(height: 8),
                 _isTranslating
-                    ? const Center(child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 20),
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ))
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
                     : Text(
-                        _translatedText.isEmpty ? 'Translation will appear here...' : _translatedText,
+                        _translatedText.isEmpty
+                            ? 'Translation will appear here...'
+                            : _translatedText,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -371,17 +429,20 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
             NeumorphicCard(
               borderRadius: 16,
               padding: const EdgeInsets.all(20),
-              color: Colors.red.withOpacity(0.05),
+              color: Colors.red.withValues(alpha: 0.05),
               child: Column(
                 children: [
                   const Icon(Icons.mic, color: Colors.red, size: 36),
                   const SizedBox(height: 12),
-                  const Text('Listening to voice input...', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Listening to voice input...',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 8),
                   SizedBox(
                     width: 100,
                     child: LinearProgressIndicator(
-                      backgroundColor: Colors.red.withOpacity(0.1),
+                      backgroundColor: Colors.red.withValues(alpha: 0.1),
                       color: Colors.red,
                     ),
                   ),
