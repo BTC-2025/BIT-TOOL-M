@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - develop
+    tags:
+      - "v*.*.*"
 
   pull_request:
     branches:
@@ -12,9 +14,6 @@ on:
       - develop
 
   workflow_dispatch:
-
-  tags:
-    - "v*.*.*"
 
 permissions:
   contents: read
@@ -75,6 +74,12 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Setup Flutter
         uses: flutter-actions/setup-flutter@v4
