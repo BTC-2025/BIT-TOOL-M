@@ -378,14 +378,16 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
               size: 22,
             ),
             const SizedBox(height: 3),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? primaryColor : unselectedColor,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected ? primaryColor : unselectedColor,
+                ),
               ),
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
