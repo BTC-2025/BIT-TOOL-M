@@ -1,35 +1,3 @@
-class MailItem {
-  final String id;
-  final String sender;
-  final String receiver;
-  final String subject;
-  final DateTime time;
-  final String priority;
-  final List<String> attachments;
-  final String body;
-  final String status; // Read, Unread
-  final String category; // Inbox, Sent, Draft, Spam, Trash, Archive
-  final List<String> tags;
-  bool isStarred;
-  bool isImportant;
-
-  MailItem({
-    required this.id,
-    required this.sender,
-    required this.receiver,
-    required this.subject,
-    required this.time,
-    required this.priority,
-    required this.attachments,
-    required this.body,
-    required this.status,
-    required this.category,
-    required this.tags,
-    this.isStarred = false,
-    this.isImportant = false,
-  });
-}
-
 class CalendarEvent {
   final String id;
   final String title;
@@ -84,43 +52,42 @@ class ContactItem {
   });
 }
 
-class ChatMessage {
+class NoteItem {
   final String id;
-  final String senderName;
-  final String messageText;
-  final DateTime time;
-  final bool isSentByMe;
-  final String status; // Sent, Delivered, Read
-  final bool isPinned;
-  final String category; // Inbox, Sent, Archived, Pinned, Draft
+  String title;
+  String content;
+  DateTime updatedAt;
+  String category; // General, Work, Personal, Ideas, Todo
+  bool isPinned;
+  String colorHex;
 
-  ChatMessage({
+  NoteItem({
     required this.id,
-    required this.senderName,
-    required this.messageText,
-    required this.time,
-    required this.isSentByMe,
-    required this.status,
+    required this.title,
+    required this.content,
+    required this.updatedAt,
+    this.category = 'General',
     this.isPinned = false,
-    this.category = 'Inbox',
+    this.colorHex = '#3B82F6',
   });
-}
 
-class FileItem {
-  final String id;
-  final String name;
-  final String size;
-  final String
-  category; // Recent, Uploaded, Downloaded, Shared, Deleted, Favorite
-  final String fileType; // PDF, CSV, PNG, DOCX
-  final DateTime lastModified;
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'content': content,
+    'updatedAt': updatedAt.toIso8601String(),
+    'category': category,
+    'isPinned': isPinned,
+    'colorHex': colorHex,
+  };
 
-  FileItem({
-    required this.id,
-    required this.name,
-    required this.size,
-    required this.category,
-    required this.fileType,
-    required this.lastModified,
-  });
+  factory NoteItem.fromJson(Map<String, dynamic> json) => NoteItem(
+    id: json['id'] as String,
+    title: json['title'] as String,
+    content: json['content'] as String,
+    updatedAt: DateTime.parse(json['updatedAt'] as String),
+    category: json['category'] as String? ?? 'General',
+    isPinned: json['isPinned'] as bool? ?? false,
+    colorHex: json['colorHex'] as String? ?? '#3B82F6',
+  );
 }

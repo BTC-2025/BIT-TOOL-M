@@ -1,20 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../features/dashboard/dashboard_screen.dart';
-import '../../features/sessions/sessions_screen.dart';
-import '../../features/mail/mail_screen.dart';
-import '../../features/calendar/calendar_screen.dart';
 import '../../features/calculator/calculator_screen.dart';
+import '../../features/calendar/calendar_screen.dart';
+import '../../features/notes/notes_screen.dart';
 import '../../features/contacts/contacts_screen.dart';
-import '../../features/messages/messages_screen.dart';
-import '../../features/authentication/auth_screen.dart';
-import '../../features/devices/devices_screen.dart';
-import '../../features/files/files_screen.dart';
-import '../../features/reports/reports_screen.dart';
-import '../../features/settings/settings_screen.dart';
-import '../../features/news/news_screen.dart';
-import '../../features/search/search_screen.dart';
-import '../../features/translator/translator_screen.dart';
-import '../../features/lens/lens_screen.dart';
 import '../../features/weather/weather_screen.dart';
 import '../../features/keyboard/keyboard_screen.dart';
 import '../theme/app_theme.dart';
@@ -33,117 +21,39 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
   bool _isDark = false;
 
   final List<String> _titles = [
-    'Home',
-    'Activities',
-    'Mail',
-    'Calendar',
     'Calculator',
+    'Calendar',
+    'Notes',
     'Contacts',
-    'Messages',
-    'Authentication',
-    'Devices',
-    'Files',
-    'Reports',
-    'Profile',
-    'News',
-    'Keyboard',
-    'Translator',
-    'Lens',
     'Weather',
-    'Search',
+    'Keyboard',
   ];
 
   final List<IconData> _icons = [
-    Icons.grid_view_rounded,
-    Icons.bar_chart_rounded,
-    Icons.email_outlined,
-    Icons.calendar_today_rounded,
     Icons.calculate_outlined,
+    Icons.calendar_today_rounded,
+    Icons.note_alt_outlined,
     Icons.people_outline_rounded,
-    Icons.forum_outlined,
-    Icons.security_rounded,
-    Icons.important_devices_rounded,
-    Icons.folder_open_rounded,
-    Icons.analytics_rounded,
-    Icons.person_outline_rounded,
-    Icons.newspaper_rounded,
-    Icons.keyboard_outlined,
-    Icons.translate_rounded,
-    Icons.camera_alt_outlined,
     Icons.cloud_outlined,
-    Icons.search,
+    Icons.keyboard_outlined,
   ];
 
   Widget _buildScreen(int index) {
     switch (index) {
       case 0:
-        return DashboardScreen(
-          onNavigate: (newIndex) {
-            setState(() {
-              _currentIndex = newIndex;
-            });
-          },
-        );
-      case 1:
-        return const SessionsScreen();
-      case 2:
-        return const MailScreen();
-      case 3:
-        return const CalendarScreen();
-      case 4:
         return const CalculatorScreen();
-      case 5:
+      case 1:
+        return const CalendarScreen();
+      case 2:
+        return const NotesScreen();
+      case 3:
         return const ContactsScreen();
-      case 6:
-        return const MessagesScreen();
-      case 7:
-        return const AuthScreen();
-      case 8:
-        return const DevicesScreen();
-      case 9:
-        return const FilesScreen();
-      case 10:
-        return const ReportsScreen();
-      case 11:
-        return SettingsScreen(
-          isDark: _isDark,
-          onThemeChanged: (val) {
-            setState(() {
-              _isDark = val;
-            });
-          },
-          onNavigate: (newIndex) {
-            setState(() {
-              _currentIndex = newIndex;
-            });
-          },
-        );
-      case 12:
-        return const NewsScreen();
-      case 13:
-        return const KeyboardScreen();
-      case 14:
-        return const TranslatorScreen();
-      case 15:
-        return const LensScreen();
-      case 16:
+      case 4:
         return const WeatherScreen();
-      case 17:
-        return SearchScreen(
-          onNavigate: (newIndex) {
-            setState(() {
-              _currentIndex = newIndex;
-            });
-          },
-        );
+      case 5:
+        return const KeyboardScreen();
       default:
-        return DashboardScreen(
-          onNavigate: (newIndex) {
-            setState(() {
-              _currentIndex = newIndex;
-            });
-          },
-        );
+        return const CalculatorScreen();
     }
   }
 
@@ -173,22 +83,20 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
               ),
               const Divider(),
               ListTile(
-                leading: const Icon(Icons.security, color: Colors.red),
-                title: const Text('Suspicious login blocked'),
-                subtitle: const Text(
-                  'B2Auth flagged a high-risk access attempt.',
-                ),
+                leading: const Icon(Icons.cloud_sync, color: Colors.blue),
+                title: const Text('Weather data updated'),
+                subtitle: const Text('Local forecast refreshed successfully.'),
                 trailing: Text(
                   'Just now',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.mail, color: Colors.blue),
-                title: const Text('New client registration draft'),
-                subtitle: const Text('HR team uploaded new evaluation sheets.'),
+                leading: const Icon(Icons.event, color: Colors.green),
+                title: const Text('Calendar reminder'),
+                subtitle: const Text('Upcoming events are synced and ready.'),
                 trailing: Text(
-                  '10m ago',
+                  '15m ago',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
@@ -287,10 +195,15 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                 borderRadius: 50,
                 onPressed: () {
                   setState(() {
-                    _currentIndex = 17; // Navigate to Search Screen
+                    _isDark = !_isDark;
                   });
                 },
-                child: const Icon(Icons.search, size: 20),
+                child: Icon(
+                  _isDark
+                      ? Icons.light_mode_outlined
+                      : Icons.dark_mode_outlined,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 10),
               NeumorphicButton(
@@ -390,7 +303,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                             child: _buildScreen(_currentIndex),
                           ),
                         ),
-                        // B2Auth Premium Bottom Navigation bar
+                        // Bottom Navigation bar for Mobile
                         SafeArea(
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
@@ -405,18 +318,29 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                                   children: [
                                     _buildBottomNavItem(
                                       0,
-                                      'Home',
-                                      Icons.grid_view_rounded,
+                                      'Calculator',
+                                      _icons[0],
                                     ),
                                     _buildBottomNavItem(
                                       1,
-                                      'Activities',
-                                      Icons.bar_chart_rounded,
+                                      'Calendar',
+                                      _icons[1],
+                                    ),
+                                    _buildBottomNavItem(2, 'Notes', _icons[2]),
+                                    _buildBottomNavItem(
+                                      3,
+                                      'Contacts',
+                                      _icons[3],
                                     ),
                                     _buildBottomNavItem(
-                                      11,
-                                      'Profile',
-                                      Icons.person_outline_rounded,
+                                      4,
+                                      'Weather',
+                                      _icons[4],
+                                    ),
+                                    _buildBottomNavItem(
+                                      5,
+                                      'Keyboard',
+                                      _icons[5],
                                     ),
                                   ],
                                 ),
@@ -426,8 +350,6 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                         ),
                       ],
                     ),
-
-              // ─── Floating Back Button removed ────
             ],
           ),
         ),
@@ -453,13 +375,13 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
             Icon(
               icon,
               color: isSelected ? primaryColor : unselectedColor,
-              size: 24,
+              size: 22,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 3),
             Text(
               label,
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 9,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 color: isSelected ? primaryColor : unselectedColor,
               ),

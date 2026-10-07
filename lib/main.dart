@@ -23,9 +23,11 @@ class BITToolApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SessionProvider()),
-        ChangeNotifierProxyProvider<SessionProvider, MailProvider>(
-          create: (context) => MailProvider(context.read<SessionProvider>()),
-          update: (_, session, previous) => previous ?? MailProvider(session),
+        ChangeNotifierProxyProvider<SessionProvider, CalculatorProvider>(
+          create: (context) =>
+              CalculatorProvider(context.read<SessionProvider>()),
+          update: (_, session, previous) =>
+              previous ?? CalculatorProvider(session),
         ),
         ChangeNotifierProxyProvider<SessionProvider, CalendarProvider>(
           create: (context) =>
@@ -33,41 +35,15 @@ class BITToolApp extends StatelessWidget {
           update: (_, session, previous) =>
               previous ?? CalendarProvider(session),
         ),
-        ChangeNotifierProxyProvider<SessionProvider, CalculatorProvider>(
-          create: (context) =>
-              CalculatorProvider(context.read<SessionProvider>()),
-          update: (_, session, previous) =>
-              previous ?? CalculatorProvider(session),
+        ChangeNotifierProxyProvider<SessionProvider, NotesProvider>(
+          create: (context) => NotesProvider(context.read<SessionProvider>()),
+          update: (_, session, previous) => previous ?? NotesProvider(session),
         ),
         ChangeNotifierProxyProvider<SessionProvider, ContactsProvider>(
           create: (context) =>
               ContactsProvider(context.read<SessionProvider>()),
           update: (_, session, previous) =>
               previous ?? ContactsProvider(session),
-        ),
-        ChangeNotifierProxyProvider<SessionProvider, MessagesProvider>(
-          create: (context) =>
-              MessagesProvider(context.read<SessionProvider>()),
-          update: (_, session, previous) =>
-              previous ?? MessagesProvider(session),
-        ),
-        ChangeNotifierProxyProvider<SessionProvider, AuthProvider>(
-          create: (context) => AuthProvider(context.read<SessionProvider>()),
-          update: (_, session, previous) => previous ?? AuthProvider(session),
-        ),
-        ChangeNotifierProxyProvider<SessionProvider, DevicesProvider>(
-          create: (context) => DevicesProvider(context.read<SessionProvider>()),
-          update: (_, session, previous) =>
-              previous ?? DevicesProvider(session),
-        ),
-        ChangeNotifierProxyProvider<SessionProvider, FilesProvider>(
-          create: (context) => FilesProvider(context.read<SessionProvider>()),
-          update: (_, session, previous) => previous ?? FilesProvider(session),
-        ),
-        ChangeNotifierProxyProvider<SessionProvider, ReportsProvider>(
-          create: (context) => ReportsProvider(context.read<SessionProvider>()),
-          update: (_, session, previous) =>
-              previous ?? ReportsProvider(session),
         ),
       ],
       child: MaterialApp(

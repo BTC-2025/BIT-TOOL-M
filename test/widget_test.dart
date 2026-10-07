@@ -9,7 +9,7 @@ void main() {
     await tester.pumpWidget(const BITToolApp());
     await tester.pumpAndSettle();
 
-    // Verify initial Home screen title is displayed
-    expect(find.text('Home'), findsWidgets);
+    // Verify initial Calculator screen title is displayed
+    expect(find.text('Calculator'), findsWidgets);
   });
 }

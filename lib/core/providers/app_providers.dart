@@ -4,152 +4,6 @@ import '../models/app_models.dart';
 import '../models/calculator_models.dart';
 import 'session_provider.dart';
 
-// --- MAIL PROVIDER ---
-class MailProvider extends ChangeNotifier {
-  final SessionProvider sessionProvider;
-  final List<MailItem> _mails = [];
-
-  MailProvider(this.sessionProvider) {
-    _seedMails();
-  }
-
-  List<MailItem> get mails => List.unmodifiable(_mails);
-
-  void toggleStar(String id) {
-    final index = _mails.indexWhere((m) => m.id == id);
-    if (index != -1) {
-      _mails[index].isStarred = !_mails[index].isStarred;
-      sessionProvider.logActivity(
-        iconName: 'star',
-        device: 'Current Device',
-        module: 'BNX Mail',
-        duration: '150ms',
-        status: 'Success',
-        description: 'Toggled star status on: "${_mails[index].subject}"',
-        category: 'Mail',
-      );
-      notifyListeners();
-    }
-  }
-
-  void toggleImportant(String id) {
-    final index = _mails.indexWhere((m) => m.id == id);
-    if (index != -1) {
-      _mails[index].isImportant = !_mails[index].isImportant;
-      sessionProvider.logActivity(
-        iconName: 'label_important',
-        device: 'Current Device',
-        module: 'BNX Mail',
-        duration: '140ms',
-        status: 'Success',
-        description: 'Toggled important status on: "${_mails[index].subject}"',
-        category: 'Mail',
-      );
-      notifyListeners();
-    }
-  }
-
-  void deleteMail(String id) {
-    final index = _mails.indexWhere((m) => m.id == id);
-    if (index != -1) {
-      final mail = _mails[index];
-      _mails.removeAt(index);
-      sessionProvider.logActivity(
-        iconName: 'delete',
-        device: 'Current Device',
-        module: 'BNX Mail',
-        duration: '220ms',
-        status: 'Success',
-        description: 'Moved mail to trash: "${mail.subject}"',
-        category: 'Mail',
-      );
-      notifyListeners();
-    }
-  }
-
-  void composeMail({
-    required String receiver,
-    required String subject,
-    required String body,
-    required String priority,
-  }) {
-    final newMail = MailItem(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      sender: 'user@bittool.com',
-      receiver: receiver,
-      subject: subject,
-      time: DateTime.now(),
-      priority: priority,
-      attachments: [],
-      body: body,
-      status: 'Read',
-      category: 'Sent',
-      tags: ['Work'],
-    );
-    _mails.insert(0, newMail);
-    sessionProvider.logActivity(
-      iconName: 'send',
-      device: 'Current Device',
-      module: 'BNX Mail',
-      duration: '450ms',
-      status: 'Success',
-      description: 'Sent mail to $receiver regarding: "$subject"',
-      category: 'Mail',
-    );
-    notifyListeners();
-  }
-
-  void _seedMails() {
-    final now = DateTime.now();
-    _mails.addAll([
-      MailItem(
-        id: 'm1',
-        sender: 'security@b2auth.com',
-        receiver: 'user@bittool.com',
-        subject: 'B2Auth Security Alert - Multi-device enrollment detected',
-        time: now.subtract(const Duration(minutes: 10)),
-        priority: 'High',
-        attachments: [],
-        body:
-            'We detected a new login from a device registered in London, UK. Please check your active sessions panel.',
-        status: 'Unread',
-        category: 'Inbox',
-        tags: ['Security', 'Alert'],
-        isImportant: true,
-      ),
-      MailItem(
-        id: 'm2',
-        sender: 'hr@googleworkspace.com',
-        receiver: 'user@bittool.com',
-        subject: 'Q3 Performance Evaluation Cycle',
-        time: now.subtract(const Duration(hours: 3)),
-        priority: 'Medium',
-        attachments: ['eval_template.pdf'],
-        body:
-            'Hi Team, please complete your self evaluations by Friday. Find the template attached.',
-        status: 'Read',
-        category: 'Inbox',
-        tags: ['Work', 'HR'],
-        isStarred: true,
-      ),
-      MailItem(
-        id: 'm3',
-        sender: 'newsletter@medium.com',
-        receiver: 'user@bittool.com',
-        subject: 'Top Stories on Flutter and Clean Architecture',
-        time: now.subtract(const Duration(days: 1)),
-        priority: 'Low',
-        attachments: [],
-        body:
-            'Learn how to construct elegant frontend layouts using Neumorphic principles and providers.',
-        status: 'Read',
-        category: 'Inbox',
-        tags: ['Tech'],
-      ),
-    ]);
-  }
-}
-
 // --- CALENDAR PROVIDER ---
 class CalendarProvider extends ChangeNotifier {
   final SessionProvider sessionProvider;
@@ -1267,242 +1121,155 @@ class ContactsProvider extends ChangeNotifier {
   }
 }
 
-// --- MESSAGES PROVIDER ---
-class MessagesProvider extends ChangeNotifier {
+// --- NOTES PROVIDER ---
+class NotesProvider extends ChangeNotifier {
   final SessionProvider sessionProvider;
-  final List<ChatMessage> _messages = [];
+  final List<NoteItem> _notes = [];
 
-  MessagesProvider(this.sessionProvider) {
-    _seedMessages();
+  NotesProvider(this.sessionProvider) {
+    _seedNotes();
   }
 
-  List<ChatMessage> get messages => List.unmodifiable(_messages);
+  List<NoteItem> get notes => List.unmodifiable(_notes);
 
-  void sendMessage(String text) {
-    final newMessage = ChatMessage(
+  void addNote({
+    required String title,
+    required String content,
+    String category = 'General',
+    String colorHex = '#3B82F6',
+    bool isPinned = false,
+  }) {
+    final note = NoteItem(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      senderName: 'CurrentUser',
-      messageText: text,
-      time: DateTime.now(),
-      isSentByMe: true,
-      status: 'Sent',
+      title: title,
+      content: content,
+      updatedAt: DateTime.now(),
+      category: category,
+      colorHex: colorHex,
+      isPinned: isPinned,
     );
-    _messages.insert(0, newMessage);
+    _notes.insert(0, note);
     sessionProvider.logActivity(
-      iconName: 'chat',
+      iconName: 'note_add',
       device: 'Current Device',
-      module: 'Messages',
-      duration: '280ms',
+      module: 'Notes',
+      duration: '180ms',
       status: 'Success',
-      description: 'Sent message: "$text"',
-      category: 'Messaging',
+      description: 'Created new note: "$title"',
+      category: 'Notes',
     );
     notifyListeners();
-    // Auto-receive simulation
-    Future.delayed(const Duration(seconds: 2), () {
-      final replies = [
-        "Received! Will coordinate with BNX Mail.",
-        "Got it, looking into B2Auth logs.",
-        "Looks good, let's sync up tomorrow.",
-      ];
-      final responseText = replies[Random().nextInt(replies.length)];
-      final responseMsg = ChatMessage(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        senderName: 'Sarah Connor',
-        messageText: responseText,
-        time: DateTime.now(),
-        isSentByMe: false,
-        status: 'Read',
-      );
-      _messages.insert(0, responseMsg);
+  }
+
+  void updateNote(
+    String id, {
+    String? title,
+    String? content,
+    String? category,
+    String? colorHex,
+    bool? isPinned,
+  }) {
+    final index = _notes.indexWhere((n) => n.id == id);
+    if (index != -1) {
+      final note = _notes[index];
+      if (title != null) note.title = title;
+      if (content != null) note.content = content;
+      if (category != null) note.category = category;
+      if (colorHex != null) note.colorHex = colorHex;
+      if (isPinned != null) note.isPinned = isPinned;
+      note.updatedAt = DateTime.now();
+
       sessionProvider.logActivity(
-        iconName: 'chat_bubble',
-        device: 'External Source',
-        module: 'Messages',
+        iconName: 'edit_note',
+        device: 'Current Device',
+        module: 'Notes',
         duration: '120ms',
         status: 'Success',
-        description: 'Received message from Sarah Connor: "$responseText"',
-        category: 'Messaging',
-      );
-      notifyListeners();
-    });
-  }
-
-  void _seedMessages() {
-    final now = DateTime.now();
-    _messages.addAll([
-      ChatMessage(
-        id: 'msg1',
-        senderName: 'Sarah Connor',
-        messageText: 'Did you review the new OAuth credentials in B2Auth?',
-        time: now.subtract(const Duration(minutes: 15)),
-        isSentByMe: false,
-        status: 'Read',
-        isPinned: true,
-      ),
-      ChatMessage(
-        id: 'msg2',
-        senderName: 'CurrentUser',
-        messageText: 'Yes, looking at the credentials log right now.',
-        time: now.subtract(const Duration(minutes: 10)),
-        isSentByMe: true,
-        status: 'Read',
-      ),
-    ]);
-  }
-}
-
-// --- AUTH PROVIDER ---
-class AuthProvider extends ChangeNotifier {
-  final SessionProvider sessionProvider;
-  final int _riskScore = 15; // out of 100
-
-  AuthProvider(this.sessionProvider);
-
-  int get riskScore => _riskScore;
-
-  void triggerBiometricAuth() {
-    sessionProvider.logActivity(
-      iconName: 'fingerprint',
-      device: 'Current Device',
-      module: 'Authentication',
-      duration: '400ms',
-      status: 'Success',
-      description: 'Biometric authorization validated successfully',
-      category: 'Security',
-    );
-  }
-
-  void triggerOTPRequest() {
-    sessionProvider.logActivity(
-      iconName: 'sms_failed',
-      device: 'Current Device',
-      module: 'Authentication',
-      duration: '1.5s',
-      status: 'Pending',
-      description: 'OTP code requested for admin login verification',
-      category: 'Security',
-    );
-  }
-}
-
-// --- DEVICES PROVIDER ---
-class DevicesProvider extends ChangeNotifier {
-  final SessionProvider sessionProvider;
-  final List<Map<String, String>> _devices = [
-    {
-      'id': 'd1',
-      'name': 'Windows Desktop',
-      'os': 'Windows 11 Enterprise',
-      'browser': 'Chrome v124',
-      'ip': '192.168.1.45',
-      'location': 'New York, USA',
-      'status': 'Active Now',
-    },
-    {
-      'id': 'd2',
-      'name': 'iPhone 15 Pro',
-      'os': 'iOS 17.4',
-      'browser': 'Native Client',
-      'ip': '100.80.20.12',
-      'location': 'San Francisco, USA',
-      'status': 'Active 10 mins ago',
-    },
-  ];
-
-  DevicesProvider(this.sessionProvider);
-
-  List<Map<String, String>> get devices => _devices;
-
-  void removeDevice(String id) {
-    final index = _devices.indexWhere((d) => d['id'] == id);
-    if (index != -1) {
-      final name = _devices[index]['name'];
-      _devices.removeAt(index);
-      sessionProvider.logActivity(
-        iconName: 'phonelink_erase',
-        device: 'Current Device',
-        module: 'Devices',
-        duration: '600ms',
-        status: 'Success',
-        description: 'Revoked access authorization for device: $name',
-        category: 'Security',
+        description: 'Updated note: "${note.title}"',
+        category: 'Notes',
       );
       notifyListeners();
     }
   }
-}
 
-// --- FILES PROVIDER ---
-class FilesProvider extends ChangeNotifier {
-  final SessionProvider sessionProvider;
-  final List<FileItem> _files = [];
-
-  FilesProvider(this.sessionProvider) {
-    _seedFiles();
+  void deleteNote(String id) {
+    final index = _notes.indexWhere((n) => n.id == id);
+    if (index != -1) {
+      final note = _notes[index];
+      _notes.removeAt(index);
+      sessionProvider.logActivity(
+        iconName: 'delete',
+        device: 'Current Device',
+        module: 'Notes',
+        duration: '150ms',
+        status: 'Success',
+        description: 'Deleted note: "${note.title}"',
+        category: 'Notes',
+      );
+      notifyListeners();
+    }
   }
 
-  List<FileItem> get files => List.unmodifiable(_files);
-
-  void uploadFile(String name, String size, String type) {
-    final newFile = FileItem(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      name: name,
-      size: size,
-      category: 'Uploaded',
-      fileType: type,
-      lastModified: DateTime.now(),
-    );
-    _files.insert(0, newFile);
-    sessionProvider.logActivity(
-      iconName: 'cloud_upload',
-      device: 'Current Device',
-      module: 'Files',
-      duration: '1.2s',
-      status: 'Success',
-      description: 'Uploaded file: "$name ($size)" to secure repository',
-      category: 'Storage',
-    );
-    notifyListeners();
+  void togglePin(String id) {
+    final index = _notes.indexWhere((n) => n.id == id);
+    if (index != -1) {
+      _notes[index].isPinned = !_notes[index].isPinned;
+      sessionProvider.logActivity(
+        iconName: 'push_pin',
+        device: 'Current Device',
+        module: 'Notes',
+        duration: '90ms',
+        status: 'Success',
+        description: 'Toggled pin for note: "${_notes[index].title}"',
+        category: 'Notes',
+      );
+      notifyListeners();
+    }
   }
 
-  void _seedFiles() {
-    _files.addAll([
-      FileItem(
-        id: 'f1',
-        name: 'b2auth_config_v2.json',
-        size: '14 KB',
-        category: 'Recent',
-        fileType: 'JSON',
-        lastModified: DateTime.now().subtract(const Duration(hours: 1)),
+  void _seedNotes() {
+    final now = DateTime.now();
+    _notes.addAll([
+      NoteItem(
+        id: 'n1',
+        title: 'Project Roadmap',
+        content:
+            'Focusing on core productivity utilities: Calculator, Calendar, Notes, Contacts, Weather, and Keyboard.',
+        updatedAt: now.subtract(const Duration(hours: 2)),
+        category: 'Work',
+        isPinned: true,
+        colorHex: '#3B82F6',
       ),
-      FileItem(
-        id: 'f2',
-        name: 'evaluation_guidelines_2026.pdf',
-        size: '4.2 MB',
-        category: 'Shared',
-        fileType: 'PDF',
-        lastModified: DateTime.now().subtract(const Duration(days: 2)),
+      NoteItem(
+        id: 'n2',
+        title: 'Meeting Highlights',
+        content:
+            'Refactored navigation shell to provide clean neumorphic multi-platform experience.',
+        updatedAt: now.subtract(const Duration(hours: 5)),
+        category: 'Work',
+        isPinned: true,
+        colorHex: '#10B981',
+      ),
+      NoteItem(
+        id: 'n3',
+        title: 'Ideas & Brainstorming',
+        content:
+            'Add customizable widget themes and quick shortcuts for active toolsets.',
+        updatedAt: now.subtract(const Duration(days: 1)),
+        category: 'Ideas',
+        isPinned: false,
+        colorHex: '#F59E0B',
+      ),
+      NoteItem(
+        id: 'n4',
+        title: 'Personal Goals',
+        content:
+            'Read documentation on Flutter cross-platform compilation and native asset integration.',
+        updatedAt: now.subtract(const Duration(days: 2)),
+        category: 'Personal',
+        isPinned: false,
+        colorHex: '#8B5CF6',
       ),
     ]);
-  }
-}
-
-// --- REPORTS PROVIDER ---
-class ReportsProvider extends ChangeNotifier {
-  final SessionProvider sessionProvider;
-
-  ReportsProvider(this.sessionProvider);
-
-  void simulateExport(String format) {
-    sessionProvider.logActivity(
-      iconName: 'picture_as_pdf',
-      device: 'Current Device',
-      module: 'Reports',
-      duration: '2.5s',
-      status: 'Success',
-      description: 'Exported activity summary report in $format format',
-      category: 'Analytics',
-    );
   }
 }
