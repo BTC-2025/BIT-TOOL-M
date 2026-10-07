@@ -1,0 +1,6 @@
+If:
+  PathMatch: .*(linux|windows).*
+
+Diagnostics:
+  Suppress: ["*"]
+  UnusedIncludes: None
