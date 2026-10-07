@@ -9,7 +9,7 @@ import 'core/providers/session_provider.dart';
 import 'core/providers/app_providers.dart';
 
 // Shell
-import 'core/widgets/responsive_shell.dart';
+import 'core/widgets/splash_screen.dart';
 
 void main() {
   runApp(const BITToolApp());
@@ -77,7 +77,7 @@ class BITToolApp extends StatelessWidget {
         darkTheme: NeumorphicTheme.darkTheme,
         themeMode: ThemeMode
             .light, // Handled internally by ResponsiveShell dynamic theme injection
-        home: const ResponsiveShell(),
+        home: const SplashScreen(),
       ),
     );
   }
