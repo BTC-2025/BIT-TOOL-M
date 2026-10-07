@@ -1,6 +1,6 @@
 {
-    "name": "bit_tools_backend",
-    "short_name": "bit_tools_backend",
+    "name": "Bit tool",
+    "short_name": "Bit tool",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#ffffff",

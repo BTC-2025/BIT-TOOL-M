@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "bit_tools_backend" "\0"
+            VALUE "CompanyName", "com.bit-tool.com" "\0"
+            VALUE "FileDescription", "Bit tool" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "bit_tools_backend" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
+            VALUE "InternalName", "Bit tool" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.bit-tool.com. All rights reserved." "\0"
             VALUE "OriginalFilename", "bit_tools_backend.exe" "\0"
-            VALUE "ProductName", "bit_tools_backend" "\0"
+            VALUE "ProductName", "Bit tool" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

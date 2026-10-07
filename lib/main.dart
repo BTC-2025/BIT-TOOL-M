@@ -47,7 +47,7 @@ class BITToolApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'BIT Tool',
+        title: 'Bit tool',
         debugShowCheckedModeBanner: false,
         theme: NeumorphicTheme.lightTheme,
         darkTheme: NeumorphicTheme.darkTheme,

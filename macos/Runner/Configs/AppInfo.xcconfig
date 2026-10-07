@@ -5,10 +5,10 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = bit_tools_backend
+PRODUCT_NAME = Bit tool
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.bitToolsBackend
+PRODUCT_BUNDLE_IDENTIFIER = com.bit-tool.com
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 com.bit-tool.com. All rights reserved.

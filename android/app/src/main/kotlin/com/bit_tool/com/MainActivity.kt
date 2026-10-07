@@ -1,4 +1,4 @@
-package com.example.bit_tools_backend
+package com.bit_tool.com
 
 import io.flutter.embedding.android.FlutterActivity
 
