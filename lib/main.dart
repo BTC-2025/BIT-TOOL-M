@@ -7,6 +7,7 @@ import 'core/theme/app_theme.dart';
 // Providers
 import 'core/providers/session_provider.dart';
 import 'core/providers/app_providers.dart';
+import 'core/providers/theme_provider.dart';
 
 // Shell
 import 'core/widgets/splash_screen.dart';
@@ -22,6 +23,7 @@ class BITToolApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => SessionProvider()),
         ChangeNotifierProxyProvider<SessionProvider, CalculatorProvider>(
           create: (context) =>
@@ -46,14 +48,17 @@ class BITToolApp extends StatelessWidget {
               previous ?? ContactsProvider(session),
         ),
       ],
-      child: MaterialApp(
-        title: 'Bit tool',
-        debugShowCheckedModeBanner: false,
-        theme: NeumorphicTheme.lightTheme,
-        darkTheme: NeumorphicTheme.darkTheme,
-        themeMode: ThemeMode
-            .light, // Handled internally by ResponsiveShell dynamic theme injection
-        home: const SplashScreen(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'Bit tool',
+            debugShowCheckedModeBanner: false,
+            theme: NeumorphicTheme.lightTheme,
+            darkTheme: NeumorphicTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
+            home: const SplashScreen(),
+          );
+        },
       ),
     );
   }

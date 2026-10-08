@@ -1,6 +1,7 @@
 #ifndef FLUTTER_MY_APPLICATION_H_
 #define FLUTTER_MY_APPLICATION_H_
 
+#if defined(__linux__) || __has_include(<gtk/gtk.h>)
 #include <gtk/gtk.h>
 
 G_DECLARE_FINAL_TYPE(MyApplication,
@@ -17,5 +18,6 @@ G_DECLARE_FINAL_TYPE(MyApplication,
  * Returns: a new #MyApplication.
  */
 MyApplication* my_application_new();
+#endif
 
 #endif  // FLUTTER_MY_APPLICATION_H_

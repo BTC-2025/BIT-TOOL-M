@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../core/providers/app_providers.dart';
-import '../../core/providers/session_provider.dart';
 import '../../core/models/calculator_models.dart';
 import '../../core/widgets/neumorphic_widgets.dart';
-import '../../core/theme/app_spacing.dart';
+import 'widgets/cross_app_history_widget.dart';
+import 'models/cross_app_history_models.dart';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
@@ -17,11 +17,32 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen> {
   final ScrollController _tapeScrollController = ScrollController();
   bool _showHistoryList = false;
+  int _mobileTab = 0; // 0: Calculator, 1: Cross-App History
 
   @override
   void dispose() {
     _tapeScrollController.dispose();
     super.dispose();
+  }
+
+  void _loadCrossAppTape(CrossAppTape tape, CalculatorProvider calc) {
+    calc.clearAll();
+    for (int i = 0; i < tape.steps.length; i++) {
+      final step = tape.steps[i];
+      final strVal = step.value.toStringAsFixed(step.value % 1 == 0 ? 0 : 2);
+      if (i == 0 || step.operator == '=') {
+        for (int c = 0; c < strVal.length; c++) {
+          calc.enterDigit(strVal[c]);
+        }
+        calc.commitEntry();
+      } else {
+        calc.setOperator(step.operator);
+        for (int c = 0; c < strVal.length; c++) {
+          calc.enterDigit(strVal[c]);
+        }
+        calc.commitEntry();
+      }
+    }
   }
 
   void _scrollTapeToBottom() {
@@ -43,42 +64,203 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final primaryColor = Theme.of(context).primaryColor;
     final onSurface = Theme.of(context).colorScheme.onSurface;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // ── Header ──
-        _buildHeader(context, calcProvider, isDark, primaryColor),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isDesktop = constraints.maxWidth >= 880;
 
-        Expanded(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+        if (isDesktop) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── Left: Cross-App History ──
+              SizedBox(
+                width: 320,
+                child: CrossAppHistoryWidget(
+                  onLoadTape: (tape) => _loadCrossAppTape(tape, calcProvider),
+                ),
+              ),
+              const SizedBox(width: 16),
+
+              // ── Right: Compact Before Calculator Card ──
+              Expanded(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 480),
+                    child: _buildCalculatorCard(
+                      context,
+                      calcProvider,
+                      isDark,
+                      primaryColor,
+                      onSurface,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        } else {
+          // Mobile / Narrow Layout with Top Switcher
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFE2E8F0),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => setState(() => _mobileTab = 0),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _mobileTab == 0
+                                ? primaryColor
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Calculator',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: _mobileTab == 0
+                                  ? Colors.white
+                                  : (isDark
+                                      ? const Color(0xFF94A3B8)
+                                      : const Color(0xFF64748B)),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => setState(() => _mobileTab = 1),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _mobileTab == 1
+                                ? primaryColor
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Cross-App History',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: _mobileTab == 1
+                                  ? Colors.white
+                                  : (isDark
+                                      ? const Color(0xFF94A3B8)
+                                      : const Color(0xFF64748B)),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: _mobileTab == 0
+                    ? _buildCalculatorCard(
+                        context,
+                        calcProvider,
+                        isDark,
+                        primaryColor,
+                        onSurface,
+                      )
+                    : CrossAppHistoryWidget(
+                        onLoadTape: (tape) {
+                          _loadCrossAppTape(tape, calcProvider);
+                          setState(() => _mobileTab = 0);
+                        },
+                      ),
+              ),
+            ],
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildCalculatorCard(
+    BuildContext context,
+    CalculatorProvider calcProvider,
+    bool isDark,
+    Color primaryColor,
+    Color onSurface,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // ── Header: # BETA CALC [Save] [Logs] [Share] [Clear] ──
+          _buildHeader(context, calcProvider, isDark, primaryColor),
+
+          Divider(
+            height: 1,
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+          ),
+
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 24),
-
                   // ── History Sections (Togglable) ──
                   if (_showHistoryList &&
                       calcProvider.historySections.isNotEmpty) ...[
                     const Text(
                       'Calculation Logs',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.2,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     _buildHistorySectionsList(
                       context,
                       calcProvider,
                       isDark,
                       primaryColor,
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     const Divider(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                   ],
 
                   // ── SET BASE ──
@@ -90,7 +272,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       primaryColor,
                       onSurface,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                   ],
 
                   // ── Tape Entries ──
@@ -108,12 +290,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       onSurface,
                     ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
 
                   // ── Mode Tabs ──
                   _buildModeTabs(context, calcProvider, isDark, primaryColor),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
 
                   // ── Mode-specific content ──
                   _buildModeContent(
@@ -123,7 +305,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     primaryColor,
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
 
                   // ── Number Pad ──
                   _buildNumberPad(
@@ -134,30 +316,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     onSurface,
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
 
                   // ── Total Bar ──
                   _buildTotalBar(context, calcProvider, isDark, primaryColor),
-
-                  // ── Ecosystem Sessions ──
-                  const SizedBox(height: AppSpacing.lg),
-                  const Text(
-                    'Ecosystem Sessions',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  _buildEcosystemSessionsList(),
-                  const SizedBox(height: AppSpacing.xxl),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -171,11 +340,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     Color primary,
   ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Row(
         children: [
-          Icon(Icons.auto_awesome, color: primary, size: 18),
-          const SizedBox(width: 6),
+          const Text(
+            '#',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF10B981),
+            ),
+          ),
+          const SizedBox(width: 8),
           Text(
             'BETA CALC',
             style: TextStyle(
@@ -210,13 +386,23 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               const SnackBar(content: Text('Log summary copied to clipboard')),
             );
           }),
-          _headerAction(Icons.delete_outline, 'Clear', () => calc.clearAll()),
+          _headerAction(
+            Icons.delete_outline,
+            'Clear',
+            () => calc.clearAll(),
+            iconColor: Colors.red.shade400,
+          ),
         ],
       ),
     );
   }
 
-  Widget _headerAction(IconData icon, String tooltip, VoidCallback onTap) {
+  Widget _headerAction(
+    IconData icon,
+    String tooltip,
+    VoidCallback onTap, {
+    Color? iconColor,
+  }) {
     return Tooltip(
       message: tooltip,
       child: InkWell(
@@ -224,7 +410,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(6.0),
-          child: Icon(icon, size: 18, color: Colors.grey.shade600),
+          child: Icon(icon, size: 18, color: iconColor ?? Colors.grey.shade600),
         ),
       ),
     );
@@ -241,14 +427,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     Color onSurface,
   ) {
     return NeumorphicCard(
-      borderRadius: 16,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      borderRadius: 14,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       child: Row(
         children: [
           Text(
             'SET BASE',
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.w700,
               color: Colors.grey.shade500,
               letterSpacing: 0.5,
@@ -258,7 +444,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           Text(
             calc.currentInput == '0' ? '0' : calc.currentInput,
             style: TextStyle(
-              fontSize: 22,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
               color: onSurface,
             ),
@@ -705,31 +891,31 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   ) {
     return NeumorphicCard(
       borderRadius: 14,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'CONTINUE',
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 10,
               fontWeight: FontWeight.w700,
               color: Colors.grey.shade500,
               letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Row(
             children: [
               Text(
                 calc.pendingOperator,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: FontWeight.w600,
                   color: Colors.grey.shade500,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               Expanded(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
@@ -737,7 +923,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   child: Text(
                     calc.currentInput,
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: onSurface,
                     ),
@@ -827,7 +1013,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 2),
           decoration: BoxDecoration(
             color: isActive
                 ? (mode == CalcMode.discount
@@ -836,29 +1022,30 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 : (isDark
                       ? Colors.white.withValues(alpha: 0.05)
                       : Colors.grey.shade200),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(14),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 12,
-                color: isActive ? Colors.white : Colors.grey.shade600,
-              ),
-              const SizedBox(width: 3),
-              Flexible(
-                child: Text(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 12,
+                  color: isActive ? Colors.white : Colors.grey.shade600,
+                ),
+                const SizedBox(width: 3),
+                Text(
                   label,
-                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     color: isActive ? Colors.white : Colors.grey.shade600,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -1309,7 +1496,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         // Row 2: 7 8 9 -
         Row(
           children: [
@@ -1344,7 +1531,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         // Row 3: 4 5 6 +
         Row(
           children: [
@@ -1379,7 +1566,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         // Row 4 & 5: [1][2][3][ = spans 2 rows ]  /  [SCI][0][.][ = cont ]
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1417,7 +1604,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Row(
                     children: [
                       _padButton(
@@ -1450,21 +1637,21 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
             // Right column — = button spanning 2 rows
             Expanded(
               flex: 1,
               child: SizedBox(
-                height: 112,
+                height: 94,
                 child: NeumorphicButton(
                   padding: EdgeInsets.zero,
-                  borderRadius: 14,
+                  borderRadius: 12,
                   color: const Color(0xFF16A34A),
                   onPressed: () => calc.calculate(),
                   child: const Icon(
                     Icons.drag_handle,
                     color: Colors.white,
-                    size: 28,
+                    size: 26,
                   ),
                 ),
               ),
@@ -1782,13 +1969,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     return Expanded(
       flex: flex,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 2),
         child: NeumorphicButton(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          borderRadius: 14,
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          borderRadius: 12,
           onPressed: onTap,
           child: icon != null
-              ? Icon(icon, color: textColor ?? onSurface, size: 18)
+              ? Icon(icon, color: textColor ?? onSurface, size: 16)
               : Text(
                   label ?? '',
                   textAlign: TextAlign.center,
@@ -1817,10 +2004,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final symbol = calc.getCurrencySymbol();
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B3A2D),
-        borderRadius: BorderRadius.circular(14),
+        color: const Color(0xFF0F172A),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1828,13 +2015,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           Text(
             isUsd ? 'TOTAL (SIMULATED USD)' : 'TAPE RUNNING TOTAL',
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 9,
               fontWeight: FontWeight.w700,
               color: Colors.white.withValues(alpha: 0.6),
               letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -1845,7 +2032,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   child: Text(
                     '$symbol${_formatDisplay(total)}',
                     style: const TextStyle(
-                      fontSize: 22,
+                      fontSize: 20,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF4ADE80),
                     ),
@@ -1881,140 +2068,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════
-  // ECOSYSTEM SESSIONS — preserved from original
-  // ═══════════════════════════════════════════════════════════
-  Widget _buildEcosystemSessionsList() {
-    return Consumer<SessionProvider>(
-      builder: (context, sessionProvider, child) {
-        final calcActivities = sessionProvider.activities
-            .where((act) => act.module == 'Calculator')
-            .toList();
 
-        if (calcActivities.isEmpty) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Text(
-                'No ecosystem logs found.',
-                style: TextStyle(fontSize: 13, color: Colors.grey),
-              ),
-            ),
-          );
-        }
-
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: calcActivities.length,
-          itemBuilder: (context, i) {
-            final act = calcActivities[i];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: NeumorphicCard(
-                borderRadius: 16,
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: NeumorphicDecoration.build(
-                        context: context,
-                        inset: true,
-                        borderRadius: 12,
-                      ),
-                      child: Icon(
-                        Icons.calculate_outlined,
-                        color: Theme.of(context).primaryColor,
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                _extractEcosystem(act.description),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              Text(
-                                '${act.timestamp.hour}:${act.timestamp.minute.toString().padLeft(2, '0')}',
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            act.description,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.devices,
-                                size: 12,
-                                color: Colors.grey.shade500,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                act.device,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.grey.shade500,
-                                ),
-                              ),
-                              const Spacer(),
-                              Text(
-                                act.status,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: act.status == 'Success'
-                                      ? Colors.green
-                                      : Colors.red,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  String _extractEcosystem(String description) {
-    if (description.toLowerCase().contains('bnx mail')) {
-      return 'BNX Mail';
-    }
-    if (description.toLowerCase().contains('clicksbusiness')) {
-      return 'ClicksBusiness';
-    }
-    if (description.toLowerCase().contains('clicks')) {
-      return 'Clicks';
-    }
-    if (description.toLowerCase().contains('b2auth')) {
-      return 'B2Auth';
-    }
-    return 'BNX Ecosystem';
-  }
 
   // ═══════════════════════════════════════════════════════════
   // HELPERS

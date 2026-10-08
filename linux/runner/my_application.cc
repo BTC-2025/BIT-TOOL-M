@@ -1,5 +1,6 @@
 #include "my_application.h"
 
+#if defined(__linux__) || __has_include(<gtk/gtk.h>)
 #include <flutter_linux/flutter_linux.h>
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
@@ -146,3 +147,4 @@ MyApplication* my_application_new() {
                                      "application-id", APPLICATION_ID, "flags",
                                      G_APPLICATION_NON_UNIQUE, nullptr));
 }
+#endif  // defined(__linux__) || __has_include(<gtk/gtk.h>)

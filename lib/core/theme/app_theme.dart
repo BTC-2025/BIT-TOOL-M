@@ -75,9 +75,10 @@ class NeumorphicTheme {
       brightness: Brightness.dark,
       scaffoldBackgroundColor: darkBg,
       primaryColor: darkAccent,
-      cardColor: darkCard,
+      cardColor: const Color(0xFF1E293B),
+      dividerColor: const Color(0xFF334155),
       colorScheme: const ColorScheme.dark(
-        surface: darkBg,
+        surface: Color(0xFF1E293B),
         primary: darkAccent,
         onSurface: darkText,
       ),
