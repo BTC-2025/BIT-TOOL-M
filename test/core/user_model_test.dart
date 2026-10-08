@@ -120,5 +120,18 @@ void main() {
 
       expect(user1, equals(user2));
     });
+
+    test('parses alternative photo/avatar keys and resolves relative URL', () {
+      final json = {
+        'id': 99,
+        'email': 'photo@example.com',
+        'avatarUrl': '/uploads/photo99.png',
+      };
+      final user = UserModel.fromJson(json);
+
+      expect(user.profilePictureUrl, '/uploads/photo99.png');
+      expect(user.hasValidProfilePicture, isTrue);
+      expect(user.resolvedProfilePictureUrl, 'https://api.bnxmail.com/uploads/photo99.png');
+    });
   });
 }

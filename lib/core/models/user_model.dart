@@ -91,13 +91,28 @@ class UserModel {
       );
     }
 
+    final rawPic = json['profilePictureUrl'] ??
+        json['profile_picture_url'] ??
+        json['avatarUrl'] ??
+        json['avatar_url'] ??
+        json['avatar'] ??
+        json['photo'] ??
+        json['photoUrl'] ??
+        json['picture'] ??
+        json['image'];
+    final profilePic = (rawPic != null &&
+            rawPic.toString().trim().isNotEmpty &&
+            rawPic.toString().trim() != 'null')
+        ? rawPic.toString().trim()
+        : null;
+
     return UserModel(
       id: id,
       email: json['email']?.toString() ?? '',
       firstName: json['firstName']?.toString(),
       lastName: json['lastName']?.toString(),
       fullName: (json['fullName'] ?? json['name'])?.toString(),
-      profilePictureUrl: json['profilePictureUrl']?.toString(),
+      profilePictureUrl: profilePic,
       role: json['role']?.toString(),
       accountType: json['accountType']?.toString(),
       storageUsed: json['storageUsed'] is num
@@ -182,7 +197,26 @@ class UserModel {
   bool get hasValidProfilePicture {
     if (profilePictureUrl == null) return false;
     final url = profilePictureUrl!.trim();
-    return url.startsWith('http://') || url.startsWith('https://');
+    if (url.isEmpty || url.toLowerCase() == 'null') return false;
+    return url.startsWith('http://') ||
+        url.startsWith('https://') ||
+        url.startsWith('data:image/') ||
+        url.startsWith('/');
+  }
+
+  /// Returns the fully qualified URL for network images, or raw data URL for base64 images.
+  String? get resolvedProfilePictureUrl {
+    if (!hasValidProfilePicture) return null;
+    final url = profilePictureUrl!.trim();
+    if (url.startsWith('http://') ||
+        url.startsWith('https://') ||
+        url.startsWith('data:image/')) {
+      return url;
+    }
+    if (url.startsWith('/')) {
+      return 'https://api.bnxmail.com$url';
+    }
+    return 'https://api.bnxmail.com/$url';
   }
 
   @override

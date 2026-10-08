@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:bit_tools_backend/core/api/api_client.dart';
-import 'package:bit_tools_backend/core/api/api_config.dart';
 import 'package:bit_tools_backend/core/api/api_exceptions.dart';
 import 'package:bit_tools_backend/core/auth/auth_storage.dart';
 import 'package:bit_tools_backend/core/providers/auth_provider.dart';

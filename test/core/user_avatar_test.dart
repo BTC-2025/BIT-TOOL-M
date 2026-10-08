@@ -63,5 +63,48 @@ void main() {
       expect(find.byType(CircleAvatar), findsOneWidget);
       expect(find.text('U'), findsOneWidget);
     });
+
+    testWidgets('renders image when profilePictureUrl is a relative path', (
+      WidgetTester tester,
+    ) async {
+      const user = UserModel(
+        id: 3,
+        email: 'user@example.com',
+        fullName: 'Jane Doe',
+        profilePictureUrl: '/uploads/avatars/user3.jpg',
+      );
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: UserAvatar(user: user, radius: 24)),
+        ),
+      );
+
+      expect(user.resolvedProfilePictureUrl, 'https://api.bnxmail.com/uploads/avatars/user3.jpg');
+      expect(find.byType(Image), findsOneWidget);
+    });
+
+    testWidgets('renders image when profilePictureUrl is a base64 data URI', (
+      WidgetTester tester,
+    ) async {
+      // 1x1 transparent PNG base64
+      const base64Png =
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+      const user = UserModel(
+        id: 4,
+        email: 'user@example.com',
+        fullName: 'Jane Doe',
+        profilePictureUrl: base64Png,
+      );
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: UserAvatar(user: user, radius: 24)),
+        ),
+      );
+
+      expect(user.hasValidProfilePicture, isTrue);
+      expect(find.byType(Image), findsOneWidget);
+    });
   });
 }
