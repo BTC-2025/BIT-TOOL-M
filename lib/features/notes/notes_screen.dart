@@ -13,6 +13,13 @@ class NotesScreen extends StatefulWidget {
 class _NotesScreenState extends State<NotesScreen> {
   String _selectedFilter = 'All Apps';
 
+  // Inline note creation controllers
+  final TextEditingController _inlineTitleController = TextEditingController();
+  final TextEditingController _inlineContentController = TextEditingController();
+  bool _inlineIsPinned = false;
+  String _inlineCategory = 'Bit Tool';
+  String _inlineColorHex = '#A7F3D0';
+
   final List<String> _filterTabs = [
     'All Apps',
     'Archived',
@@ -31,6 +38,13 @@ class _NotesScreenState extends State<NotesScreen> {
     {'name': 'Peach', 'hex': '#FED7AA', 'color': const Color(0xFFFED7AA)},
   ];
 
+  @override
+  void dispose() {
+    _inlineTitleController.dispose();
+    _inlineContentController.dispose();
+    super.dispose();
+  }
+
   Color _parseColor(String hex) {
     try {
       final clean = hex.replaceAll('#', '');
@@ -41,197 +55,146 @@ class _NotesScreenState extends State<NotesScreen> {
     return const Color(0xFFA7F3D0);
   }
 
-  void _showNoteDialog({NoteItem? note}) {
-    final titleController = TextEditingController(text: note?.title ?? '');
-    final contentController = TextEditingController(text: note?.content ?? '');
-    String category = note?.category ?? 'Bit Tool';
-    String colorHex = note?.colorHex ?? '#A7F3D0';
-    bool isPinned = note?.isPinned ?? false;
+  void _saveInlineNote() {
+    final title = _inlineTitleController.text.trim();
+    final content = _inlineContentController.text.trim();
+    if (title.isEmpty && content.isEmpty) return;
+
+    final provider = context.read<NotesProvider>();
+    provider.addNote(
+      title: title.isEmpty ? 'Untitled' : title,
+      content: content,
+      category: _inlineCategory,
+      colorHex: _inlineColorHex,
+      isPinned: _inlineIsPinned,
+    );
+
+    _inlineTitleController.clear();
+    _inlineContentController.clear();
+    setState(() {
+      _inlineIsPinned = false;
+      _inlineColorHex = '#A7F3D0';
+      _inlineCategory = 'Bit Tool';
+    });
+  }
+
+  void _clearInlineNote() {
+    _inlineTitleController.clear();
+    _inlineContentController.clear();
+    setState(() {
+      _inlineIsPinned = false;
+    });
+  }
+
+  void _showNoteEditDialog(NoteItem note) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleController = TextEditingController(text: note.title);
+    final contentController = TextEditingController(text: note.content);
+    String category = note.category;
+    String colorHex = note.colorHex;
+    bool isPinned = note.isPinned;
 
     showDialog(
       context: context,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
-            return AlertDialog(
-              backgroundColor: Colors.white,
+            final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+            final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+            final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+
+            return Dialog(
+              backgroundColor: cardBg,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
+                side: isDark ? BorderSide(color: borderColor) : BorderSide.none,
               ),
-              title: Text(
-                note == null ? 'Create New Note' : 'Edit Note',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: Color(0xFF0F172A),
-                ),
-              ),
-              content: SingleChildScrollView(
-                child: SizedBox(
-                  width: 440,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      TextField(
-                        controller: titleController,
-                        decoration: InputDecoration(
-                          hintText: 'Note Title...',
-                          filled: true,
-                          fillColor: const Color(0xFFF8FAFC),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              child: Container(
+                width: 460,
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Edit Note',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: textColor,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              initialValue: ['Cliks', 'BNX Mail', 'Cliks Business', 'Bit Tool', 'General', 'Work', 'Ideas', 'Personal']
-                                      .contains(category)
-                                  ? category
-                                  : 'Bit Tool',
-                              decoration: InputDecoration(
-                                labelText: 'Application / Category',
-                                filled: true,
-                                fillColor: const Color(0xFFF8FAFC),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                                ),
-                              ),
-                              items: ['Cliks', 'BNX Mail', 'Cliks Business', 'Bit Tool', 'General', 'Work', 'Ideas', 'Personal'].map((cat) {
-                                return DropdownMenuItem(value: cat, child: Text(cat));
-                              }).toList(),
-                              onChanged: (val) {
-                                if (val != null) {
-                                  setDialogState(() => category = val);
-                                }
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          IconButton(
-                            icon: Icon(
-                              isPinned ? Icons.push_pin : Icons.push_pin_outlined,
-                              color: isPinned ? const Color(0xFF2563EB) : const Color(0xFF94A3B8),
-                            ),
-                            onPressed: () {
-                              setDialogState(() => isPinned = !isPinned);
-                            },
-                            tooltip: 'Pin Note',
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: contentController,
-                        maxLines: 5,
-                        decoration: InputDecoration(
-                          hintText: 'Take a note...',
-                          filled: true,
-                          fillColor: const Color(0xFFF8FAFC),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                          ),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded, size: 20),
+                          onPressed: () => Navigator.pop(ctx),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Select Card Color:',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF64748B),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: _pastelColors.map((c) {
-                          final isSelected = colorHex == c['hex'];
-                          return GestureDetector(
-                            onTap: () {
-                              setDialogState(() => colorHex = c['hex']);
-                            },
-                            child: Container(
-                              width: 34,
-                              height: 34,
-                              decoration: BoxDecoration(
-                                color: c['color'] as Color,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: isSelected
-                                      ? const Color(0xFF0F172A)
-                                      : Colors.transparent,
-                                  width: 2.5,
-                                ),
-                              ),
-                              child: isSelected
-                                  ? const Icon(Icons.check, size: 18, color: Color(0xFF0F172A))
-                                  : null,
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancel', style: TextStyle(color: Color(0xFF64748B))),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      ],
                     ),
-                  ),
-                  onPressed: () {
-                    final title = titleController.text.trim();
-                    final content = contentController.text.trim();
-                    if (title.isEmpty && content.isEmpty) return;
-
-                    final provider = context.read<NotesProvider>();
-                    if (note == null) {
-                      provider.addNote(
-                        title: title.isEmpty ? 'Untitled' : title,
-                        content: content,
-                        category: category,
-                        colorHex: colorHex,
-                        isPinned: isPinned,
-                      );
-                    } else {
-                      provider.updateNote(
-                        note.id,
-                        title: title.isEmpty ? 'Untitled' : title,
-                        content: content,
-                        category: category,
-                        colorHex: colorHex,
-                        isPinned: isPinned,
-                      );
-                    }
-                    Navigator.pop(ctx);
-                  },
-                  child: Text(note == null ? 'Create' : 'Save'),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: titleController,
+                      style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold),
+                      decoration: InputDecoration(
+                        hintText: 'Note Title...',
+                        hintStyle: TextStyle(color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: borderColor),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: contentController,
+                      maxLines: 4,
+                      style: TextStyle(color: textColor, fontSize: 14),
+                      decoration: InputDecoration(
+                        hintText: "What's on your mind?",
+                        hintStyle: TextStyle(color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: borderColor),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text('Cancel'),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2563EB),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: () {
+                            context.read<NotesProvider>().updateNote(
+                              note.id,
+                              title: titleController.text.trim(),
+                              content: contentController.text.trim(),
+                              category: category,
+                              colorHex: colorHex,
+                              isPinned: isPinned,
+                            );
+                            Navigator.pop(ctx);
+                          },
+                          child: const Text('Save'),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
+              ),
             );
           },
         );
@@ -240,22 +203,27 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   void _showColorPickerSheet(NoteItem note) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 'Change Note Color',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
               ),
               const SizedBox(height: 16),
               Row(
@@ -264,9 +232,9 @@ class _NotesScreenState extends State<NotesScreen> {
                   return GestureDetector(
                     onTap: () {
                       context.read<NotesProvider>().updateNote(
-                            note.id,
-                            colorHex: c['hex'] as String,
-                          );
+                        note.id,
+                        colorHex: c['hex'] as String,
+                      );
                       Navigator.pop(ctx);
                     },
                     child: Container(
@@ -275,7 +243,7 @@ class _NotesScreenState extends State<NotesScreen> {
                       decoration: BoxDecoration(
                         color: c['color'] as Color,
                         shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        border: Border.all(color: const Color(0xFFCBD5E1)),
                       ),
                     ),
                   );
@@ -291,81 +259,203 @@ class _NotesScreenState extends State<NotesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final notesProvider = Provider.of<NotesProvider>(context);
     final allNotes = notesProvider.notes;
 
     // Filter notes based on selected tab
     final filteredNotes = allNotes.where((n) {
       if (_selectedFilter == 'All Apps') return true;
-      if (_selectedFilter == 'Archived') return false; // simple mock for archived
+      if (_selectedFilter == 'Archived') return false;
       return n.category.toLowerCase() == _selectedFilter.toLowerCase();
     }).toList();
 
     return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 12),
-
-          // ─── Top Floating Search / Create Note Input Pill ─────────────────────
+          // ─── Inline Note Creation Box (Screenshot 3) ──────────────────────
           Center(
-            child: InkWell(
-              onTap: () => _showNoteDialog(),
-              borderRadius: BorderRadius.circular(24),
-              child: Container(
-                width: 480,
-                height: 48,
-                padding: const EdgeInsets.symmetric(horizontal: 18),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
+            child: Container(
+              width: 560,
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                 ),
-                child: const Row(
-                  children: [
-                    Icon(
-                      Icons.add_rounded,
-                      color: Color(0xFF64748B),
-                      size: 20,
-                    ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Create a new note...',
-                        style: TextStyle(
-                          color: Color(0xFF94A3B8),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                    blurRadius: 14,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Title Row with Pin Icon
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _inlineTitleController,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'Note Title',
+                            hintStyle: TextStyle(
+                              color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
                         ),
                       ),
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            _inlineIsPinned = !_inlineIsPinned;
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Icon(
+                            _inlineIsPinned ? Icons.push_pin : Icons.push_pin_outlined,
+                            size: 20,
+                            color: _inlineIsPinned
+                                ? const Color(0xFF2563EB)
+                                : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Content Field
+                  TextField(
+                    controller: _inlineContentController,
+                    maxLines: null,
+                    minLines: 2,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
                     ),
-                    Icon(
-                      Icons.check_box_outlined,
-                      color: Color(0xFF64748B),
-                      size: 20,
+                    decoration: InputDecoration(
+                      hintText: "What's on your mind?",
+                      hintStyle: TextStyle(
+                        color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                        fontSize: 14,
+                      ),
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
                     ),
-                    SizedBox(width: 14),
-                    Icon(
-                      Icons.image_outlined,
-                      color: Color(0xFF64748B),
-                      size: 20,
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Bottom Action Bar: Icons + Cancel + Save Note
+                  Row(
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          // Quick color rotation
+                          final idx = _pastelColors.indexWhere((c) => c['hex'] == _inlineColorHex);
+                          final nextIdx = (idx + 1) % _pastelColors.length;
+                          setState(() {
+                            _inlineColorHex = _pastelColors[nextIdx]['hex'] as String;
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(6),
+                        child: Padding(
+                          padding: const EdgeInsets.all(6),
+                          child: Icon(
+                            Icons.palette_outlined,
+                            size: 19,
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      InkWell(
+                        onTap: () {},
+                        borderRadius: BorderRadius.circular(6),
+                        child: Padding(
+                          padding: const EdgeInsets.all(6),
+                          child: Icon(
+                            Icons.check_box_outlined,
+                            size: 19,
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      InkWell(
+                        onTap: () {},
+                        borderRadius: BorderRadius.circular(6),
+                        child: Padding(
+                          padding: const EdgeInsets.all(6),
+                          child: Icon(
+                            Icons.image_outlined,
+                            size: 19,
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      TextButton(
+                        onPressed: _clearInlineNote,
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        ),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: _saveInlineNote,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isDark ? const Color(0xFF2563EB) : const Color(0xFF0F172A),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          'Save Note',
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
 
           const SizedBox(height: 28),
 
-          // ─── Filter Tabs Row ──────────────────────────────────────────────────
+          // ─── Filter Tabs Row (Screenshot 3) ───────────────────────────────
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -377,31 +467,26 @@ class _NotesScreenState extends State<NotesScreen> {
                     onTap: () => setState(() => _selectedFilter = tab),
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? const Color(0xFF0F172A)
-                            : Colors.white,
+                            ? (isDark ? const Color(0xFF2563EB) : const Color(0xFF0F172A))
+                            : (isDark ? const Color(0xFF1E293B) : Colors.white),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: isSelected
-                              ? const Color(0xFF0F172A)
-                              : const Color(0xFFE2E8F0),
+                              ? (isDark ? const Color(0xFF2563EB) : const Color(0xFF0F172A))
+                              : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                         ),
                       ),
                       child: Text(
                         tab,
                         style: TextStyle(
                           fontSize: 13,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.w500,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                           color: isSelected
                               ? Colors.white
-                              : const Color(0xFF475569),
+                              : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
                         ),
                       ),
                     ),
@@ -411,17 +496,17 @@ class _NotesScreenState extends State<NotesScreen> {
             ),
           ),
 
-          const SizedBox(height: 28),
+          const SizedBox(height: 24),
 
-          // ─── Notes Grid / Cards Row ───────────────────────────────────────────
+          // ─── Notes Grid / Cards Row (Screenshot 3) ────────────────────────
           if (filteredNotes.isEmpty)
             Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 40),
                 child: Text(
-                  'No notes in $_selectedFilter. Tap "Create a new note" above!',
-                  style: const TextStyle(
-                    color: Color(0xFF94A3B8),
+                  'No notes in $_selectedFilter. Tap "Save Note" above to add one!',
+                  style: TextStyle(
+                    color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
                     fontSize: 14,
                   ),
                 ),
@@ -446,19 +531,19 @@ class _NotesScreenState extends State<NotesScreen> {
     final bgColor = _parseColor(note.colorHex);
 
     return InkWell(
-      onTap: () => _showNoteDialog(note: note),
+      onTap: () => _showNoteEditDialog(note),
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        width: 250,
-        constraints: const BoxConstraints(minHeight: 170),
+        width: 255,
+        constraints: const BoxConstraints(minHeight: 175),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
               offset: const Offset(0, 3),
             ),
           ],
@@ -474,35 +559,19 @@ class _NotesScreenState extends State<NotesScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        note.category.toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0F172A),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
+                    _buildCategoryBadge(note.category),
                     InkWell(
                       onTap: () {
                         context.read<NotesProvider>().togglePin(note.id);
                       },
-                      child: Icon(
-                        note.isPinned
-                            ? Icons.push_pin
-                            : Icons.push_pin_outlined,
-                        size: 18,
-                        color: const Color(0xFF475569),
+                      borderRadius: BorderRadius.circular(6),
+                      child: Padding(
+                        padding: const EdgeInsets.all(2),
+                        child: Icon(
+                          note.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+                          size: 18,
+                          color: const Color(0xFF475569),
+                        ),
                       ),
                     ),
                   ],
@@ -543,13 +612,17 @@ class _NotesScreenState extends State<NotesScreen> {
               children: [
                 InkWell(
                   onTap: () => _showColorPickerSheet(note),
-                  child: const Icon(
-                    Icons.palette_outlined,
-                    size: 18,
-                    color: Color(0xFF475569),
+                  borderRadius: BorderRadius.circular(6),
+                  child: const Padding(
+                    padding: EdgeInsets.all(3),
+                    child: Icon(
+                      Icons.palette_outlined,
+                      size: 17,
+                      color: Color(0xFF475569),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
                 InkWell(
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -559,10 +632,14 @@ class _NotesScreenState extends State<NotesScreen> {
                       ),
                     );
                   },
-                  child: const Icon(
-                    Icons.archive_outlined,
-                    size: 18,
-                    color: Color(0xFF475569),
+                  borderRadius: BorderRadius.circular(6),
+                  child: const Padding(
+                    padding: EdgeInsets.all(3),
+                    child: Icon(
+                      Icons.inventory_2_outlined,
+                      size: 17,
+                      color: Color(0xFF475569),
+                    ),
                   ),
                 ),
                 const Spacer(),
@@ -570,16 +647,55 @@ class _NotesScreenState extends State<NotesScreen> {
                   onTap: () {
                     context.read<NotesProvider>().deleteNote(note.id);
                   },
-                  child: const Icon(
-                    Icons.delete_outline,
-                    size: 18,
-                    color: Color(0xFF475569),
+                  borderRadius: BorderRadius.circular(6),
+                  child: const Padding(
+                    padding: EdgeInsets.all(3),
+                    child: Icon(
+                      Icons.delete_outline_rounded,
+                      size: 18,
+                      color: Color(0xFF475569),
+                    ),
                   ),
                 ),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryBadge(String category) {
+    String label = category.toUpperCase();
+    Widget? leadingIcon;
+
+    if (category.toLowerCase() == 'bnx mail') {
+      leadingIcon = const Padding(
+        padding: EdgeInsets.only(right: 4),
+        child: Icon(Icons.near_me_rounded, size: 11, color: Color(0xFF0F172A)),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (leadingIcon != null) leadingIcon,
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0F172A),
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
       ),
     );
   }

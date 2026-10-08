@@ -20,160 +20,276 @@ class _ContactsScreenState extends State<ContactsScreen> {
   }
 
   void _showAddEditContactDialog({ContactItem? contact}) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final nameController = TextEditingController(text: contact?.name ?? '');
-    final compController = TextEditingController(text: contact?.company ?? 'Cliks Business');
-    final roleController = TextEditingController(text: contact?.designation ?? 'Supplier');
-    final phoneController = TextEditingController(text: contact?.phone ?? '');
     final emailController = TextEditingController(text: contact?.email ?? '');
+    final phoneController = TextEditingController(text: contact?.phone ?? '');
+    String selectedRole = contact?.designation.isNotEmpty == true ? contact!.designation : 'Customer';
+    final List<String> roleOptions = ['Customer', 'Supplier', 'Chithappa', 'Employee'];
+    if (!roleOptions.contains(selectedRole)) {
+      roleOptions.add(selectedRole);
+    }
 
     showDialog(
       context: context,
       builder: (ctx) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: Text(
-            contact == null ? 'Add New Contact' : 'Edit Contact',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-              color: Color(0xFF0F172A),
-            ),
-          ),
-          content: SingleChildScrollView(
-            child: SizedBox(
-              width: 420,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Full Name',
-                      filled: true,
-                      fillColor: const Color(0xFFF8FAFC),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: compController,
-                    decoration: InputDecoration(
-                      labelText: 'Company / Source (e.g. Cliks Business)',
-                      filled: true,
-                      fillColor: const Color(0xFFF8FAFC),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: roleController,
-                    decoration: InputDecoration(
-                      labelText: 'Role (e.g. Supplier, Customer, Chithappa)',
-                      filled: true,
-                      fillColor: const Color(0xFFF8FAFC),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: emailController,
-                    decoration: InputDecoration(
-                      labelText: 'Email Address',
-                      filled: true,
-                      fillColor: const Color(0xFFF8FAFC),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: phoneController,
-                    decoration: InputDecoration(
-                      labelText: 'Phone Number',
-                      filled: true,
-                      fillColor: const Color(0xFFF8FAFC),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                      ),
-                    ),
-                  ),
-                ],
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+            final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+            final labelColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+            final fieldBg = isDark ? const Color(0xFF0F172A) : Colors.white;
+            final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+
+            InputDecoration buildFieldDecoration(String hint) {
+              return InputDecoration(
+                hintText: hint,
+                hintStyle: TextStyle(
+                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                  fontSize: 14,
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                filled: true,
+                fillColor: fieldBg,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+                ),
+              );
+            }
+
+            return Dialog(
+              backgroundColor: cardBg,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+                side: isDark ? const BorderSide(color: Color(0xFF334155)) : BorderSide.none,
               ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel', style: TextStyle(color: Color(0xFF64748B))),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+              child: Container(
+                width: 480,
+                padding: const EdgeInsets.all(28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header: Title + Close Icon
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          contact == null ? 'Create New Contact' : 'Edit Contact',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: textColor,
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () => Navigator.pop(ctx),
+                          borderRadius: BorderRadius.circular(10),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: Icon(
+                              Icons.close_rounded,
+                              size: 20,
+                              color: labelColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+
+                    // FULL NAME *
+                    Text(
+                      'FULL NAME *',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                        color: labelColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: nameController,
+                      style: TextStyle(color: textColor, fontSize: 14),
+                      decoration: buildFieldDecoration('e.g. John Doe'),
+                    ),
+                    const SizedBox(height: 18),
+
+                    // EMAIL ADDRESS
+                    Text(
+                      'EMAIL ADDRESS',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                        color: labelColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: emailController,
+                      style: TextStyle(color: textColor, fontSize: 14),
+                      decoration: buildFieldDecoration('john@example.com'),
+                    ),
+                    const SizedBox(height: 18),
+
+                    // PHONE NUMBER + ROLE ROW
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'PHONE NUMBER',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.5,
+                                  color: labelColor,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              TextField(
+                                controller: phoneController,
+                                style: TextStyle(color: textColor, fontSize: 14),
+                                decoration: buildFieldDecoration('+1 (555) 000-0000'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'ROLE',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.5,
+                                  color: labelColor,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              DropdownButtonFormField<String>(
+                                initialValue: selectedRole,
+                                dropdownColor: cardBg,
+                                style: TextStyle(color: textColor, fontSize: 14),
+                                decoration: buildFieldDecoration(''),
+                                icon: Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  color: labelColor,
+                                ),
+                                items: roleOptions.map((role) {
+                                  return DropdownMenuItem<String>(
+                                    value: role,
+                                    child: Text(role, style: TextStyle(color: textColor)),
+                                  );
+                                }).toList(),
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    setDialogState(() => selectedRole = val);
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 28),
+
+                    // Actions: Cancel & Create Contact
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          ),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: labelColor,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2563EB),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 13),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                          onPressed: () {
+                            final name = nameController.text.trim();
+                            if (name.isEmpty) return;
+
+                            final provider = context.read<ContactsProvider>();
+                            if (contact == null) {
+                              final now = DateTime.now();
+                              final dateStr = 'Added ${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
+                              final newContact = ContactItem(
+                                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                                photoUrl: '',
+                                name: name,
+                                company: 'Cliks Business',
+                                designation: selectedRole,
+                                phone: phoneController.text.trim().isEmpty ? '8984724747' : phoneController.text.trim(),
+                                email: emailController.text.trim().isEmpty ? 'aruntest@bnxmail.com' : emailController.text.trim(),
+                                department: 'Operations',
+                                location: dateStr,
+                                notes: 'Cliks Business • $dateStr',
+                              );
+                              provider.addContact(newContact);
+                            } else {
+                              provider.deleteContact(contact.id);
+                              final updated = ContactItem(
+                                id: contact.id,
+                                photoUrl: contact.photoUrl,
+                                name: name,
+                                company: contact.company.isEmpty ? 'Cliks Business' : contact.company,
+                                designation: selectedRole,
+                                phone: phoneController.text.trim().isEmpty ? contact.phone : phoneController.text.trim(),
+                                email: emailController.text.trim().isEmpty ? contact.email : emailController.text.trim(),
+                                department: contact.department,
+                                location: contact.location,
+                                notes: contact.notes,
+                                isFavorite: contact.isFavorite,
+                                isBlocked: contact.isBlocked,
+                              );
+                              provider.addContact(updated);
+                            }
+                            Navigator.pop(ctx);
+                          },
+                          child: Text(
+                            contact == null ? 'Create Contact' : 'Update Contact',
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              onPressed: () {
-                final name = nameController.text.trim();
-                if (name.isEmpty) return;
-
-                final provider = context.read<ContactsProvider>();
-                if (contact == null) {
-                  final now = DateTime.now();
-                  final dateStr = 'Added ${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
-                  final newContact = ContactItem(
-                    id: DateTime.now().millisecondsSinceEpoch.toString(),
-                    photoUrl: '',
-                    name: name,
-                    company: compController.text.trim().isEmpty ? 'Cliks Business' : compController.text.trim(),
-                    designation: roleController.text.trim().isEmpty ? 'Supplier' : roleController.text.trim(),
-                    phone: phoneController.text.trim(),
-                    email: emailController.text.trim(),
-                    department: 'Operations',
-                    location: dateStr,
-                    notes: '${compController.text.trim()} • $dateStr',
-                  );
-                  provider.addContact(newContact);
-                } else {
-                  // Update contact
-                  provider.deleteContact(contact.id);
-                  final updated = ContactItem(
-                    id: contact.id,
-                    photoUrl: contact.photoUrl,
-                    name: name,
-                    company: compController.text.trim().isEmpty ? contact.company : compController.text.trim(),
-                    designation: roleController.text.trim().isEmpty ? contact.designation : roleController.text.trim(),
-                    phone: phoneController.text.trim(),
-                    email: emailController.text.trim(),
-                    department: contact.department,
-                    location: contact.location,
-                    notes: contact.notes,
-                    isFavorite: contact.isFavorite,
-                    isBlocked: contact.isBlocked,
-                  );
-                  provider.addContact(updated);
-                }
-                Navigator.pop(ctx);
-              },
-              child: Text(contact == null ? 'Save' : 'Update'),
-            ),
-          ],
+            );
+          },
         );
       },
     );
@@ -503,19 +619,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       const SizedBox(height: 3),
                       Row(
                         children: [
-                          Container(
-                            width: 10,
-                            height: 10,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF10B981),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.check,
-                              size: 7,
-                              color: Colors.white,
-                            ),
-                          ),
+                          _buildSourceLogo(sourceText),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
@@ -666,6 +770,42 @@ class _ContactsScreenState extends State<ContactsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSourceLogo(String sourceText) {
+    final lower = sourceText.toLowerCase();
+    String assetPath = 'assets/cliks_business_img.png';
+    if (lower.contains('bnx')) {
+      assetPath = 'assets/bnx_mail_logo.png';
+    } else if (lower.contains('bit')) {
+      assetPath = 'assets/bit_tool_logo.png';
+    } else if (lower.contains('cliks business')) {
+      assetPath = 'assets/cliks_business_img.png';
+    } else if (lower.contains('cliks')) {
+      assetPath = 'assets/cliks_logo.png';
+    }
+
+    return SizedBox(
+      width: 14,
+      height: 14,
+      child: Image.asset(
+        assetPath,
+        fit: BoxFit.contain,
+        errorBuilder: (_, __, ___) => Container(
+          width: 12,
+          height: 12,
+          decoration: const BoxDecoration(
+            color: Color(0xFF10B981),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.check,
+            size: 8,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }

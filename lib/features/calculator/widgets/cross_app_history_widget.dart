@@ -536,21 +536,30 @@ class _CrossAppHistoryWidgetState extends State<CrossAppHistoryWidget> {
         return Container(
           width: size,
           height: size,
+          padding: EdgeInsets.all(size * 0.1),
           decoration: BoxDecoration(
             color: const Color(0xFFEFF6FF),
-            borderRadius: BorderRadius.circular(size * 0.3),
+            borderRadius: BorderRadius.circular(size * 0.28),
           ),
-          child: Icon(
-            Icons.mark_email_read_rounded,
-            color: const Color(0xFF2563EB),
-            size: size * 0.65,
+          child: Image.asset(
+            'assets/bnx_mail_logo.png',
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => Icon(
+              Icons.mark_email_read_rounded,
+              color: const Color(0xFF2563EB),
+              size: size * 0.65,
+            ),
           ),
         );
       case 'bit_tool':
         return Container(
           width: size,
           height: size,
-          padding: EdgeInsets.all(size * 0.15),
+          padding: EdgeInsets.all(size * 0.1),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+            borderRadius: BorderRadius.circular(size * 0.28),
+          ),
           child: Image.asset(
             'assets/bit_tool_logo.png',
             fit: BoxFit.contain,
@@ -562,33 +571,45 @@ class _CrossAppHistoryWidgetState extends State<CrossAppHistoryWidget> {
           ),
         );
       case 'cliks':
-        return Container(
+        return SizedBox(
           width: size,
           height: size,
-          decoration: BoxDecoration(
-            color: const Color(0xFFECFDF5),
-            shape: BoxShape.circle,
-            border: Border.all(color: const Color(0xFF10B981), width: 1.5),
-          ),
-          child: Icon(
-            Icons.check,
-            color: const Color(0xFF10B981),
-            size: size * 0.6,
+          child: Image.asset(
+            'assets/cliks_logo.png',
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFECFDF5),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF10B981), width: 1.5),
+              ),
+              child: Icon(
+                Icons.check,
+                color: const Color(0xFF10B981),
+                size: size * 0.6,
+              ),
+            ),
           ),
         );
       case 'cliks_business':
-        return Container(
+        return SizedBox(
           width: size,
           height: size,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF0FDF4),
-            shape: BoxShape.circle,
-            border: Border.all(color: const Color(0xFF059669), width: 1.8),
-          ),
-          child: Icon(
-            Icons.done_all,
-            color: const Color(0xFF059669),
-            size: size * 0.6,
+          child: Image.asset(
+            'assets/cliks_business_img.png',
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0FDF4),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF059669), width: 1.8),
+              ),
+              child: Icon(
+                Icons.done_all,
+                color: const Color(0xFF059669),
+                size: size * 0.6,
+              ),
+            ),
           ),
         );
       default:

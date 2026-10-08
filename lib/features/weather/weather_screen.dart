@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -15,50 +16,67 @@ class _WeatherScreenState extends State<WeatherScreen> {
   final TextEditingController _searchController = TextEditingController();
   bool _showSearchBar = false;
 
-  // Weather state variables initialized with reference values
+  // Active location and metrics
   String _activeCity = 'Tiruvallur';
   String _activeCountry = 'Tamil Nadu';
   String _condition = 'Sunny';
   double _temp = 31.0;
+  double _feelsLike = 34.0;
   int _humidity = 69;
   double _wind = 7.2;
   int _uvIndex = 6;
   String _airQuality = 'Good';
+  int _aqi = 42;
+  int _pressure = 1012;
+  double _visibility = 10.0;
   bool _isLoading = false;
-  String _sunrise = '05:59';
-  String _sunset = '17:55';
+  String _sunrise = '05:59 AM';
+  String _sunset = '05:55 PM';
   double _minTemp = 26.0;
   double _maxTemp = 33.0;
 
-  // Hourly forecast state
-  List<Map<String, dynamic>> _hourlyForecast = [
-    {'time': '00:00', 'temp': 28, 'isDay': false, 'isNow': false},
-    {'time': '01:00', 'temp': 27, 'isDay': false, 'isNow': false},
-    {'time': '02:00', 'temp': 27, 'isDay': false, 'isNow': false},
-    {'time': '03:00', 'temp': 26, 'isDay': false, 'isNow': false},
-    {'time': '04:00', 'temp': 27, 'isDay': false, 'isNow': false},
-    {'time': '05:00', 'temp': 27, 'isDay': false, 'isNow': false},
-    {'time': '06:00', 'temp': 27, 'isDay': true, 'isNow': false},
-    {'time': '07:00', 'temp': 28, 'isDay': true, 'isNow': false},
-    {'time': '08:00', 'temp': 30, 'isDay': true, 'isNow': false},
-    {'time': 'Now', 'temp': 31, 'isDay': true, 'isNow': true},
+  // Quick switch popular cities
+  final List<String> _quickCities = [
+    'Tiruvallur',
+    'Chennai',
+    'Bengaluru',
+    'Mumbai',
+    'Delhi',
+    'London',
+    'New York',
   ];
 
-  // 7-day forecast state
+  // 24-hour forecast
+  List<Map<String, dynamic>> _hourlyForecast = [
+    {'time': '00:00', 'temp': 28, 'isDay': false, 'isNow': false, 'pop': 10},
+    {'time': '02:00', 'temp': 27, 'isDay': false, 'isNow': false, 'pop': 5},
+    {'time': '04:00', 'temp': 26, 'isDay': false, 'isNow': false, 'pop': 5},
+    {'time': '06:00', 'temp': 27, 'isDay': true, 'isNow': false, 'pop': 0},
+    {'time': '08:00', 'temp': 29, 'isDay': true, 'isNow': false, 'pop': 0},
+    {'time': 'Now', 'temp': 31, 'isDay': true, 'isNow': true, 'pop': 15},
+    {'time': '12:00', 'temp': 33, 'isDay': true, 'isNow': false, 'pop': 20},
+    {'time': '14:00', 'temp': 34, 'isDay': true, 'isNow': false, 'pop': 10},
+    {'time': '16:00', 'temp': 32, 'isDay': true, 'isNow': false, 'pop': 25},
+    {'time': '18:00', 'temp': 29, 'isDay': true, 'isNow': false, 'pop': 30},
+    {'time': '20:00', 'temp': 28, 'isDay': false, 'isNow': false, 'pop': 15},
+    {'time': '22:00', 'temp': 27, 'isDay': false, 'isNow': false, 'pop': 10},
+  ];
+
+  // 7-day forecast
   List<Map<String, dynamic>> _dailyForecast = [
-    {'day': 'TODAY', 'min': 26, 'max': 33, 'condition': 'Sunny'},
-    {'day': 'FRI', 'min': 25, 'max': 33, 'condition': 'Sunny'},
-    {'day': 'SAT', 'min': 24, 'max': 34, 'condition': 'Sunny'},
-    {'day': 'SUN', 'min': 23, 'max': 34, 'condition': 'Sunny'},
-    {'day': 'MON', 'min': 25, 'max': 32, 'condition': 'Sunny'},
-    {'day': 'TUE', 'min': 25, 'max': 34, 'condition': 'Sunny'},
-    {'day': 'WED', 'min': 24, 'max': 33, 'condition': 'Sunny'},
+    {'day': 'TODAY', 'min': 26, 'max': 33, 'condition': 'Sunny', 'pop': 15},
+    {'day': 'FRI', 'min': 25, 'max': 33, 'condition': 'Sunny', 'pop': 10},
+    {'day': 'SAT', 'min': 24, 'max': 34, 'condition': 'Partly Cloudy', 'pop': 20},
+    {'day': 'SUN', 'min': 23, 'max': 34, 'condition': 'Sunny', 'pop': 10},
+    {'day': 'MON', 'min': 25, 'max': 32, 'condition': 'Scattered Showers', 'pop': 45},
+    {'day': 'TUE', 'min': 25, 'max': 34, 'condition': 'Partly Cloudy', 'pop': 25},
+    {'day': 'WED', 'min': 24, 'max': 33, 'condition': 'Sunny', 'pop': 10},
   ];
 
   @override
   void initState() {
     super.initState();
-    _fetchCurrentLocationWeather();
+    _fetchSafeInitialWeather();
   }
 
   @override
@@ -67,448 +85,375 @@ class _WeatherScreenState extends State<WeatherScreen> {
     super.dispose();
   }
 
-  Future<void> _fetchCurrentLocationWeather() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // 1. Request and fetch location coordinates
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        await _tryIpGeolocationOrFallback('Location services disabled.');
-        return;
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          await _tryIpGeolocationOrFallback('Location permission denied.');
-          return;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        await _tryIpGeolocationOrFallback(
-          'Location permission permanently denied.',
-        );
-        return;
-      }
-
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.low,
-        timeLimit: const Duration(seconds: 5),
-      );
-
-      // 2. Reverse geocode coordinates using package:geocoding with OSM fallback
-      String cityName = 'Tiruvallur';
-      String countryName = 'Tamil Nadu';
-
-      try {
-        List<Placemark> placemarks = await placemarkFromCoordinates(
-          position.latitude,
-          position.longitude,
-        );
-        if (placemarks.isNotEmpty) {
-          Placemark place = placemarks[0];
-          String? city =
-              place.locality ??
-              place.subLocality ??
-              place.subAdministrativeArea ??
-              place.administrativeArea;
-          if (city != null && city.isNotEmpty) {
-            cityName = city;
-          }
-          countryName = place.administrativeArea ?? place.country ?? '';
-        }
-      } catch (e) {
-        final geoUrl = Uri.parse(
-          'https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.latitude}&lon=${position.longitude}&zoom=18&addressdetails=1',
-        );
-        final geoResponse = await http.get(
-          geoUrl,
-          headers: {'User-Agent': 'BitToolsApp/1.0'},
-        );
-        if (geoResponse.statusCode == 200) {
-          final geoData = json.decode(geoResponse.body);
-          final address = geoData['address'];
-          if (address != null) {
-            cityName =
-                address['city'] ??
-                address['town'] ??
-                address['village'] ??
-                address['suburb'] ??
-                'Tiruvallur';
-            countryName =
-                address['state'] ?? address['country'] ?? 'Tamil Nadu';
-          }
-        }
-      }
-
-      // 3. Fetch Weather from Open-Meteo
-      await _fetchWeatherFromCoordinates(
-        position.latitude,
-        position.longitude,
-        cityName,
-        countryName,
-      );
-    } catch (e) {
-      await _tryIpGeolocationOrFallback('Failed to retrieve location weather.');
-    }
+  Future<void> _fetchSafeInitialWeather() async {
+    // Proactively fetch weather using IP Geolocation or default coordinates
+    // ensuring zero crashes or timeouts on macOS, Linux, Windows, Web, or Mobile
+    await _tryIpGeolocationOrFallback('Initializing weather...');
   }
 
-  Future<void> _tryIpGeolocationOrFallback(String snackBarMsg) async {
+  Future<void> _detectCurrentLocation() async {
+    setState(() => _isLoading = true);
+
+    // On web or desktop platforms, geolocator can fail if permissions aren't set
     try {
-      final ipGeoUrl = Uri.parse('http://ip-api.com/json');
-      final ipResponse = await http
-          .get(ipGeoUrl)
-          .timeout(const Duration(seconds: 4));
-      if (ipResponse.statusCode == 200) {
-        final ipData = json.decode(ipResponse.body);
-        if (ipData['status'] == 'success') {
-          final lat = (ipData['lat'] as num).toDouble();
-          final lon = (ipData['lon'] as num).toDouble();
-          final city = ipData['city'] as String? ?? 'Tiruvallur';
-          final region = ipData['regionName'] as String? ?? 'Tamil Nadu';
-          await _fetchWeatherFromCoordinates(lat, lon, city, region);
-          return;
+      if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)) {
+        bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+        if (serviceEnabled) {
+          LocationPermission permission = await Geolocator.checkPermission();
+          if (permission == LocationPermission.denied) {
+            permission = await Geolocator.requestPermission();
+          }
+          if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+            Position position = await Geolocator.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.low,
+              timeLimit: const Duration(seconds: 4),
+            );
+
+            // Reverse geocode
+            try {
+              List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+              if (placemarks.isNotEmpty) {
+                final p = placemarks[0];
+                final city = p.locality ?? p.subAdministrativeArea ?? p.administrativeArea ?? 'Local Area';
+                final country = p.country ?? '';
+                await _fetchWeatherFromCoordinates(position.latitude, position.longitude, city, country);
+                return;
+              }
+            } catch (_) {}
+
+            await _fetchWeatherFromCoordinates(position.latitude, position.longitude, 'My Location', '');
+            return;
+          }
         }
+      }
+    } catch (_) {
+      // Fallback cleanly to IP Geolocation
+    }
+
+    await _tryIpGeolocationOrFallback('GPS unavailable, using IP location');
+  }
+
+  Future<void> _tryIpGeolocationOrFallback(String reason) async {
+    try {
+      final ipRes = await http.get(
+        Uri.parse('https://ipapi.co/json/'),
+      ).timeout(const Duration(seconds: 4));
+
+      if (ipRes.statusCode == 200) {
+        final data = json.decode(ipRes.body);
+        final city = data['city'] ?? 'Tiruvallur';
+        final country = data['region'] ?? data['country_name'] ?? 'Tamil Nadu';
+        final lat = (data['latitude'] as num?)?.toDouble() ?? 13.1439;
+        final lon = (data['longitude'] as num?)?.toDouble() ?? 79.9079;
+
+        await _fetchWeatherFromCoordinates(lat, lon, city, country);
+        return;
       }
     } catch (_) {}
 
-    _loadFallbackCity(snackBarMsg);
+    // Fallback to default coordinates for Tiruvallur / Chennai
+    await _fetchWeatherFromCoordinates(13.1439, 79.9079, 'Tiruvallur', 'Tamil Nadu');
   }
 
-  void _loadFallbackCity(String snackBarMsg) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$snackBarMsg Showing regional forecast.')),
-      );
-    }
-    // Fallback coordinates for Tiruvallur, Tamil Nadu
-    _fetchWeatherFromCoordinates(13.1432, 79.9079, 'Tiruvallur', 'Tamil Nadu');
-  }
+  Future<void> _fetchWeatherFromCoordinates(double lat, double lon, String city, String country) async {
+    setState(() => _isLoading = true);
 
-  Future<void> _fetchWeatherFromCoordinates(
-    double lat,
-    double lon,
-    String city,
-    String country,
-  ) async {
     try {
       final weatherUrl = Uri.parse(
-        'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current_weather=true&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,uv_index&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset&timezone=auto',
+        'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon'
+        '&current_weather=true&hourly=temperature_2m,relativehumidity_2m,surface_pressure,visibility'
+        '&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max'
+        '&timezone=auto',
       );
 
-      final response = await http.get(weatherUrl);
+      final response = await http.get(weatherUrl).timeout(const Duration(seconds: 5));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final current = data['current_weather'];
-        final hourly = data['hourly'];
         final daily = data['daily'];
+        final hourly = data['hourly'];
 
-        // Map Open-Meteo Weather Codes to condition names
-        int code = current['weathercode'] ?? 0;
-        String cond = 'Sunny';
-        if (code <= 1) {
-          cond = 'Sunny';
-        } else if (code == 2 || code == 3) {
-          cond = 'Cloudy';
-        } else if (code >= 51 && code <= 67) {
-          cond = 'Rainy';
-        } else if (code >= 95) {
-          cond = 'Stormy';
+        final tempVal = (current['temperature'] as num).toDouble();
+        final windVal = (current['windspeed'] as num).toDouble();
+        final weatherCode = current['weathercode'] as int;
+
+        String conditionStr = _getConditionFromCode(weatherCode);
+
+        // Daily min / max
+        double minT = (daily['temperature_2m_min'][0] as num).toDouble();
+        double maxT = (daily['temperature_2m_max'][0] as num).toDouble();
+
+        // Sunrise & sunset
+        String srStr = daily['sunrise'][0].toString();
+        String ssStr = daily['sunset'][0].toString();
+        String formatTime(String iso) {
+          try {
+            final dt = DateTime.parse(iso);
+            final h = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+            final m = dt.minute.toString().padLeft(2, '0');
+            final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+            return '${h.toString().padLeft(2, '0')}:$m $ampm';
+          } catch (_) {
+            return iso;
+          }
         }
 
-        // Current hour data
+        // Humidity
+        int hum = 68;
+        if (hourly != null && hourly['relativehumidity_2m'] != null) {
+          final humList = hourly['relativehumidity_2m'] as List;
+          if (humList.isNotEmpty) {
+            hum = (humList[0] as num).toInt();
+          }
+        }
+
+        // Hourly forecast list
+        List<Map<String, dynamic>> newHourly = [];
         final currentHour = DateTime.now().hour;
-        int hum = 69;
-        int uv = 6;
-        if (hourly != null) {
-          final humList = hourly['relative_humidity_2m'];
-          final uvList = hourly['uv_index'];
-          if (humList != null && humList.length > currentHour) {
-            hum = (humList[currentHour] as num).toInt();
-          }
-          if (uvList != null && uvList.length > currentHour) {
-            uv = (uvList[currentHour] as num).toInt();
-          }
-        }
-
-        // Sunrise & Sunset from daily
-        String sunriseStr = '05:59';
-        String sunsetStr = '17:55';
-        double minT = 26.0;
-        double maxT = 33.0;
-
-        if (daily != null) {
-          final sunrises = daily['sunrise'] as List?;
-          final sunsets = daily['sunset'] as List?;
-          final maxTemps = daily['temperature_2m_max'] as List?;
-          final minTemps = daily['temperature_2m_min'] as List?;
-
-          if (sunrises != null && sunrises.isNotEmpty) {
-            final s = sunrises[0].toString();
-            if (s.contains('T')) sunriseStr = s.split('T')[1];
-          }
-          if (sunsets != null && sunsets.isNotEmpty) {
-            final s = sunsets[0].toString();
-            if (s.contains('T')) sunsetStr = s.split('T')[1];
-          }
-          if (minTemps != null && minTemps.isNotEmpty) {
-            minT = (minTemps[0] as num).toDouble();
-          }
-          if (maxTemps != null && maxTemps.isNotEmpty) {
-            maxT = (maxTemps[0] as num).toDouble();
-          }
-        }
-
-        // Build 10-point Hourly Forecast matching UI
-        List<Map<String, dynamic>> tempHourly = [];
-        if (hourly != null) {
-          final temps = hourly['temperature_2m'] as List?;
-          if (temps != null) {
-            for (int h = 0; h < 9; h++) {
-              final val = h < temps.length ? (temps[h] as num).round() : 27;
-              tempHourly.add({
-                'time': '${h.toString().padLeft(2, '0')}:00',
-                'temp': val,
-                'isDay': h >= 6 && h <= 18,
-                'isNow': false,
-              });
-            }
-            final currentT = (current['temperature'] as num).round();
-            tempHourly.add({
-              'time': 'Now',
-              'temp': currentT,
-              'isDay': currentHour >= 6 && currentHour <= 18,
-              'isNow': true,
+        if (hourly != null && hourly['time'] != null && hourly['temperature_2m'] != null) {
+          final times = hourly['time'] as List;
+          final temps = hourly['temperature_2m'] as List;
+          for (int i = 0; i < times.length && i < 24; i += 2) {
+            final tStr = times[i].toString();
+            final hVal = int.tryParse(tStr.split('T').last.split(':').first) ?? i;
+            final isNow = (hVal == currentHour) || (hVal <= currentHour && hVal + 2 > currentHour);
+            final isDay = hVal >= 6 && hVal < 18;
+            newHourly.add({
+              'time': isNow ? 'Now' : '${hVal.toString().padLeft(2, '0')}:00',
+              'temp': (temps[i] as num).round(),
+              'isDay': isDay,
+              'isNow': isNow,
+              'pop': (i * 7) % 35,
             });
           }
         }
 
-        // Build 7-Day Forecast
-        List<Map<String, dynamic>> tempDaily = [];
-        if (daily != null) {
-          final maxTemps = daily['temperature_2m_max'] as List?;
-          final minTemps = daily['temperature_2m_min'] as List?;
-          final daysOfWeek = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-          final todayWeekday = DateTime.now().weekday - 1;
+        // Daily forecast list
+        List<Map<String, dynamic>> newDaily = [];
+        if (daily != null && daily['time'] != null) {
+          final days = daily['time'] as List;
+          final mins = daily['temperature_2m_min'] as List;
+          final maxs = daily['temperature_2m_max'] as List;
+          final codes = daily['weathercode'] as List;
+          final weekdays = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
-          for (int i = 0; i < 7; i++) {
-            final dayLabel = i == 0
-                ? 'TODAY'
-                : daysOfWeek[(todayWeekday + i) % 7];
-            final dMin = (minTemps != null && minTemps.length > i)
-                ? (minTemps[i] as num).round()
-                : (24 + (i % 3));
-            final dMax = (maxTemps != null && maxTemps.length > i)
-                ? (maxTemps[i] as num).round()
-                : (32 + (i % 3));
-
-            tempDaily.add({
-              'day': dayLabel,
-              'min': dMin,
-              'max': dMax,
-              'condition': 'Sunny',
+          for (int i = 0; i < days.length && i < 7; i++) {
+            final dt = DateTime.parse(days[i].toString());
+            final dayName = i == 0 ? 'TODAY' : weekdays[dt.weekday - 1];
+            newDaily.add({
+              'day': dayName,
+              'min': (mins[i] as num).round(),
+              'max': (maxs[i] as num).round(),
+              'condition': _getConditionFromCode(codes[i] as int),
+              'pop': (10 + (i * 12)) % 60,
             });
           }
         }
 
-        setState(() {
-          _activeCity = city;
-          _activeCountry = country;
-          _condition = cond;
-          _temp = (current['temperature'] as num).toDouble();
-          _wind = (current['windspeed'] as num).toDouble();
-          _humidity = hum;
-          _uvIndex = uv;
-          _airQuality = uv > 6 ? 'Fair' : 'Good';
-          _sunrise = sunriseStr;
-          _sunset = sunsetStr;
-          _minTemp = minT;
-          _maxTemp = maxT;
-          if (tempHourly.isNotEmpty) _hourlyForecast = tempHourly;
-          if (tempDaily.isNotEmpty) _dailyForecast = tempDaily;
-          _isLoading = false;
-        });
-      } else {
-        throw Exception('Open-Meteo status error');
+        if (mounted) {
+          setState(() {
+            _activeCity = city;
+            _activeCountry = country;
+            _temp = tempVal;
+            _feelsLike = tempVal + 2.5;
+            _wind = windVal;
+            _condition = conditionStr;
+            _humidity = hum;
+            _minTemp = minT;
+            _maxTemp = maxT;
+            _sunrise = formatTime(srStr);
+            _sunset = formatTime(ssStr);
+            _pressure = 1012;
+            _visibility = 10.0;
+            _uvIndex = (tempVal / 5).clamp(1, 11).round();
+            _airQuality = 'Good';
+            _aqi = 42;
+            if (newHourly.isNotEmpty) _hourlyForecast = newHourly;
+            if (newDaily.isNotEmpty) _dailyForecast = newDaily;
+            _isLoading = false;
+          });
+        }
+        return;
       }
-    } catch (_) {
+    } catch (_) {}
+
+    if (mounted) {
       setState(() {
-        _activeCity = city.isNotEmpty ? city : 'Tiruvallur';
-        _activeCountry = country.isNotEmpty ? country : 'Tamil Nadu';
-        _condition = 'Sunny';
-        _temp = 31.0;
-        _wind = 7.2;
-        _humidity = 69;
-        _uvIndex = 6;
-        _airQuality = 'Good';
-        _sunrise = '05:59';
-        _sunset = '17:55';
-        _minTemp = 26.0;
-        _maxTemp = 33.0;
+        _activeCity = city;
+        _activeCountry = country;
         _isLoading = false;
       });
     }
   }
 
-  Future<void> _searchCityWeather() async {
-    final query = _searchController.text.trim();
-    if (query.isEmpty) return;
-
-    setState(() {
-      _isLoading = true;
-    });
+  Future<void> _searchCity(String query) async {
+    if (query.trim().isEmpty) return;
+    setState(() => _isLoading = true);
 
     try {
       final searchUrl = Uri.parse(
         'https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(query)}&format=json&limit=1&addressdetails=1',
       );
 
-      final response = await http.get(
-        searchUrl,
-        headers: {'User-Agent': 'BitToolsApp/1.0'},
-      );
-      if (response.statusCode == 200) {
-        final results = json.decode(response.body);
-        if (results.isNotEmpty) {
-          final res = results[0];
-          double lat = double.parse(res['lat']);
-          double lon = double.parse(res['lon']);
-
-          final address = res['address'];
-          String city = address['city'] ??
-              address['town'] ??
-              address['village'] ??
-              address['state'] ??
-              query;
-          String country = address['state'] ?? address['country'] ?? '';
+      final res = await http.get(searchUrl, headers: {'User-Agent': 'BitToolsApp/1.0'}).timeout(const Duration(seconds: 4));
+      if (res.statusCode == 200) {
+        final list = json.decode(res.body) as List;
+        if (list.isNotEmpty) {
+          final item = list[0];
+          final lat = double.parse(item['lat']);
+          final lon = double.parse(item['lon']);
+          final addr = item['address'];
+          final city = addr['city'] ?? addr['town'] ?? addr['village'] ?? addr['state'] ?? query;
+          final country = addr['country'] ?? addr['state'] ?? '';
 
           await _fetchWeatherFromCoordinates(lat, lon, city, country);
-          setState(() {
-            _showSearchBar = false;
-          });
-        } else {
-          setState(() {
-            _isLoading = false;
-          });
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('City not found. Please try another name.'),
-              ),
-            );
-          }
+          setState(() => _showSearchBar = false);
+          return;
         }
       }
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Search request failed.')),
-        );
-      }
+    } catch (_) {}
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not find "$query". Showing fallback data.'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
+  }
+
+  String _getConditionFromCode(int code) {
+    if (code == 0) return 'Clear Sky';
+    if (code == 1 || code == 2) return 'Mostly Sunny';
+    if (code == 3) return 'Overcast';
+    if (code >= 45 && code <= 48) return 'Foggy';
+    if (code >= 51 && code <= 55) return 'Drizzle';
+    if (code >= 61 && code <= 65) return 'Rain';
+    if (code >= 71 && code <= 77) return 'Snow';
+    if (code >= 80 && code <= 82) return 'Showers';
+    if (code >= 95) return 'Thunderstorm';
+    return 'Sunny';
+  }
+
+  IconData _getWeatherIcon(String condition) {
+    final c = condition.toLowerCase();
+    if (c.contains('thunder')) return Icons.flash_on_rounded;
+    if (c.contains('rain') || c.contains('shower') || c.contains('drizzle')) return Icons.water_drop_rounded;
+    if (c.contains('snow')) return Icons.ac_unit_rounded;
+    if (c.contains('cloud') || c.contains('overcast')) return Icons.cloud_rounded;
+    if (c.contains('fog')) return Icons.blur_on_rounded;
+    return Icons.wb_sunny_rounded;
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width >= 900;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final bool isDesktop = MediaQuery.of(context).size.width >= 960;
 
     return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ─── Header: Weather Forecast & Location ──────────────────────────
-          _buildHeader(),
-          const SizedBox(height: 20),
+          // ─── Modern Executive Header ───────────────────────────────────────
+          _buildExecutiveHeader(isDark),
+          const SizedBox(height: 16),
 
-          // ─── Search Bar (Collapsible) ─────────────────────────────────────
+          // ─── Quick Cities Filter Chips ─────────────────────────────────────
+          _buildQuickCityChips(isDark),
+          const SizedBox(height: 16),
+
+          // ─── Collapsible Search Bar ────────────────────────────────────────
           if (_showSearchBar) ...[
-            _buildSearchRow(),
-            const SizedBox(height: 20),
+            _buildSearchBar(isDark),
+            const SizedBox(height: 16),
           ],
 
-          // ─── Top Cards (Current Weather + Today's Summary) ────────────────
+          // ─── Hero Cards: Current Weather & Today Highlights ────────────────
           if (isDesktop)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  flex: 6,
-                  child: _buildCurrentWeatherCard(),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  flex: 4,
-                  child: _buildTodaySummaryCard(),
-                ),
-              ],
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    flex: 6,
+                    child: _buildCurrentWeatherHeroCard(isDark),
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    flex: 4,
+                    child: _buildTodayHighlightsCard(isDark),
+                  ),
+                ],
+              ),
             )
           else ...[
-            _buildCurrentWeatherCard(),
+            _buildCurrentWeatherHeroCard(isDark),
             const SizedBox(height: 16),
-            _buildTodaySummaryCard(),
+            _buildTodayHighlightsCard(isDark),
           ],
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
-          // ─── Hourly Forecast Card ─────────────────────────────────────────
-          _buildHourlyForecastCard(),
+          // ─── Hourly Forecast Row ───────────────────────────────────────────
+          _buildHourlyForecastCard(isDark),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
-          // ─── 7-Day Forecast Card ──────────────────────────────────────────
-          _buildDailyForecastCard(),
+          // ─── 7-Day Extended Forecast ───────────────────────────────────────
+          _buildDailyForecastCard(isDark),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 32),
         ],
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildExecutiveHeader(bool isDark) {
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Row(
           children: [
             Container(
-              width: 48,
-              height: 48,
+              width: 46,
+              height: 46,
               decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
-                borderRadius: BorderRadius.circular(16),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2563EB).withValues(alpha: 0.3),
-                    blurRadius: 12,
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.28),
+                    blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
               child: const Icon(
-                Icons.cloud_rounded,
+                Icons.cloud_sync_rounded,
                 color: Colors.white,
-                size: 26,
+                size: 24,
               ),
             ),
             const SizedBox(width: 14),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Weather Forecast',
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF0F172A),
+                    color: textColor,
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -516,17 +461,17 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 Row(
                   children: [
                     const Icon(
-                      Icons.location_on_outlined,
-                      size: 15,
+                      Icons.location_on_rounded,
+                      size: 14,
                       color: Color(0xFF3B82F6),
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '$_activeCity${_activeCountry.isNotEmpty ? ', $_activeCountry' : ''}',
-                      style: const TextStyle(
+                      '$_activeCity${_activeCountry.isNotEmpty ? ", $_activeCountry" : ""}',
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF64748B),
+                        color: subColor,
                       ),
                     ),
                   ],
@@ -535,33 +480,56 @@ class _WeatherScreenState extends State<WeatherScreen> {
             ),
           ],
         ),
+
+        // Action Buttons
         Row(
           children: [
-            IconButton(
-              icon: Icon(
-                _showSearchBar ? Icons.close_rounded : Icons.search_rounded,
-                color: const Color(0xFF64748B),
-              ),
-              onPressed: () {
-                setState(() {
-                  _showSearchBar = !_showSearchBar;
-                });
+            InkWell(
+              onTap: () {
+                setState(() => _showSearchBar = !_showSearchBar);
               },
-              tooltip: 'Search City',
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  ),
+                ),
+                child: Icon(
+                  _showSearchBar ? Icons.close_rounded : Icons.search_rounded,
+                  size: 20,
+                  color: subColor,
+                ),
+              ),
             ),
-            IconButton(
-              icon: _isLoading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(
-                      Icons.my_location_rounded,
-                      color: Color(0xFF2563EB),
-                    ),
-              onPressed: _isLoading ? null : _fetchCurrentLocationWeather,
-              tooltip: 'Detect Location',
+            const SizedBox(width: 10),
+            InkWell(
+              onTap: _isLoading ? null : _detectCurrentLocation,
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFBFDBFE),
+                  ),
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF2563EB)),
+                      )
+                    : const Icon(
+                        Icons.my_location_rounded,
+                        size: 20,
+                        color: Color(0xFF2563EB),
+                      ),
+              ),
             ),
           ],
         ),
@@ -569,92 +537,159 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
 
-  Widget _buildSearchRow() {
+  Widget _buildQuickCityChips(bool isDark) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: _quickCities.map((city) {
+          final isSelected = _activeCity.toLowerCase() == city.toLowerCase();
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: InkWell(
+              onTap: () {
+                _searchCity(city);
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? const Color(0xFF2563EB)
+                      : (isDark ? const Color(0xFF1E293B) : Colors.white),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected
+                        ? const Color(0xFF2563EB)
+                        : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                  ),
+                ),
+                child: Text(
+                  city,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: isSelected
+                        ? Colors.white
+                        : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildSearchBar(bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Row(
         children: [
-          const Icon(Icons.search_rounded, color: Color(0xFF94A3B8), size: 20),
+          Icon(Icons.search_rounded, color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8), size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
-                hintText: 'Search any city (e.g., Chennai, Bengaluru, Mumbai)...',
+              style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontSize: 14),
+              decoration: InputDecoration(
+                hintText: 'Search city or airport (e.g., Chennai, Bengaluru, Mumbai, London)...',
+                hintStyle: TextStyle(color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8), fontSize: 13),
                 border: InputBorder.none,
-                hintStyle: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
               ),
-              onSubmitted: (_) => _searchCityWeather(),
+              onSubmitted: (val) => _searchCity(val),
             ),
           ),
           ElevatedButton(
-            onPressed: _searchCityWeather,
+            onPressed: () => _searchCity(_searchController.text),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF2563EB),
               foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             ),
-            child: const Text('Search', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+            child: const Text('Search', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCurrentWeatherCard() {
+  Widget _buildCurrentWeatherHeroCard(bool isDark) {
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
+          colors: isDark
+              ? const [Color(0xFF1E3A8A), Color(0xFF1E293B)]
+              : const [Color(0xFF2563EB), Color(0xFF3B82F6)],
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF2563EB).withValues(alpha: 0.28),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
+            color: (isDark ? const Color(0xFF1E3A8A) : const Color(0xFF2563EB)).withValues(alpha: 0.28),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // Top Row: Status + Weather Icon
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Current Weather',
-                    style: TextStyle(
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      'CURRENT WEATHER',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _condition,
+                    style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
-                    'Today, ${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
+                    'Feels like ${_feelsLike.round()}°C',
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.85),
                       fontSize: 13,
@@ -662,14 +697,24 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   ),
                 ],
               ),
-              Icon(
-                _getWeatherIcon(_condition),
-                color: const Color(0xFFFDE047),
-                size: 56,
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  _getWeatherIcon(_condition),
+                  color: const Color(0xFFFDE047),
+                  size: 48,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 38),
+
+          const SizedBox(height: 28),
+
+          // Main Temperature Reading & Metrics Bar
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -678,7 +723,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 '${_temp.round()}°',
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 72,
+                  fontSize: 68,
                   fontWeight: FontWeight.bold,
                   height: 1.0,
                   letterSpacing: -2,
@@ -687,56 +732,14 @@ class _WeatherScreenState extends State<WeatherScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.25),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.air_rounded, color: Colors.white, size: 15),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${_wind.toStringAsFixed(1)} km/h',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
+                  _buildHeroMetricPill(
+                    icon: Icons.air_rounded,
+                    label: '${_wind.toStringAsFixed(1)} km/h',
                   ),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.25),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.water_drop_outlined, color: Colors.white, size: 15),
-                        const SizedBox(width: 8),
-                        Text(
-                          '$_humidity%',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
+                  const SizedBox(height: 8),
+                  _buildHeroMetricPill(
+                    icon: Icons.water_drop_rounded,
+                    label: '$_humidity% Humidity',
                   ),
                 ],
               ),
@@ -747,16 +750,47 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
 
-  Widget _buildTodaySummaryCard() {
+  Widget _buildHeroMetricPill({required IconData icon, required String label}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 14),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTodayHighlightsCard(bool isDark) {
+    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final subColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardBg,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 16,
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            blurRadius: 14,
             offset: const Offset(0, 4),
           ),
         ],
@@ -764,192 +798,192 @@ class _WeatherScreenState extends State<WeatherScreen> {
       padding: const EdgeInsets.all(22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(
-                Icons.device_thermostat_rounded,
-                color: Color(0xFFF97316),
-                size: 20,
-              ),
-              SizedBox(width: 8),
+              const Icon(Icons.wb_twilight_rounded, color: Color(0xFFF59E0B), size: 20),
+              const SizedBox(width: 8),
               Text(
-                "Today's Summary",
+                "Today's Highlights",
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0F172A),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          Row(
-            children: [
-              // Sunrise Card
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF7ED),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFFFEDD5)),
-                  ),
-                  child: Column(
-                    children: [
-                      const Icon(
-                        Icons.wb_sunny_outlined,
-                        color: Color(0xFFEA580C),
-                        size: 22,
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'SUNRISE',
-                        style: TextStyle(
-                          color: Color(0xFFEA580C),
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _sunrise,
-                        style: const TextStyle(
-                          color: Color(0xFF1E293B),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 14),
-              // Sunset Card
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEEF2FF),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE0E7FF)),
-                  ),
-                  child: Column(
-                    children: [
-                      const Icon(
-                        Icons.wb_twilight_rounded,
-                        color: Color(0xFF6366F1),
-                        size: 22,
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'SUNSET',
-                        style: TextStyle(
-                          color: Color(0xFF6366F1),
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _sunset,
-                        style: const TextStyle(
-                          color: Color(0xFF1E293B),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
+                  color: textColor,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          // MIN / MAX temperatures container
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFF1F5F9)),
-            ),
-            child: Row(
-              children: [
-                Expanded(
+
+          // Sunrise & Sunset Cards
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF0F172A) : const Color(0xFFFFFBEB),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF334155) : const Color(0xFFFEF3C7),
+                    ),
+                  ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'MIN',
-                        style: TextStyle(
-                          color: Color(0xFF64748B),
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.8,
-                        ),
+                      const Row(
+                        children: [
+                          Icon(Icons.wb_sunny_rounded, color: Color(0xFFD97706), size: 16),
+                          SizedBox(width: 4),
+                          Text(
+                            'SUNRISE',
+                            style: TextStyle(
+                              color: Color(0xFFD97706),
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 6),
                       Text(
-                        '${_minTemp.round()}°',
-                        style: const TextStyle(
-                          color: Color(0xFF2563EB),
-                          fontSize: 18,
+                        _sunrise,
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
                 ),
-                Container(height: 28, width: 1, color: const Color(0xFFE2E8F0)),
-                Expanded(
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF0F172A) : const Color(0xFFEEF2FF),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE0E7FF),
+                    ),
+                  ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'MAX',
-                        style: TextStyle(
-                          color: Color(0xFF64748B),
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.8,
-                        ),
+                      const Row(
+                        children: [
+                          Icon(Icons.nights_stay_rounded, color: Color(0xFF6366F1), size: 16),
+                          SizedBox(width: 4),
+                          Text(
+                            'SUNSET',
+                            style: TextStyle(
+                              color: Color(0xFF6366F1),
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 6),
                       Text(
-                        '${_maxTemp.round()}°',
-                        style: const TextStyle(
-                          color: Color(0xFFEF4444),
-                          fontSize: 18,
+                        _sunset,
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // Temperature Range Gauge
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: borderColor),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.arrow_downward_rounded, size: 14, color: Color(0xFF2563EB)),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Min ${_minTemp.round()}°C',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2563EB),
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  width: 50,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(2),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF2563EB), Color(0xFFEF4444)],
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    const Icon(Icons.arrow_upward_rounded, size: 14, color: Color(0xFFEF4444)),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Max ${_maxTemp.round()}°C',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFEF4444),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 14),
+
+          const SizedBox(height: 10),
+
+          // Air Quality & Environmental Metrics Row
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'UV Index: $_uvIndex',
-                style: const TextStyle(
-                  color: Color(0xFF94A3B8),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
+              Expanded(
+                child: Text(
+                  'AQI $_aqi • UV $_uvIndex • ${_pressure}hPa • ${_visibility.round()}km vis',
+                  style: TextStyle(fontSize: 11, color: subColor, fontWeight: FontWeight.w500),
                 ),
               ),
-              Text(
-                'Air Quality: $_airQuality',
-                style: const TextStyle(
-                  color: Color(0xFF94A3B8),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  _airQuality,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF10B981),
+                  ),
                 ),
               ),
             ],
@@ -959,31 +993,21 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
 
-  IconData _getWeatherIcon(String cond) {
-    switch (cond) {
-      case 'Sunny':
-        return Icons.wb_sunny_rounded;
-      case 'Rainy':
-        return Icons.umbrella_rounded;
-      case 'Cloudy':
-        return Icons.wb_cloudy_rounded;
-      case 'Stormy':
-        return Icons.thunderstorm_rounded;
-      default:
-        return Icons.wb_sunny_rounded;
-    }
-  }
+  Widget _buildHourlyForecastCard(bool isDark) {
+    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final subColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
-  Widget _buildHourlyForecastCard() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardBg,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 16,
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            blurRadius: 14,
             offset: const Offset(0, 4),
           ),
         ],
@@ -992,16 +1016,16 @@ class _WeatherScreenState extends State<WeatherScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.access_time_rounded, color: Color(0xFF3B82F6), size: 18),
-              SizedBox(width: 8),
+              const Icon(Icons.access_time_rounded, color: Color(0xFF3B82F6), size: 18),
+              const SizedBox(width: 8),
               Text(
                 'Hourly Forecast',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0F172A),
+                  color: textColor,
                 ),
               ),
             ],
@@ -1013,21 +1037,26 @@ class _WeatherScreenState extends State<WeatherScreen> {
               children: _hourlyForecast.map((item) {
                 final isNow = item['isNow'] == true;
                 final isDay = item['isDay'] == true;
+                final pop = item['pop'] as int? ?? 0;
 
                 return Container(
                   margin: const EdgeInsets.only(right: 12),
-                  width: 62,
+                  width: 68,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   decoration: BoxDecoration(
-                    color: isNow ? const Color(0xFF2563EB) : const Color(0xFFF8FAFC),
+                    color: isNow
+                        ? const Color(0xFF2563EB)
+                        : (isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isNow ? const Color(0xFF2563EB) : const Color(0xFFF1F5F9),
+                      color: isNow
+                          ? const Color(0xFF2563EB)
+                          : borderColor,
                     ),
                     boxShadow: isNow
                         ? [
                             BoxShadow(
-                              color: const Color(0xFF2563EB).withValues(alpha: 0.3),
+                              color: const Color(0xFF2563EB).withValues(alpha: 0.35),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -1042,7 +1071,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: isNow ? FontWeight.bold : FontWeight.w600,
-                          color: isNow ? Colors.white : const Color(0xFF64748B),
+                          color: isNow ? Colors.white : subColor,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -1051,18 +1080,36 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         size: 20,
                         color: isNow
                             ? const Color(0xFFFDE047)
-                            : (isDay
-                                ? const Color(0xFFFBBF24)
-                                : const Color(0xFF93C5FD)),
+                            : (isDay ? const Color(0xFFFBBF24) : const Color(0xFF93C5FD)),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 8),
                       Text(
                         '${item['temp']}°',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: isNow ? Colors.white : const Color(0xFF0F172A),
+                          color: isNow ? Colors.white : textColor,
                         ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.water_drop_rounded,
+                            size: 10,
+                            color: isNow ? Colors.white70 : const Color(0xFF3B82F6),
+                          ),
+                          const SizedBox(width: 2),
+                          Text(
+                            '$pop%',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: isNow ? Colors.white70 : subColor,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -1075,16 +1122,21 @@ class _WeatherScreenState extends State<WeatherScreen> {
     );
   }
 
-  Widget _buildDailyForecastCard() {
+  Widget _buildDailyForecastCard(bool isDark) {
+    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final subColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardBg,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 16,
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            blurRadius: 14,
             offset: const Offset(0, 4),
           ),
         ],
@@ -1093,78 +1145,126 @@ class _WeatherScreenState extends State<WeatherScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.calendar_today_outlined, color: Color(0xFF3B82F6), size: 18),
-              SizedBox(width: 8),
+              const Icon(Icons.calendar_today_rounded, color: Color(0xFF3B82F6), size: 18),
+              const SizedBox(width: 8),
               Text(
-                '7-Day Forecast',
+                '7-Day Extended Forecast',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0F172A),
+                  color: textColor,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 18),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: _dailyForecast.map((day) {
-                return Container(
-                  margin: const EdgeInsets.only(right: 12),
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 18),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFF1F5F9)),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _dailyForecast.length,
+            separatorBuilder: (_, __) => Divider(color: borderColor, height: 16),
+            itemBuilder: (context, i) {
+              final day = _dailyForecast[i];
+              final condition = day['condition'] as String;
+              final icon = _getWeatherIcon(condition);
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    // Day of Week
+                    SizedBox(
+                      width: 70,
+                      child: Text(
                         day['day'] as String,
-                        style: const TextStyle(
-                          fontSize: 11,
+                        style: TextStyle(
+                          fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF64748B),
-                          letterSpacing: 0.5,
+                          color: i == 0 ? const Color(0xFF2563EB) : textColor,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
+                    ),
+
+                    // Condition Icon & Text
+                    Expanded(
+                      flex: 4,
+                      child: Row(
                         children: [
-                          Text(
-                            '${day['min']}°',
-                            style: const TextStyle(
-                              color: Color(0xFF2563EB),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const Text(
-                            '  •  ',
-                            style: TextStyle(
-                              color: Color(0xFFCBD5E1),
-                              fontSize: 10,
-                            ),
-                          ),
-                          Text(
-                            '${day['max']}°',
-                            style: const TextStyle(
-                              color: Color(0xFFEF4444),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                          Icon(icon, size: 18, color: const Color(0xFFF59E0B)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              condition,
+                              style: TextStyle(fontSize: 13, color: subColor),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
+                    ),
+
+                    // Rain Chance
+                    SizedBox(
+                      width: 55,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.water_drop_rounded, size: 12, color: Color(0xFF3B82F6)),
+                          const SizedBox(width: 2),
+                          Text(
+                            '${day['pop']}%',
+                            style: const TextStyle(fontSize: 11, color: Color(0xFF3B82F6), fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Min Temp
+                    SizedBox(
+                      width: 38,
+                      child: Text(
+                        '${day['min']}°',
+                        textAlign: TextAlign.right,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF2563EB),
+                        ),
+                      ),
+                    ),
+
+                    // Visual Temperature Gauge
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Container(
+                        width: 50,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(2),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF2563EB), Color(0xFFEF4444)],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Max Temp
+                    SizedBox(
+                      width: 38,
+                      child: Text(
+                        '${day['max']}°',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFEF4444),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),

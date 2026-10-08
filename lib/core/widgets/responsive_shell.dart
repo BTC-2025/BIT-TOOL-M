@@ -185,7 +185,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
         category: 'Tools',
         icon: Icons.calculate_outlined,
         iconColor: const Color(0xFF3B82F6),
-        keywords: ['calc', 'calculator', 'math', 'gst', 'tax', 'discount', 'tape', 'history', 'sum', 'add'],
+        keywords: ['calc', 'calculator', 'math', 'gst', 'tax', 'discount', 'tape', 'history', 'sum', 'add', 'bnx', 'bnx mail', 'cliks', 'cliks business', 'cross-app', 'cross app'],
         onTap: () => _switchTab(0),
       ),
       _SearchResultItem(
