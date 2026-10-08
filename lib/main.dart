@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 
 // Providers
+import 'core/providers/auth_provider.dart';
 import 'core/providers/session_provider.dart';
 import 'core/providers/app_providers.dart';
 import 'core/providers/theme_provider.dart';
@@ -24,6 +25,7 @@ class BITToolApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()..initializeAuth()),
         ChangeNotifierProvider(create: (_) => SessionProvider()),
         ChangeNotifierProxyProvider<SessionProvider, CalculatorProvider>(
           create: (context) =>

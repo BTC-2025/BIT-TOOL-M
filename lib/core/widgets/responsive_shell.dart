@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_providers.dart';
+import '../providers/auth_provider.dart';
+import 'user_avatar.dart';
 import '../../features/calculator/calculator_screen.dart';
 import '../../features/calendar/calendar_screen.dart';
 import '../../features/notes/notes_screen.dart';
@@ -8,6 +10,7 @@ import '../../features/contacts/contacts_screen.dart';
 import '../../features/weather/weather_screen.dart';
 import '../../features/keyboard/keyboard_screen.dart';
 import '../../features/settings/settings_screen.dart';
+import '../../features/auth/sign_in_screen.dart';
 
 class _SearchResultItem {
   final String title;
@@ -857,6 +860,14 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
     );
   }
 
+  AuthProvider? _getAuthProvider({bool listen = true}) {
+    try {
+      return Provider.of<AuthProvider>(context, listen: listen);
+    } catch (_) {
+      return null;
+    }
+  }
+
   void _showProfileMenu() {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     showGeneralDialog(
@@ -864,7 +875,12 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
       barrierDismissible: true,
       barrierLabel: 'Profile',
       barrierColor: Colors.black.withValues(alpha: 0.25),
-      pageBuilder: (context, anim1, anim2) {
+      pageBuilder: (dialogContext, anim1, anim2) {
+        final auth = _getAuthProvider(listen: false);
+        final user = auth?.user;
+        final isLoading = auth?.isLoading ?? false;
+        final hasError = auth?.hasError ?? false;
+
         return SafeArea(
           child: Align(
             alignment: Alignment.topRight,
@@ -893,70 +909,197 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: 24),
-                    CircleAvatar(
-                      radius: 36,
-                      backgroundColor: isDark
-                          ? const Color(0xFF2563EB)
-                          : const Color(0xFF0F172A),
-                      child: const Text(
-                        'RK',
+                    if (isLoading) ...[
+                      SizedBox(
+                        width: 72,
+                        height: 72,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            color: isDark
+                                ? const Color(0xFF60A5FA)
+                                : const Color(0xFF2563EB),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Loading profile...',
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Ravi Kumar C',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF0F172A),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'ravinew2004@bnxmail.com',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: isDark
-                            ? const Color(0xFF94A3B8)
-                            : const Color(0xFF64748B),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    OutlinedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        setState(() => _currentIndex = 6);
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: isDark
-                              ? const Color(0xFF334155)
-                              : const Color(0xFFE2E8F0),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 10,
-                        ),
-                      ),
-                      child: Text(
-                        'Manage your Account',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
                           color: isDark
                               ? Colors.white
                               : const Color(0xFF0F172A),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Please wait',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: isDark
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ] else if (user != null) ...[
+                      UserAvatar(user: user, radius: 36, fontSize: 22),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          user.displayName,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          user.email,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: isDark
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF64748B),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ] else if (hasError) ...[
+                      CircleAvatar(
+                        radius: 36,
+                        backgroundColor: Colors.red.withValues(alpha: 0.15),
+                        child: const Icon(
+                          Icons.warning_amber_rounded,
+                          color: Colors.red,
+                          size: 36,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          auth?.errorMessage ?? 'Connection Error',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton.icon(
+                        onPressed: () {
+                          Navigator.pop(dialogContext);
+                          auth?.retry();
+                        },
+                        icon: const Icon(Icons.refresh, size: 16),
+                        label: const Text('Retry'),
+                      ),
+                    ] else ...[
+                      CircleAvatar(
+                        radius: 36,
+                        backgroundColor: isDark
+                            ? const Color(0xFF334155)
+                            : const Color(0xFFE2E8F0),
+                        child: Icon(
+                          Icons.person_outline,
+                          size: 36,
+                          color: isDark
+                              ? Colors.white70
+                              : const Color(0xFF64748B),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Not Signed In',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF0F172A),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    if (user != null) ...[
+                      OutlinedButton(
+                        onPressed: () {
+                          Navigator.pop(dialogContext);
+                          setState(() => _currentIndex = 6);
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color: isDark
+                                ? const Color(0xFF334155)
+                                : const Color(0xFFE2E8F0),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 10,
+                          ),
+                        ),
+                        child: Text(
+                          'Manage your Account',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
+                          ),
+                        ),
+                      ),
+                    ] else ...[
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(dialogContext);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SignInScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1D6EE5),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 28,
+                            vertical: 10,
+                          ),
+                        ),
+                        child: const Text(
+                          'Sign in to B2Auth',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     Divider(
                       color: isDark
@@ -983,7 +1126,15 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                         ),
                       ),
                       dense: true,
-                      onTap: () => Navigator.pop(context),
+                      onTap: () {
+                        Navigator.pop(dialogContext);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const SignInScreen(),
+                          ),
+                        );
+                      },
                     ),
                     ListTile(
                       leading: Icon(
@@ -1004,7 +1155,10 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                         ),
                       ),
                       dense: true,
-                      onTap: () => Navigator.pop(context),
+                      onTap: () {
+                        Navigator.pop(dialogContext);
+                        auth?.signOut();
+                      },
                     ),
                     Divider(
                       color: isDark
@@ -1266,57 +1420,95 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
           const SizedBox(width: 8),
 
           // User Profile Pill
-          InkWell(
-            onTap: _showProfileMenu,
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isDark
-                      ? const Color(0xFF334155)
-                      : const Color(0xFFE2E8F0),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircleAvatar(
-                    radius: 14,
-                    backgroundColor: isDark
-                        ? const Color(0xFF2563EB)
-                        : const Color(0xFF0F172A),
-                    child: const Text(
-                      'RK',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
+          Builder(
+            builder: (context) {
+              final authProvider = _getAuthProvider(listen: true);
+              final user = authProvider?.user;
+              final isLoading = authProvider?.isLoading ?? false;
+
+              return InkWell(
+                onTap: () {
+                  if (user == null && !isLoading) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SignInScreen(),
                       ),
+                    );
+                  } else {
+                    _showProfileMenu();
+                  }
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Ravi Kumar C',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? Colors.white : const Color(0xFF0F172A),
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isLoading) ...[
+                        SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: isDark
+                                ? const Color(0xFF60A5FA)
+                                : const Color(0xFF2563EB),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Loading...',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: isDark
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF64748B),
+                          ),
+                        ),
+                      ] else ...[
+                        UserAvatar(user: user, radius: 14, fontSize: 11),
+                        const SizedBox(width: 8),
+                        Text(
+                          user?.displayName ??
+                              (authProvider?.hasError == true
+                                  ? 'Error'
+                                  : 'Sign in'),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 18,
+                        color: isDark
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF64748B),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    size: 18,
-                    color: isDark
-                        ? const Color(0xFF94A3B8)
-                        : const Color(0xFF64748B),
-                  ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           ),
         ],
       ),

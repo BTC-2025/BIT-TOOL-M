@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/providers/theme_provider.dart';
+import '../../core/providers/auth_provider.dart';
+import '../../core/widgets/user_avatar.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -93,6 +95,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // ── Profile Card ──────────────────────────────────────────────────────────
   Widget _buildProfileCard(bool isDark) {
+    AuthProvider? authProvider;
+    try {
+      authProvider = Provider.of<AuthProvider?>(context, listen: true);
+    } catch (_) {
+      authProvider = null;
+    }
+
+    final user = authProvider?.user;
+    final displayName = user?.displayName ?? 'Ravi Kumar C';
+    final email = (user != null && user.email.isNotEmpty)
+        ? user.email
+        : 'ravinew2004@bnxmail.com';
+    final accountType = user?.accountType ?? 'BUSINESS';
+    final phoneNumber = user?.phoneNumber ?? '8072909876';
+    final recoveryEmail = user?.recoveryEmail ?? 'chandran123@bnxmail.com';
+    final dob = user?.dob ?? 'Not set';
+    final initials = user?.initials ?? 'R';
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
@@ -202,28 +222,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               child: Row(
                 children: [
-                  // Blue Avatar Circle with 'R'
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF1E3A8A).withValues(alpha: 0.6)
-                          : const Color(0xFFDBEAFE),
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      'R',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: isDark
-                            ? const Color(0xFF93C5FD)
-                            : const Color(0xFF2563EB),
-                      ),
-                    ),
-                  ),
+                  // Avatar Circle / Image
+                  user?.hasValidProfilePicture == true
+                      ? UserAvatar(user: user, radius: 22)
+                      : Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? const Color(0xFF1E3A8A).withValues(alpha: 0.6)
+                                : const Color(0xFFDBEAFE),
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            initials,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: isDark
+                                  ? const Color(0xFF93C5FD)
+                                  : const Color(0xFF2563EB),
+                            ),
+                          ),
+                        ),
                   const SizedBox(width: 12),
                   // Name and Email
                   Expanded(
@@ -233,7 +255,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Row(
                           children: [
                             Text(
-                              'Ravi Kumar C',
+                              displayName,
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
@@ -260,7 +282,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'ravinew2004@bnxmail.com',
+                          email,
                           style: TextStyle(
                             fontSize: 12,
                             color: isDark
@@ -294,7 +316,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   isDark: isDark,
                   icon: Icons.work_outline_rounded,
                   label: 'ACCOUNT TYPE',
-                  value: 'BUSINESS',
+                  value: accountType,
                 ),
               ),
               const SizedBox(width: 10),
@@ -303,7 +325,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   isDark: isDark,
                   icon: Icons.phone_outlined,
                   label: 'PHONE NUMBER',
-                  value: '8072909876',
+                  value: phoneNumber,
                 ),
               ),
             ],
@@ -316,7 +338,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   isDark: isDark,
                   icon: Icons.mail_outline_rounded,
                   label: 'RECOVERY EMAIL',
-                  value: 'chandran123@bnxmail.com',
+                  value: recoveryEmail,
                 ),
               ),
               const SizedBox(width: 10),
@@ -325,7 +347,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   isDark: isDark,
                   icon: Icons.calendar_today_outlined,
                   label: 'DATE OF BIRTH',
-                  value: 'Not set',
+                  value: dob,
                 ),
               ),
             ],
