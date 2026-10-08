@@ -138,8 +138,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               color: _mobileTab == 0
                                   ? Colors.white
                                   : (isDark
-                                      ? const Color(0xFF94A3B8)
-                                      : const Color(0xFF64748B)),
+                                        ? const Color(0xFF94A3B8)
+                                        : const Color(0xFF64748B)),
                             ),
                           ),
                         ),
@@ -167,8 +167,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               color: _mobileTab == 1
                                   ? Colors.white
                                   : (isDark
-                                      ? const Color(0xFF94A3B8)
-                                      : const Color(0xFF64748B)),
+                                        ? const Color(0xFF94A3B8)
+                                        : const Color(0xFF64748B)),
                             ),
                           ),
                         ),
@@ -236,7 +236,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14.0,
+                vertical: 12.0,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -2067,8 +2070,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       ),
     );
   }
-
-
 
   // ═══════════════════════════════════════════════════════════
   // HELPERS

@@ -4,10 +4,7 @@ import '../models/cross_app_history_models.dart';
 class CrossAppHistoryWidget extends StatefulWidget {
   final Function(CrossAppTape tape)? onLoadTape;
 
-  const CrossAppHistoryWidget({
-    super.key,
-    this.onLoadTape,
-  });
+  const CrossAppHistoryWidget({super.key, this.onLoadTape});
 
   @override
   State<CrossAppHistoryWidget> createState() => _CrossAppHistoryWidgetState();
@@ -245,8 +242,9 @@ class _CrossAppHistoryWidgetState extends State<CrossAppHistoryWidget> {
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.5,
-                color:
-                    isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                color: isDark
+                    ? const Color(0xFF94A3B8)
+                    : const Color(0xFF64748B),
               ),
             ),
           ],
@@ -420,8 +418,10 @@ class _CrossAppHistoryWidgetState extends State<CrossAppHistoryWidget> {
             itemBuilder: (context, i) {
               final step = tape.steps[i];
               return Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: isDark
                       ? const Color(0xFF0F172A)
@@ -469,8 +469,9 @@ class _CrossAppHistoryWidgetState extends State<CrossAppHistoryWidget> {
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
-                            color:
-                                isDark ? Colors.white : const Color(0xFF0F172A),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
                           ),
                         ),
                         Text(
@@ -478,8 +479,9 @@ class _CrossAppHistoryWidgetState extends State<CrossAppHistoryWidget> {
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
-                            color:
-                                isDark ? Colors.white : const Color(0xFF0F172A),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
                           ),
                         ),
                       ],

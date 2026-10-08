@@ -113,11 +113,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           fillColor: const Color(0xFFF8FAFC),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE2E8F0),
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE2E8F0),
+                            ),
                           ),
                         ),
                       ),
@@ -130,11 +134,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           fillColor: const Color(0xFFF8FAFC),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE2E8F0),
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE2E8F0),
+                            ),
                           ),
                         ),
                       ),
@@ -147,11 +155,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           fillColor: const Color(0xFFF8FAFC),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE2E8F0),
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE2E8F0),
+                            ),
                           ),
                         ),
                       ),
@@ -164,12 +176,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           fillColor: const Color(0xFFF8FAFC),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE2E8F0),
+                            ),
                           ),
                         ),
-                        items: ['Meeting', 'Birthday', 'Holiday', 'Reminder'].map((cat) {
-                          return DropdownMenuItem(value: cat, child: Text(cat));
-                        }).toList(),
+                        items: ['Meeting', 'Birthday', 'Holiday', 'Reminder']
+                            .map((cat) {
+                              return DropdownMenuItem(
+                                value: cat,
+                                child: Text(cat),
+                              );
+                            })
+                            .toList(),
                         onChanged: (val) {
                           if (val != null) {
                             setDialogState(() {
@@ -185,7 +204,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancel', style: TextStyle(color: Color(0xFF64748B))),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Color(0xFF64748B)),
+                  ),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -227,7 +249,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
       builder: (ctx) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: Text(
             event.title,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -237,11 +261,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (event.description.isNotEmpty) ...[
-                Text(event.description, style: const TextStyle(color: Color(0xFF475569))),
+                Text(
+                  event.description,
+                  style: const TextStyle(color: Color(0xFF475569)),
+                ),
                 const SizedBox(height: 12),
               ],
-              Text('Category: ${event.category}', style: const TextStyle(fontWeight: FontWeight.w600)),
-              if (event.location.isNotEmpty) Text('Location: ${event.location}'),
+              Text(
+                'Category: ${event.category}',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              if (event.location.isNotEmpty)
+                Text('Location: ${event.location}'),
               Text(
                 'Date: ${event.startTime.day}/${event.startTime.month}/${event.startTime.year}',
                 style: const TextStyle(color: Color(0xFF64748B)),
@@ -446,10 +477,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   isDense: true,
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.zero,
-                  hintStyle: TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF94A3B8),
-                  ),
+                  hintStyle: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
                 ),
                 style: const TextStyle(fontSize: 12),
                 onChanged: (_) => setState(() {}),
@@ -587,14 +615,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
             if (dayNumber < 1 || dayNumber > daysInMonth) {
               // Empty padding cell outside current month
-              return Container(
-                height: 105,
-                color: const Color(0xFFF8FAFC),
-              );
+              return Container(height: 105, color: const Color(0xFFF8FAFC));
             }
 
             final cellDate = DateTime(year, month, dayNumber);
-            final isSelected = cellDate.year == _selectedDate.year &&
+            final isSelected =
+                cellDate.year == _selectedDate.year &&
                 cellDate.month == _selectedDate.month &&
                 cellDate.day == _selectedDate.day;
 
@@ -604,7 +630,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
             // Events for this date
             final dayEvents = allEvents.where((e) {
-              final matchDate = e.startTime.year == year &&
+              final matchDate =
+                  e.startTime.year == year &&
                   e.startTime.month == month &&
                   e.startTime.day == dayNumber;
               if (!matchDate) return false;
@@ -674,7 +701,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     if (isGandhiJayanti)
                       Container(
                         margin: const EdgeInsets.only(top: 2),
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFEF3C7),
                           borderRadius: BorderRadius.circular(6),
@@ -700,7 +730,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     if (isColumbusDay)
                       Container(
                         margin: const EdgeInsets.only(top: 2),
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFDCFCE7),
                           borderRadius: BorderRadius.circular(6),
@@ -732,7 +765,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         onTap: () => _showEventDetailsDialog(e),
                         child: Container(
                           margin: const EdgeInsets.only(top: 2),
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xFFEFF6FF),
                             borderRadius: BorderRadius.circular(5),

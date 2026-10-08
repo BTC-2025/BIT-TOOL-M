@@ -40,10 +40,12 @@ class ThemeProvider extends ChangeNotifier {
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: dark ? Brightness.light : Brightness.dark,
         statusBarBrightness: dark ? Brightness.dark : Brightness.light,
-        systemNavigationBarColor:
-            dark ? const Color(0xFF0E131F) : const Color(0xFFF8FAFC),
-        systemNavigationBarIconBrightness:
-            dark ? Brightness.light : Brightness.dark,
+        systemNavigationBarColor: dark
+            ? const Color(0xFF0E131F)
+            : const Color(0xFFF8FAFC),
+        systemNavigationBarIconBrightness: dark
+            ? Brightness.light
+            : Brightness.dark,
       ),
     );
   }

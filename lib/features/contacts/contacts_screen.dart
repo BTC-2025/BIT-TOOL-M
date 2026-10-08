@@ -24,8 +24,15 @@ class _ContactsScreenState extends State<ContactsScreen> {
     final nameController = TextEditingController(text: contact?.name ?? '');
     final emailController = TextEditingController(text: contact?.email ?? '');
     final phoneController = TextEditingController(text: contact?.phone ?? '');
-    String selectedRole = contact?.designation.isNotEmpty == true ? contact!.designation : 'Customer';
-    final List<String> roleOptions = ['Customer', 'Supplier', 'Chithappa', 'Employee'];
+    String selectedRole = contact?.designation.isNotEmpty == true
+        ? contact!.designation
+        : 'Customer';
+    final List<String> roleOptions = [
+      'Customer',
+      'Supplier',
+      'Chithappa',
+      'Employee',
+    ];
     if (!roleOptions.contains(selectedRole)) {
       roleOptions.add(selectedRole);
     }
@@ -37,18 +44,27 @@ class _ContactsScreenState extends State<ContactsScreen> {
           builder: (dialogContext, setDialogState) {
             final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
             final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
-            final labelColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+            final labelColor = isDark
+                ? const Color(0xFF94A3B8)
+                : const Color(0xFF64748B);
             final fieldBg = isDark ? const Color(0xFF0F172A) : Colors.white;
-            final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+            final borderColor = isDark
+                ? const Color(0xFF334155)
+                : const Color(0xFFE2E8F0);
 
             InputDecoration buildFieldDecoration(String hint) {
               return InputDecoration(
                 hintText: hint,
                 hintStyle: TextStyle(
-                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                  color: isDark
+                      ? const Color(0xFF64748B)
+                      : const Color(0xFF94A3B8),
                   fontSize: 14,
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 filled: true,
                 fillColor: fieldBg,
                 enabledBorder: OutlineInputBorder(
@@ -57,7 +73,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF2563EB),
+                    width: 1.5,
+                  ),
                 ),
               );
             }
@@ -66,7 +85,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
               backgroundColor: cardBg,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
-                side: isDark ? const BorderSide(color: Color(0xFF334155)) : BorderSide.none,
+                side: isDark
+                    ? const BorderSide(color: Color(0xFF334155))
+                    : BorderSide.none,
               ),
               child: Container(
                 width: 480,
@@ -80,7 +101,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          contact == null ? 'Create New Contact' : 'Edit Contact',
+                          contact == null
+                              ? 'Create New Contact'
+                              : 'Edit Contact',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
@@ -159,8 +182,13 @@ class _ContactsScreenState extends State<ContactsScreen> {
                               const SizedBox(height: 8),
                               TextField(
                                 controller: phoneController,
-                                style: TextStyle(color: textColor, fontSize: 14),
-                                decoration: buildFieldDecoration('+1 (555) 000-0000'),
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: 14,
+                                ),
+                                decoration: buildFieldDecoration(
+                                  '+1 (555) 000-0000',
+                                ),
                               ),
                             ],
                           ),
@@ -183,7 +211,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
                               DropdownButtonFormField<String>(
                                 initialValue: selectedRole,
                                 dropdownColor: cardBg,
-                                style: TextStyle(color: textColor, fontSize: 14),
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: 14,
+                                ),
                                 decoration: buildFieldDecoration(''),
                                 icon: Icon(
                                   Icons.keyboard_arrow_down_rounded,
@@ -192,7 +223,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                 items: roleOptions.map((role) {
                                   return DropdownMenuItem<String>(
                                     value: role,
-                                    child: Text(role, style: TextStyle(color: textColor)),
+                                    child: Text(
+                                      role,
+                                      style: TextStyle(color: textColor),
+                                    ),
                                   );
                                 }).toList(),
                                 onChanged: (val) {
@@ -215,7 +249,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
                         TextButton(
                           onPressed: () => Navigator.pop(ctx),
                           style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
                           ),
                           child: Text(
                             'Cancel',
@@ -231,7 +268,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF2563EB),
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 13),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 22,
+                              vertical: 13,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -244,15 +284,21 @@ class _ContactsScreenState extends State<ContactsScreen> {
                             final provider = context.read<ContactsProvider>();
                             if (contact == null) {
                               final now = DateTime.now();
-                              final dateStr = 'Added ${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
+                              final dateStr =
+                                  'Added ${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
                               final newContact = ContactItem(
-                                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                                id: DateTime.now().millisecondsSinceEpoch
+                                    .toString(),
                                 photoUrl: '',
                                 name: name,
                                 company: 'Cliks Business',
                                 designation: selectedRole,
-                                phone: phoneController.text.trim().isEmpty ? '8984724747' : phoneController.text.trim(),
-                                email: emailController.text.trim().isEmpty ? 'aruntest@bnxmail.com' : emailController.text.trim(),
+                                phone: phoneController.text.trim().isEmpty
+                                    ? '8984724747'
+                                    : phoneController.text.trim(),
+                                email: emailController.text.trim().isEmpty
+                                    ? 'aruntest@bnxmail.com'
+                                    : emailController.text.trim(),
                                 department: 'Operations',
                                 location: dateStr,
                                 notes: 'Cliks Business • $dateStr',
@@ -264,10 +310,16 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                 id: contact.id,
                                 photoUrl: contact.photoUrl,
                                 name: name,
-                                company: contact.company.isEmpty ? 'Cliks Business' : contact.company,
+                                company: contact.company.isEmpty
+                                    ? 'Cliks Business'
+                                    : contact.company,
                                 designation: selectedRole,
-                                phone: phoneController.text.trim().isEmpty ? contact.phone : phoneController.text.trim(),
-                                email: emailController.text.trim().isEmpty ? contact.email : emailController.text.trim(),
+                                phone: phoneController.text.trim().isEmpty
+                                    ? contact.phone
+                                    : phoneController.text.trim(),
+                                email: emailController.text.trim().isEmpty
+                                    ? contact.email
+                                    : emailController.text.trim(),
                                 department: contact.department,
                                 location: contact.location,
                                 notes: contact.notes,
@@ -279,8 +331,13 @@ class _ContactsScreenState extends State<ContactsScreen> {
                             Navigator.pop(ctx);
                           },
                           child: Text(
-                            contact == null ? 'Create Contact' : 'Update Contact',
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            contact == null
+                                ? 'Create Contact'
+                                : 'Update Contact',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
@@ -343,7 +400,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     child: Center(
                       child: Text(
                         'No contacts found.',
-                        style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+                        style: TextStyle(
+                          color: Color(0xFF94A3B8),
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   )
@@ -452,11 +512,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.search_rounded,
-            size: 18,
-            color: Color(0xFF94A3B8),
-          ),
+          const Icon(Icons.search_rounded, size: 18, color: Color(0xFF94A3B8)),
           const SizedBox(width: 8),
           Expanded(
             child: TextField(
@@ -466,10 +522,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 isDense: true,
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
-                hintStyle: TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF94A3B8),
-                ),
+                hintStyle: TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
               ),
               style: const TextStyle(fontSize: 13),
               onChanged: (_) => setState(() {}),
@@ -487,18 +540,13 @@ class _ContactsScreenState extends State<ContactsScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       onPressed: () => _showAddEditContactDialog(),
       icon: const Icon(Icons.add, size: 18),
       label: const Text(
         'New Contact',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 13,
-        ),
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
       ),
     );
   }
@@ -507,9 +555,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
       decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1)),
       ),
       child: const Row(
         children: [
@@ -579,9 +625,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1)),
       ),
       child: Row(
         children: [
@@ -679,9 +723,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        contact.phone.isNotEmpty
-                            ? contact.phone
-                            : '8984724747',
+                        contact.phone.isNotEmpty ? contact.phone : '8984724747',
                         style: const TextStyle(
                           fontSize: 13,
                           color: Color(0xFF475569),
@@ -701,7 +743,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(8),
@@ -800,11 +845,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
             color: Color(0xFF10B981),
             shape: BoxShape.circle,
           ),
-          child: const Icon(
-            Icons.check,
-            size: 8,
-            color: Colors.white,
-          ),
+          child: const Icon(Icons.check, size: 8, color: Colors.white),
         ),
       ),
     );

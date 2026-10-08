@@ -48,45 +48,180 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
       'name': 'Smileys',
       'icon': Icons.sentiment_satisfied_alt_rounded,
       'emojis': [
-        '😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂',
-        '😉', '😍', '🥰', '😘', '😋', '😎', '🥳', '🤩', '🤔', '🤫',
-        '🤗', '🫡', '🤤', '😴', '🤯', '🤠', '🥺', '😭', '🤓', '🤑',
-        '😈', '🤡', '👻', '💀', '👽', '🤖', '🎃', '😺', '😸', '😻',
+        '😀',
+        '😃',
+        '😄',
+        '😁',
+        '😅',
+        '😂',
+        '🤣',
+        '😊',
+        '😇',
+        '🙂',
+        '😉',
+        '😍',
+        '🥰',
+        '😘',
+        '😋',
+        '😎',
+        '🥳',
+        '🤩',
+        '🤔',
+        '🤫',
+        '🤗',
+        '🫡',
+        '🤤',
+        '😴',
+        '🤯',
+        '🤠',
+        '🥺',
+        '😭',
+        '🤓',
+        '🤑',
+        '😈',
+        '🤡',
+        '👻',
+        '💀',
+        '👽',
+        '🤖',
+        '🎃',
+        '😺',
+        '😸',
+        '😻',
       ],
     },
     {
       'name': 'Gestures',
       'icon': Icons.pan_tool_alt_rounded,
       'emojis': [
-        '👍', '👎', '👏', '🙌', '🫶', '✌️', '🤞', '🤟', '🤘', '🤙',
-        '👋', '✍️', '🤝', '🙏', '💪', '👈', '👉', '👆', '👇', '👌',
-        '👊', '🤛', '🤜', '🖐️', '✋', '🖖', '🫰', '🫱', '🫲', '🫳',
+        '👍',
+        '👎',
+        '👏',
+        '🙌',
+        '🫶',
+        '✌️',
+        '🤞',
+        '🤟',
+        '🤘',
+        '🤙',
+        '👋',
+        '✍️',
+        '🤝',
+        '🙏',
+        '💪',
+        '👈',
+        '👉',
+        '👆',
+        '👇',
+        '👌',
+        '👊',
+        '🤛',
+        '🤜',
+        '🖐️',
+        '✋',
+        '🖖',
+        '🫰',
+        '🫱',
+        '🫲',
+        '🫳',
       ],
     },
     {
       'name': 'Hearts & Fire',
       'icon': Icons.local_fire_department_rounded,
       'emojis': [
-        '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '💔', '❣️',
-        '💕', '🔥', '✨', '⚡', '💥', '🌟', '⭐', '💫', '🎉', '🎊',
-        '💐', '🌸', '🌹', '🌺', '🍀', '🌈', '☀️', '🌙', '⭐', '💎',
+        '❤️',
+        '🧡',
+        '💛',
+        '💚',
+        '💙',
+        '💜',
+        '🖤',
+        '🤍',
+        '💔',
+        '❣️',
+        '💕',
+        '🔥',
+        '✨',
+        '⚡',
+        '💥',
+        '🌟',
+        '⭐',
+        '💫',
+        '🎉',
+        '🎊',
+        '💐',
+        '🌸',
+        '🌹',
+        '🌺',
+        '🍀',
+        '🌈',
+        '☀️',
+        '🌙',
+        '⭐',
+        '💎',
       ],
     },
     {
       'name': 'Tech & Work',
       'icon': Icons.devices_rounded,
       'emojis': [
-        '💡', '🚀', '💻', '📱', '⌚', '🎧', '☕', '🍔', '🍕', '⚽',
-        '🎮', '🎨', '🎵', '📚', '🏆', '🔒', '🔑', '📌', '🎁', '📦',
-        '🔔', '🏷️', '🛠️', '⚙️', '🧭', '📷', '🎬', '📡', '🕹️', '🕶️',
+        '💡',
+        '🚀',
+        '💻',
+        '📱',
+        '⌚',
+        '🎧',
+        '☕',
+        '🍔',
+        '🍕',
+        '⚽',
+        '🎮',
+        '🎨',
+        '🎵',
+        '📚',
+        '🏆',
+        '🔒',
+        '🔑',
+        '📌',
+        '🎁',
+        '📦',
+        '🔔',
+        '🏷️',
+        '🛠️',
+        '⚙️',
+        '🧭',
+        '📷',
+        '🎬',
+        '📡',
+        '🕹️',
+        '🕶️',
       ],
     },
     {
       'name': 'Symbols',
       'icon': Icons.stars_rounded,
       'emojis': [
-        '✅', '❌', '⚠️', '💯', '🆗', '🆒', '🆕', '🆓', '➡️', '⬅️',
-        '⬆️', '⬇️', '☀️', '🌙', '⭐', '☁️', '⚡', '🌈', '🔔', '🏷️',
+        '✅',
+        '❌',
+        '⚠️',
+        '💯',
+        '🆗',
+        '🆒',
+        '🆕',
+        '🆓',
+        '➡️',
+        '⬅️',
+        '⬆️',
+        '⬇️',
+        '☀️',
+        '🌙',
+        '⭐',
+        '☁️',
+        '⚡',
+        '🌈',
+        '🔔',
+        '🏷️',
       ],
     },
   ];
@@ -96,7 +231,10 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
     super.initState();
     _previousText = _textController.text;
     _textController.addListener(_onTextChanged);
-    _wpmTimer = Timer.periodic(const Duration(seconds: 1), (_) => _calculateWpm());
+    _wpmTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => _calculateWpm(),
+    );
     HardwareKeyboard.instance.addHandler(_onHardwareKeyEvent);
   }
 
@@ -122,10 +260,12 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
         // Direct insertion into TextField (e.g. typing via hardware keyboard)
         final selectionEnd = _textController.selection.baseOffset;
         final count = currentText.length - _previousText.length;
-        final start = (selectionEnd >= count && selectionEnd <= currentText.length)
+        final start =
+            (selectionEnd >= count && selectionEnd <= currentText.length)
             ? selectionEnd - count
             : _previousText.length;
-        final end = (selectionEnd >= count && selectionEnd <= currentText.length)
+        final end =
+            (selectionEnd >= count && selectionEnd <= currentText.length)
             ? selectionEnd
             : currentText.length;
         final added = currentText.substring(start, end);
@@ -156,15 +296,18 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
         _flashKey('space');
         return false;
       }
-      if (logical == LogicalKeyboardKey.enter || logical == LogicalKeyboardKey.numpadEnter) {
+      if (logical == LogicalKeyboardKey.enter ||
+          logical == LogicalKeyboardKey.numpadEnter) {
         _flashKey('return');
         return false;
       }
-      if (logical == LogicalKeyboardKey.backspace || logical == LogicalKeyboardKey.delete) {
+      if (logical == LogicalKeyboardKey.backspace ||
+          logical == LogicalKeyboardKey.delete) {
         _flashKey('delete');
         return false;
       }
-      if (logical == LogicalKeyboardKey.shiftLeft || logical == LogicalKeyboardKey.shiftRight) {
+      if (logical == LogicalKeyboardKey.shiftLeft ||
+          logical == LogicalKeyboardKey.shiftRight) {
         _flashKey('shift');
         return false;
       }
@@ -242,7 +385,9 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
       return;
     }
 
-    final elapsedSeconds = DateTime.now().difference(_typingSessionStart!).inSeconds;
+    final elapsedSeconds = DateTime.now()
+        .difference(_typingSessionStart!)
+        .inSeconds;
     if (elapsedSeconds < 2) return;
 
     final words = _textController.text.trim().split(RegExp(r'\s+')).length;
@@ -671,9 +816,13 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
             // Sound Click Feedback Toggle
             IconButton(
               icon: Icon(
-                _soundEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+                _soundEnabled
+                    ? Icons.volume_up_rounded
+                    : Icons.volume_off_rounded,
                 size: 20,
-                color: _soundEnabled ? const Color(0xFF2563EB) : const Color(0xFF94A3B8),
+                color: _soundEnabled
+                    ? const Color(0xFF2563EB)
+                    : const Color(0xFF94A3B8),
               ),
               onPressed: () => setState(() => _soundEnabled = !_soundEnabled),
               tooltip: _soundEnabled ? 'Audio Click: ON' : 'Audio Click: OFF',
@@ -689,7 +838,10 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 7,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
@@ -698,7 +850,11 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.palette_outlined, size: 16, color: Color(0xFF64748B)),
+                    const Icon(
+                      Icons.palette_outlined,
+                      size: 16,
+                      color: Color(0xFF64748B),
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       _getThemeName(_selectedTheme),
@@ -708,7 +864,11 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                         color: Color(0xFF334155),
                       ),
                     ),
-                    const Icon(Icons.arrow_drop_down, size: 18, color: Color(0xFF64748B)),
+                    const Icon(
+                      Icons.arrow_drop_down,
+                      size: 18,
+                      color: Color(0xFF64748B),
+                    ),
                   ],
                 ),
               ),
@@ -802,10 +962,10 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
               color: _selectedTheme == KeyboardTheme.cyberNeon
                   ? const Color(0xFF0F172A)
                   : const Color(0xFFF8FAFC),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              border: Border(
-                bottom: BorderSide(color: colors.editorBorder),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
               ),
+              border: Border(bottom: BorderSide(color: colors.editorBorder)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -841,14 +1001,21 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                     const SizedBox(width: 12),
                     // Live typing speed HUD
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: colors.accentColor.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.speed_rounded, size: 13, color: colors.accentColor),
+                          Icon(
+                            Icons.speed_rounded,
+                            size: 13,
+                            color: colors.accentColor,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             '$_currentWpm WPM',
@@ -876,16 +1043,32 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                 // Text Transform Tools
                 Row(
                   children: [
-                    _buildCaseButton('AA', () => _transformText((t) => t.toUpperCase()), 'UPPERCASE'),
+                    _buildCaseButton(
+                      'AA',
+                      () => _transformText((t) => t.toUpperCase()),
+                      'UPPERCASE',
+                    ),
                     const SizedBox(width: 4),
-                    _buildCaseButton('aa', () => _transformText((t) => t.toLowerCase()), 'lowercase'),
+                    _buildCaseButton(
+                      'aa',
+                      () => _transformText((t) => t.toLowerCase()),
+                      'lowercase',
+                    ),
                     const SizedBox(width: 4),
-                    _buildCaseButton('Aa', () => _transformText((t) {
-                      return t.split(' ').map((word) {
-                        if (word.isEmpty) return word;
-                        return word[0].toUpperCase() + word.substring(1).toLowerCase();
-                      }).join(' ');
-                    }), 'Title Case'),
+                    _buildCaseButton(
+                      'Aa',
+                      () => _transformText((t) {
+                        return t
+                            .split(' ')
+                            .map((word) {
+                              if (word.isEmpty) return word;
+                              return word[0].toUpperCase() +
+                                  word.substring(1).toLowerCase();
+                            })
+                            .join(' ');
+                      }),
+                      'Title Case',
+                    ),
                   ],
                 ),
               ],
@@ -928,35 +1111,71 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                   ? const Color(0xFF161F30)
                   : const Color(0xFFF1F5F9).withValues(alpha: 0.6),
               border: Border(
-                top: BorderSide(color: colors.editorBorder.withValues(alpha: 0.6)),
+                top: BorderSide(
+                  color: colors.editorBorder.withValues(alpha: 0.6),
+                ),
               ),
             ),
             child: Row(
               children: [
-                const Icon(Icons.emoji_emotions_outlined, size: 16, color: Color(0xFF94A3B8)),
+                const Icon(
+                  Icons.emoji_emotions_outlined,
+                  size: 16,
+                  color: Color(0xFF94A3B8),
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
                     child: Row(
-                      children: [
-                        '👋', '✨', '👍', '❤️', '🔥', '🚀', '😊', '🎉',
-                        '💡', '🎯', '💯', '👏', '🙏', '⚡', '☕', '🌟',
-                        '😎', '🥳', '🤩', '💐', '🌈', '💎', '🏆', '🍕',
-                      ].map((emoji) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: InkWell(
-                            onTap: () => _insertText(emoji),
-                            borderRadius: BorderRadius.circular(8),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-                              child: Text(emoji, style: const TextStyle(fontSize: 17)),
-                            ),
-                          ),
-                        );
-                      }).toList(),
+                      children:
+                          [
+                            '👋',
+                            '✨',
+                            '👍',
+                            '❤️',
+                            '🔥',
+                            '🚀',
+                            '😊',
+                            '🎉',
+                            '💡',
+                            '🎯',
+                            '💯',
+                            '👏',
+                            '🙏',
+                            '⚡',
+                            '☕',
+                            '🌟',
+                            '😎',
+                            '🥳',
+                            '🤩',
+                            '💐',
+                            '🌈',
+                            '💎',
+                            '🏆',
+                            '🍕',
+                          ].map((emoji) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
+                              child: InkWell(
+                                onTap: () => _insertText(emoji),
+                                borderRadius: BorderRadius.circular(8),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
+                                    vertical: 3,
+                                  ),
+                                  child: Text(
+                                    emoji,
+                                    style: const TextStyle(fontSize: 17),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
                     ),
                   ),
                 ),
@@ -964,7 +1183,10 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                   onTap: _toggleEmojiMode,
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: _isEmojiMode
                           ? colors.accentColor
@@ -1061,7 +1283,9 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                         ],
                       ),
                       Text(
-                        _isNumberMode ? 'Symbols & Numbers' : 'Tactile Mechanical Deck',
+                        _isNumberMode
+                            ? 'Symbols & Numbers'
+                            : 'Tactile Mechanical Deck',
                         style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -1075,7 +1299,9 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                 // ── Row 1 (10 Keys) ──────────────────────────────────────────
                 Row(
                   children: row1Keys.map((key) {
-                    final isFlashed = _activeFlashedKeys.contains(key.toLowerCase());
+                    final isFlashed = _activeFlashedKeys.contains(
+                      key.toLowerCase(),
+                    );
                     return Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 3.5),
@@ -1111,7 +1337,9 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                   children: [
                     const Spacer(flex: 1),
                     ...row2Keys.map((key) {
-                      final isFlashed = _activeFlashedKeys.contains(key.toLowerCase());
+                      final isFlashed = _activeFlashedKeys.contains(
+                        key.toLowerCase(),
+                      );
                       return Expanded(
                         flex: 2,
                         child: Padding(
@@ -1171,8 +1399,8 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                             _isCapsLock
                                 ? Icons.arrow_upward_rounded
                                 : (_isShift
-                                    ? Icons.arrow_upward_rounded
-                                    : Icons.keyboard_control_key_rounded),
+                                      ? Icons.arrow_upward_rounded
+                                      : Icons.keyboard_control_key_rounded),
                             size: 21,
                             color: (_isShift || _isCapsLock)
                                 ? colors.accentColor
@@ -1184,7 +1412,9 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
 
                     // Middle Keys
                     ...row3Keys.map((key) {
-                      final isFlashed = _activeFlashedKeys.contains(key.toLowerCase());
+                      final isFlashed = _activeFlashedKeys.contains(
+                        key.toLowerCase(),
+                      );
                       return Expanded(
                         flex: 2,
                         child: Padding(
@@ -1256,7 +1486,9 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 3.5),
                         child: _VisualKeycap(
                           keyLabel: _isNumberMode ? 'ABC' : '123',
-                          isFlashed: _activeFlashedKeys.contains(_isNumberMode ? 'abc' : '123'),
+                          isFlashed: _activeFlashedKeys.contains(
+                            _isNumberMode ? 'abc' : '123',
+                          ),
                           onTap: _toggleNumberMode,
                           showMagnifier: false,
                           baseColor: colors.functionKeyBg,
@@ -1270,7 +1502,10 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
-                              color: _activeFlashedKeys.contains(_isNumberMode ? 'abc' : '123')
+                              color:
+                                  _activeFlashedKeys.contains(
+                                    _isNumberMode ? 'abc' : '123',
+                                  )
                                   ? Colors.white
                                   : colors.standardKeyText,
                             ),
@@ -1404,10 +1639,14 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                     return Padding(
                       padding: const EdgeInsets.only(right: 6),
                       child: InkWell(
-                        onTap: () => setState(() => _selectedEmojiCategory = idx),
+                        onTap: () =>
+                            setState(() => _selectedEmojiCategory = idx),
                         borderRadius: BorderRadius.circular(10),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? colors.accentColor
@@ -1419,7 +1658,9 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                               Icon(
                                 cat['icon'] as IconData,
                                 size: 15,
-                                color: isSelected ? Colors.white : colors.functionKeyText,
+                                color: isSelected
+                                    ? Colors.white
+                                    : colors.functionKeyText,
                               ),
                               const SizedBox(width: 6),
                               Text(
@@ -1427,7 +1668,9 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  color: isSelected ? Colors.white : colors.standardKeyText,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : colors.standardKeyText,
                                 ),
                               ),
                             ],
@@ -1471,10 +1714,7 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                 onTap: () => _insertText(emoji),
                 borderRadius: BorderRadius.circular(8),
                 child: Center(
-                  child: Text(
-                    emoji,
-                    style: const TextStyle(fontSize: 22),
-                  ),
+                  child: Text(emoji, style: const TextStyle(fontSize: 22)),
                 ),
               );
             },
@@ -1667,13 +1907,15 @@ class _VisualKeycapState extends State<_VisualKeycap> {
               color: widget.isAccented
                   ? Colors.transparent
                   : (isDepressed
-                      ? widget.glowColor.withValues(alpha: 0.35)
-                      : const Color(0xFFE2E8F0)),
+                        ? widget.glowColor.withValues(alpha: 0.35)
+                        : const Color(0xFFE2E8F0)),
               width: 1.0,
             ),
             boxShadow: [
               BoxShadow(
-                color: widget.shadowColor.withValues(alpha: isDepressed ? 0.06 : 0.16),
+                color: widget.shadowColor.withValues(
+                  alpha: isDepressed ? 0.06 : 0.16,
+                ),
                 offset: Offset(0, isDepressed ? 0.8 : 2.0),
                 blurRadius: isDepressed ? 0.5 : 0.0,
               ),
@@ -1689,9 +1931,7 @@ class _VisualKeycapState extends State<_VisualKeycap> {
                 color: isDepressed ? widget.activeTextColor : widget.textColor,
                 size: 19,
               ),
-              child: Center(
-                child: widget.child,
-              ),
+              child: Center(child: widget.child),
             ),
           ),
         ),

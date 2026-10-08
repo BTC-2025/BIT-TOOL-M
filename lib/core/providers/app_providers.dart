@@ -173,8 +173,7 @@ class CalendarProvider extends ChangeNotifier {
         CalendarEvent(
           id: 'gov_h_columbus_$yr',
           title: 'Columbus Day',
-          description:
-              'Observance commemorating the history and exploration.',
+          description: 'Observance commemorating the history and exploration.',
           startTime: DateTime(yr, 10, 12, 9, 0),
           endTime: DateTime(yr, 10, 12, 17, 0),
           isRecurring: false,

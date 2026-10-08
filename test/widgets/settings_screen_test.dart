@@ -35,37 +35,38 @@ void main() {
       expect(find.text('0.02 GB / 15.00 GB'), findsOneWidget);
     });
 
-    testWidgets('renders Appearance card and toggles between Light and Dark mode', (
-      WidgetTester tester,
-    ) async {
-      tester.view.physicalSize = const Size(1200, 900);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
+    testWidgets(
+      'renders Appearance card and toggles between Light and Dark mode',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1200, 900);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
 
-      await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: SettingsScreen())),
-      );
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          const MaterialApp(home: Scaffold(body: SettingsScreen())),
+        );
+        await tester.pumpAndSettle();
 
-      // Verify Appearance card content
-      expect(find.text('Appearance'), findsOneWidget);
-      expect(find.text('Customize your workspace'), findsOneWidget);
-      expect(find.text('Light Mode'), findsOneWidget);
-      expect(find.text('Dark Mode'), findsOneWidget);
+        // Verify Appearance card content
+        expect(find.text('Appearance'), findsOneWidget);
+        expect(find.text('Customize your workspace'), findsOneWidget);
+        expect(find.text('Light Mode'), findsOneWidget);
+        expect(find.text('Dark Mode'), findsOneWidget);
 
-      // Tap Dark Mode option
-      await tester.tap(find.text('Dark Mode'));
-      await tester.pumpAndSettle();
+        // Tap Dark Mode option
+        await tester.tap(find.text('Dark Mode'));
+        await tester.pumpAndSettle();
 
-      // Tap Light Mode option
-      await tester.tap(find.text('Light Mode'));
-      await tester.pumpAndSettle();
+        // Tap Light Mode option
+        await tester.tap(find.text('Light Mode'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Light Mode'), findsOneWidget);
-    });
+        expect(find.text('Light Mode'), findsOneWidget);
+      },
+    );
 
     testWidgets('toggles dark mode via ThemeProvider', (
       WidgetTester tester,
@@ -107,21 +108,24 @@ void main() {
       expect(themeProvider.isDarkMode, false);
     });
 
-    testWidgets('renders About Bit Tool card with version 1.0.0 and description', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: SettingsScreen())),
-      );
-      await tester.pumpAndSettle();
+    testWidgets(
+      'renders About Bit Tool card with version 1.0.0 and description',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(home: Scaffold(body: SettingsScreen())),
+        );
+        await tester.pumpAndSettle();
 
-      // Verify About card content
-      expect(find.text('About Bit Tool'), findsOneWidget);
-      expect(find.text('Version 1.0.0'), findsOneWidget);
-      expect(
-        find.textContaining('Bit Tool is a premium suite of productivity applications'),
-        findsOneWidget,
-      );
-    });
+        // Verify About card content
+        expect(find.text('About Bit Tool'), findsOneWidget);
+        expect(find.text('Version 1.0.0'), findsOneWidget);
+        expect(
+          find.textContaining(
+            'Bit Tool is a premium suite of productivity applications',
+          ),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }

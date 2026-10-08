@@ -164,8 +164,18 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
 
   String _formatEventDate(DateTime dt) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     final hour = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
     final ampm = dt.hour >= 12 ? 'PM' : 'AM';
@@ -185,7 +195,24 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
         category: 'Tools',
         icon: Icons.calculate_outlined,
         iconColor: const Color(0xFF3B82F6),
-        keywords: ['calc', 'calculator', 'math', 'gst', 'tax', 'discount', 'tape', 'history', 'sum', 'add', 'bnx', 'bnx mail', 'cliks', 'cliks business', 'cross-app', 'cross app'],
+        keywords: [
+          'calc',
+          'calculator',
+          'math',
+          'gst',
+          'tax',
+          'discount',
+          'tape',
+          'history',
+          'sum',
+          'add',
+          'bnx',
+          'bnx mail',
+          'cliks',
+          'cliks business',
+          'cross-app',
+          'cross app',
+        ],
         onTap: () => _switchTab(0),
       ),
       _SearchResultItem(
@@ -194,7 +221,16 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
         category: 'Tools',
         icon: Icons.calendar_today_outlined,
         iconColor: const Color(0xFF8B5CF6),
-        keywords: ['calendar', 'cal', 'schedule', 'event', 'events', 'meeting', 'date', 'agenda'],
+        keywords: [
+          'calendar',
+          'cal',
+          'schedule',
+          'event',
+          'events',
+          'meeting',
+          'date',
+          'agenda',
+        ],
         onTap: () => _switchTab(1),
       ),
       _SearchResultItem(
@@ -203,7 +239,16 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
         category: 'Tools',
         icon: Icons.description_outlined,
         iconColor: const Color(0xFFF59E0B),
-        keywords: ['notes', 'note', 'scratchpad', 'memo', 'text', 'doc', 'write', 'todo'],
+        keywords: [
+          'notes',
+          'note',
+          'scratchpad',
+          'memo',
+          'text',
+          'doc',
+          'write',
+          'todo',
+        ],
         onTap: () => _switchTab(2),
       ),
       _SearchResultItem(
@@ -212,7 +257,15 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
         category: 'Tools',
         icon: Icons.people_outline_rounded,
         iconColor: const Color(0xFF10B981),
-        keywords: ['contacts', 'contact', 'people', 'team', 'phonebook', 'colleagues', 'directory'],
+        keywords: [
+          'contacts',
+          'contact',
+          'people',
+          'team',
+          'phonebook',
+          'colleagues',
+          'directory',
+        ],
         onTap: () => _switchTab(3),
       ),
       _SearchResultItem(
@@ -221,7 +274,15 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
         category: 'Tools',
         icon: Icons.cloud_outlined,
         iconColor: const Color(0xFF06B6D4),
-        keywords: ['weather', 'forecast', 'temperature', 'climate', 'sun', 'rain', 'humidity'],
+        keywords: [
+          'weather',
+          'forecast',
+          'temperature',
+          'climate',
+          'sun',
+          'rain',
+          'humidity',
+        ],
         onTap: () => _switchTab(4),
       ),
       _SearchResultItem(
@@ -230,7 +291,15 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
         category: 'Tools',
         icon: Icons.keyboard_outlined,
         iconColor: const Color(0xFFEC4899),
-        keywords: ['keyboard', 'keypad', 'typing', 'keys', 'emoji', 'typewriter', 'symbols'],
+        keywords: [
+          'keyboard',
+          'keypad',
+          'typing',
+          'keys',
+          'emoji',
+          'typewriter',
+          'symbols',
+        ],
         onTap: () => _switchTab(5),
       ),
       _SearchResultItem(
@@ -239,7 +308,14 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
         category: 'Tools',
         icon: Icons.settings_outlined,
         iconColor: const Color(0xFF64748B),
-        keywords: ['settings', 'preferences', 'dark mode', 'light mode', 'theme', 'config'],
+        keywords: [
+          'settings',
+          'preferences',
+          'dark mode',
+          'light mode',
+          'theme',
+          'config',
+        ],
         onTap: () => _switchTab(6),
       ),
     ];
@@ -385,8 +461,9 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color:
-                    isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                color: isDark
+                    ? const Color(0xFFCBD5E1)
+                    : const Color(0xFF334155),
               ),
               textAlign: TextAlign.center,
             ),
@@ -395,8 +472,9 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
               'Try searching for tools, contacts, notes, or calendar events.',
               style: TextStyle(
                 fontSize: 11,
-                color:
-                    isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                color: isDark
+                    ? const Color(0xFF64748B)
+                    : const Color(0xFF94A3B8),
               ),
               textAlign: TextAlign.center,
             ),
@@ -456,8 +534,10 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                   item.onTap();
                 },
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   child: Row(
                     children: [
                       Container(
@@ -467,11 +547,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                           color: item.iconColor.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Icon(
-                          item.icon,
-                          size: 18,
-                          color: item.iconColor,
-                        ),
+                        child: Icon(item.icon, size: 18, color: item.iconColor),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -541,8 +617,9 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
               height: MediaQuery.of(ctx).size.height * 0.75,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
               ),
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(ctx).viewInsets.bottom,
@@ -694,8 +771,9 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                 ],
               ),
               Divider(
-                color:
-                    isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                color: isDark
+                    ? const Color(0xFF334155)
+                    : const Color(0xFFE2E8F0),
               ),
               ListTile(
                 leading: Container(
@@ -803,8 +881,9 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                       : null,
                   boxShadow: [
                     BoxShadow(
-                      color:
-                          Colors.black.withValues(alpha: isDark ? 0.35 : 0.1),
+                      color: Colors.black.withValues(
+                        alpha: isDark ? 0.35 : 0.1,
+                      ),
                       blurRadius: 30,
                       offset: const Offset(0, 10),
                     ),
@@ -872,8 +951,9 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color:
-                              isDark ? Colors.white : const Color(0xFF0F172A),
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF0F172A),
                         ),
                       ),
                     ),
@@ -960,8 +1040,9 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF0E131F) : const Color(0xFFF8FAFC),
+      backgroundColor: isDark
+          ? const Color(0xFF0E131F)
+          : const Color(0xFFF8FAFC),
       body: SafeArea(
         child: Column(
           children: [
@@ -1073,8 +1154,8 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                       color: _searchFocusNode.hasFocus
                           ? const Color(0xFF3B82F6)
                           : (isDark
-                              ? const Color(0xFF334155)
-                              : const Color(0xFFE2E8F0)),
+                                ? const Color(0xFF334155)
+                                : const Color(0xFFE2E8F0)),
                       width: _searchFocusNode.hasFocus ? 1.5 : 1,
                     ),
                   ),
@@ -1280,9 +1361,10 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                       decoration: BoxDecoration(
                         color: isSelected
                             ? (isDark
-                                ? const Color(0xFF2563EB)
-                                    .withValues(alpha: 0.22)
-                                : const Color(0xFFEFF6FF))
+                                  ? const Color(
+                                      0xFF2563EB,
+                                    ).withValues(alpha: 0.22)
+                                  : const Color(0xFFEFF6FF))
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(12),
                         border: isSelected
@@ -1298,11 +1380,11 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                             _icons[i],
                             color: isSelected
                                 ? (isDark
-                                    ? const Color(0xFF60A5FA)
-                                    : const Color(0xFF2563EB))
+                                      ? const Color(0xFF60A5FA)
+                                      : const Color(0xFF2563EB))
                                 : (isDark
-                                    ? const Color(0xFF94A3B8)
-                                    : const Color(0xFF64748B)),
+                                      ? const Color(0xFF94A3B8)
+                                      : const Color(0xFF64748B)),
                             size: 20,
                           ),
                           const SizedBox(width: 12),
@@ -1316,11 +1398,11 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                                 fontSize: 14,
                                 color: isSelected
                                     ? (isDark
-                                        ? const Color(0xFF60A5FA)
-                                        : const Color(0xFF2563EB))
+                                          ? const Color(0xFF60A5FA)
+                                          : const Color(0xFF2563EB))
                                     : (isDark
-                                        ? const Color(0xFF94A3B8)
-                                        : const Color(0xFF475569)),
+                                          ? const Color(0xFF94A3B8)
+                                          : const Color(0xFF475569)),
                               ),
                             ),
                           ),
@@ -1386,8 +1468,8 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
           decoration: BoxDecoration(
             color: isSelected
                 ? (isDark
-                    ? const Color(0xFF2563EB).withValues(alpha: 0.22)
-                    : const Color(0xFFEFF6FF))
+                      ? const Color(0xFF2563EB).withValues(alpha: 0.22)
+                      : const Color(0xFFEFF6FF))
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
           ),
@@ -1398,11 +1480,11 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                 icon,
                 color: isSelected
                     ? (isDark
-                        ? const Color(0xFF60A5FA)
-                        : const Color(0xFF2563EB))
+                          ? const Color(0xFF60A5FA)
+                          : const Color(0xFF2563EB))
                     : (isDark
-                        ? const Color(0xFF94A3B8)
-                        : const Color(0xFF64748B)),
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF64748B)),
                 size: 18,
               ),
               const SizedBox(width: 12),
@@ -1413,12 +1495,12 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                     fontSize: 13,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                     color: isSelected
-                      ? (isDark
-                          ? const Color(0xFF60A5FA)
-                          : const Color(0xFF2563EB))
-                      : (isDark
-                          ? const Color(0xFF94A3B8)
-                          : const Color(0xFF64748B)),
+                        ? (isDark
+                              ? const Color(0xFF60A5FA)
+                              : const Color(0xFF2563EB))
+                        : (isDark
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF64748B)),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1459,11 +1541,11 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                         _icons[i],
                         color: isSelected
                             ? (isDark
-                                ? const Color(0xFF60A5FA)
-                                : const Color(0xFF2563EB))
+                                  ? const Color(0xFF60A5FA)
+                                  : const Color(0xFF2563EB))
                             : (isDark
-                                ? const Color(0xFF64748B)
-                                : const Color(0xFF64748B)),
+                                  ? const Color(0xFF64748B)
+                                  : const Color(0xFF64748B)),
                         size: 22,
                       ),
                       const SizedBox(height: 3),
@@ -1476,11 +1558,11 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                               : FontWeight.w500,
                           color: isSelected
                               ? (isDark
-                                  ? const Color(0xFF60A5FA)
-                                  : const Color(0xFF2563EB))
+                                    ? const Color(0xFF60A5FA)
+                                    : const Color(0xFF2563EB))
                               : (isDark
-                                  ? const Color(0xFF94A3B8)
-                                  : const Color(0xFF64748B)),
+                                    ? const Color(0xFF94A3B8)
+                                    : const Color(0xFF64748B)),
                         ),
                       ),
                     ],

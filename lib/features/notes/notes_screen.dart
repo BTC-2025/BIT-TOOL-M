@@ -15,7 +15,8 @@ class _NotesScreenState extends State<NotesScreen> {
 
   // Inline note creation controllers
   final TextEditingController _inlineTitleController = TextEditingController();
-  final TextEditingController _inlineContentController = TextEditingController();
+  final TextEditingController _inlineContentController =
+      TextEditingController();
   bool _inlineIsPinned = false;
   String _inlineCategory = 'Bit Tool';
   String _inlineColorHex = '#A7F3D0';
@@ -101,7 +102,9 @@ class _NotesScreenState extends State<NotesScreen> {
           builder: (context, setDialogState) {
             final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
             final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
-            final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+            final borderColor = isDark
+                ? const Color(0xFF334155)
+                : const Color(0xFFE2E8F0);
 
             return Dialog(
               backgroundColor: cardBg,
@@ -136,10 +139,18 @@ class _NotesScreenState extends State<NotesScreen> {
                     const SizedBox(height: 16),
                     TextField(
                       controller: titleController,
-                      style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'Note Title...',
-                        hintStyle: TextStyle(color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
+                        hintStyle: TextStyle(
+                          color: isDark
+                              ? const Color(0xFF64748B)
+                              : const Color(0xFF94A3B8),
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(color: borderColor),
@@ -153,7 +164,11 @@ class _NotesScreenState extends State<NotesScreen> {
                       style: TextStyle(color: textColor, fontSize: 14),
                       decoration: InputDecoration(
                         hintText: "What's on your mind?",
-                        hintStyle: TextStyle(color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
+                        hintStyle: TextStyle(
+                          color: isDark
+                              ? const Color(0xFF64748B)
+                              : const Color(0xFF94A3B8),
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(color: borderColor),
@@ -283,7 +298,9 @@ class _NotesScreenState extends State<NotesScreen> {
                 color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  color: isDark
+                      ? const Color(0xFF334155)
+                      : const Color(0xFFE2E8F0),
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -307,12 +324,16 @@ class _NotesScreenState extends State<NotesScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
                           ),
                           decoration: InputDecoration(
                             hintText: 'Note Title',
                             hintStyle: TextStyle(
-                              color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                              color: isDark
+                                  ? const Color(0xFF64748B)
+                                  : const Color(0xFF94A3B8),
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
@@ -332,11 +353,15 @@ class _NotesScreenState extends State<NotesScreen> {
                         child: Padding(
                           padding: const EdgeInsets.all(4),
                           child: Icon(
-                            _inlineIsPinned ? Icons.push_pin : Icons.push_pin_outlined,
+                            _inlineIsPinned
+                                ? Icons.push_pin
+                                : Icons.push_pin_outlined,
                             size: 20,
                             color: _inlineIsPinned
                                 ? const Color(0xFF2563EB)
-                                : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                : (isDark
+                                      ? const Color(0xFF94A3B8)
+                                      : const Color(0xFF64748B)),
                           ),
                         ),
                       ),
@@ -351,12 +376,16 @@ class _NotesScreenState extends State<NotesScreen> {
                     minLines: 2,
                     style: TextStyle(
                       fontSize: 14,
-                      color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
+                      color: isDark
+                          ? const Color(0xFFE2E8F0)
+                          : const Color(0xFF334155),
                     ),
                     decoration: InputDecoration(
                       hintText: "What's on your mind?",
                       hintStyle: TextStyle(
-                        color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                        color: isDark
+                            ? const Color(0xFF64748B)
+                            : const Color(0xFF94A3B8),
                         fontSize: 14,
                       ),
                       border: InputBorder.none,
@@ -372,10 +401,13 @@ class _NotesScreenState extends State<NotesScreen> {
                       InkWell(
                         onTap: () {
                           // Quick color rotation
-                          final idx = _pastelColors.indexWhere((c) => c['hex'] == _inlineColorHex);
+                          final idx = _pastelColors.indexWhere(
+                            (c) => c['hex'] == _inlineColorHex,
+                          );
                           final nextIdx = (idx + 1) % _pastelColors.length;
                           setState(() {
-                            _inlineColorHex = _pastelColors[nextIdx]['hex'] as String;
+                            _inlineColorHex =
+                                _pastelColors[nextIdx]['hex'] as String;
                           });
                         },
                         borderRadius: BorderRadius.circular(6),
@@ -384,7 +416,9 @@ class _NotesScreenState extends State<NotesScreen> {
                           child: Icon(
                             Icons.palette_outlined,
                             size: 19,
-                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            color: isDark
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF64748B),
                           ),
                         ),
                       ),
@@ -397,7 +431,9 @@ class _NotesScreenState extends State<NotesScreen> {
                           child: Icon(
                             Icons.check_box_outlined,
                             size: 19,
-                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            color: isDark
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF64748B),
                           ),
                         ),
                       ),
@@ -410,7 +446,9 @@ class _NotesScreenState extends State<NotesScreen> {
                           child: Icon(
                             Icons.image_outlined,
                             size: 19,
-                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            color: isDark
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF64748B),
                           ),
                         ),
                       ),
@@ -418,14 +456,19 @@ class _NotesScreenState extends State<NotesScreen> {
                       TextButton(
                         onPressed: _clearInlineNote,
                         style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
                         ),
                         child: Text(
                           'Cancel',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            color: isDark
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF64748B),
                           ),
                         ),
                       ),
@@ -433,9 +476,14 @@ class _NotesScreenState extends State<NotesScreen> {
                       ElevatedButton(
                         onPressed: _saveInlineNote,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: isDark ? const Color(0xFF2563EB) : const Color(0xFF0F172A),
+                          backgroundColor: isDark
+                              ? const Color(0xFF2563EB)
+                              : const Color(0xFF0F172A),
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 10,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -443,7 +491,10 @@ class _NotesScreenState extends State<NotesScreen> {
                         ),
                         child: const Text(
                           'Save Note',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
@@ -467,26 +518,39 @@ class _NotesScreenState extends State<NotesScreen> {
                     onTap: () => setState(() => _selectedFilter = tab),
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? (isDark ? const Color(0xFF2563EB) : const Color(0xFF0F172A))
+                            ? (isDark
+                                  ? const Color(0xFF2563EB)
+                                  : const Color(0xFF0F172A))
                             : (isDark ? const Color(0xFF1E293B) : Colors.white),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: isSelected
-                              ? (isDark ? const Color(0xFF2563EB) : const Color(0xFF0F172A))
-                              : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                              ? (isDark
+                                    ? const Color(0xFF2563EB)
+                                    : const Color(0xFF0F172A))
+                              : (isDark
+                                    ? const Color(0xFF334155)
+                                    : const Color(0xFFE2E8F0)),
                         ),
                       ),
                       child: Text(
                         tab,
                         style: TextStyle(
                           fontSize: 13,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.w500,
                           color: isSelected
                               ? Colors.white
-                              : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
+                              : (isDark
+                                    ? const Color(0xFF94A3B8)
+                                    : const Color(0xFF475569)),
                         ),
                       ),
                     ),
@@ -506,7 +570,9 @@ class _NotesScreenState extends State<NotesScreen> {
                 child: Text(
                   'No notes in $_selectedFilter. Tap "Save Note" above to add one!',
                   style: TextStyle(
-                    color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                    color: isDark
+                        ? const Color(0xFF64748B)
+                        : const Color(0xFF94A3B8),
                     fontSize: 14,
                   ),
                 ),
@@ -568,7 +634,9 @@ class _NotesScreenState extends State<NotesScreen> {
                       child: Padding(
                         padding: const EdgeInsets.all(2),
                         child: Icon(
-                          note.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+                          note.isPinned
+                              ? Icons.push_pin
+                              : Icons.push_pin_outlined,
                           size: 18,
                           color: const Color(0xFF475569),
                         ),

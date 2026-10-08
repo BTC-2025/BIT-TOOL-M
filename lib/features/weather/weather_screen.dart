@@ -66,10 +66,28 @@ class _WeatherScreenState extends State<WeatherScreen> {
   List<Map<String, dynamic>> _dailyForecast = [
     {'day': 'TODAY', 'min': 26, 'max': 33, 'condition': 'Sunny', 'pop': 15},
     {'day': 'FRI', 'min': 25, 'max': 33, 'condition': 'Sunny', 'pop': 10},
-    {'day': 'SAT', 'min': 24, 'max': 34, 'condition': 'Partly Cloudy', 'pop': 20},
+    {
+      'day': 'SAT',
+      'min': 24,
+      'max': 34,
+      'condition': 'Partly Cloudy',
+      'pop': 20,
+    },
     {'day': 'SUN', 'min': 23, 'max': 34, 'condition': 'Sunny', 'pop': 10},
-    {'day': 'MON', 'min': 25, 'max': 32, 'condition': 'Scattered Showers', 'pop': 45},
-    {'day': 'TUE', 'min': 25, 'max': 34, 'condition': 'Partly Cloudy', 'pop': 25},
+    {
+      'day': 'MON',
+      'min': 25,
+      'max': 32,
+      'condition': 'Scattered Showers',
+      'pop': 45,
+    },
+    {
+      'day': 'TUE',
+      'min': 25,
+      'max': 34,
+      'condition': 'Partly Cloudy',
+      'pop': 25,
+    },
     {'day': 'WED', 'min': 24, 'max': 33, 'condition': 'Sunny', 'pop': 10},
   ];
 
@@ -96,14 +114,17 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
     // On web or desktop platforms, geolocator can fail if permissions aren't set
     try {
-      if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)) {
+      if (!kIsWeb &&
+          (defaultTargetPlatform == TargetPlatform.android ||
+              defaultTargetPlatform == TargetPlatform.iOS)) {
         bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
         if (serviceEnabled) {
           LocationPermission permission = await Geolocator.checkPermission();
           if (permission == LocationPermission.denied) {
             permission = await Geolocator.requestPermission();
           }
-          if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+          if (permission == LocationPermission.whileInUse ||
+              permission == LocationPermission.always) {
             Position position = await Geolocator.getCurrentPosition(
               desiredAccuracy: LocationAccuracy.low,
               timeLimit: const Duration(seconds: 4),
@@ -111,17 +132,34 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
             // Reverse geocode
             try {
-              List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+              List<Placemark> placemarks = await placemarkFromCoordinates(
+                position.latitude,
+                position.longitude,
+              );
               if (placemarks.isNotEmpty) {
                 final p = placemarks[0];
-                final city = p.locality ?? p.subAdministrativeArea ?? p.administrativeArea ?? 'Local Area';
+                final city =
+                    p.locality ??
+                    p.subAdministrativeArea ??
+                    p.administrativeArea ??
+                    'Local Area';
                 final country = p.country ?? '';
-                await _fetchWeatherFromCoordinates(position.latitude, position.longitude, city, country);
+                await _fetchWeatherFromCoordinates(
+                  position.latitude,
+                  position.longitude,
+                  city,
+                  country,
+                );
                 return;
               }
             } catch (_) {}
 
-            await _fetchWeatherFromCoordinates(position.latitude, position.longitude, 'My Location', '');
+            await _fetchWeatherFromCoordinates(
+              position.latitude,
+              position.longitude,
+              'My Location',
+              '',
+            );
             return;
           }
         }
@@ -135,9 +173,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
   Future<void> _tryIpGeolocationOrFallback(String reason) async {
     try {
-      final ipRes = await http.get(
-        Uri.parse('https://ipapi.co/json/'),
-      ).timeout(const Duration(seconds: 4));
+      final ipRes = await http
+          .get(Uri.parse('https://ipapi.co/json/'))
+          .timeout(const Duration(seconds: 4));
 
       if (ipRes.statusCode == 200) {
         final data = json.decode(ipRes.body);
@@ -152,10 +190,20 @@ class _WeatherScreenState extends State<WeatherScreen> {
     } catch (_) {}
 
     // Fallback to default coordinates for Tiruvallur / Chennai
-    await _fetchWeatherFromCoordinates(13.1439, 79.9079, 'Tiruvallur', 'Tamil Nadu');
+    await _fetchWeatherFromCoordinates(
+      13.1439,
+      79.9079,
+      'Tiruvallur',
+      'Tamil Nadu',
+    );
   }
 
-  Future<void> _fetchWeatherFromCoordinates(double lat, double lon, String city, String country) async {
+  Future<void> _fetchWeatherFromCoordinates(
+    double lat,
+    double lon,
+    String city,
+    String country,
+  ) async {
     setState(() => _isLoading = true);
 
     try {
@@ -166,7 +214,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
         '&timezone=auto',
       );
 
-      final response = await http.get(weatherUrl).timeout(const Duration(seconds: 5));
+      final response = await http
+          .get(weatherUrl)
+          .timeout(const Duration(seconds: 5));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final current = data['current_weather'];
@@ -189,7 +239,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
         String formatTime(String iso) {
           try {
             final dt = DateTime.parse(iso);
-            final h = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+            final h = dt.hour > 12
+                ? dt.hour - 12
+                : (dt.hour == 0 ? 12 : dt.hour);
             final m = dt.minute.toString().padLeft(2, '0');
             final ampm = dt.hour >= 12 ? 'PM' : 'AM';
             return '${h.toString().padLeft(2, '0')}:$m $ampm';
@@ -210,13 +262,18 @@ class _WeatherScreenState extends State<WeatherScreen> {
         // Hourly forecast list
         List<Map<String, dynamic>> newHourly = [];
         final currentHour = DateTime.now().hour;
-        if (hourly != null && hourly['time'] != null && hourly['temperature_2m'] != null) {
+        if (hourly != null &&
+            hourly['time'] != null &&
+            hourly['temperature_2m'] != null) {
           final times = hourly['time'] as List;
           final temps = hourly['temperature_2m'] as List;
           for (int i = 0; i < times.length && i < 24; i += 2) {
             final tStr = times[i].toString();
-            final hVal = int.tryParse(tStr.split('T').last.split(':').first) ?? i;
-            final isNow = (hVal == currentHour) || (hVal <= currentHour && hVal + 2 > currentHour);
+            final hVal =
+                int.tryParse(tStr.split('T').last.split(':').first) ?? i;
+            final isNow =
+                (hVal == currentHour) ||
+                (hVal <= currentHour && hVal + 2 > currentHour);
             final isDay = hVal >= 6 && hVal < 18;
             newHourly.add({
               'time': isNow ? 'Now' : '${hVal.toString().padLeft(2, '0')}:00',
@@ -295,7 +352,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
         'https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(query)}&format=json&limit=1&addressdetails=1',
       );
 
-      final res = await http.get(searchUrl, headers: {'User-Agent': 'BitToolsApp/1.0'}).timeout(const Duration(seconds: 4));
+      final res = await http
+          .get(searchUrl, headers: {'User-Agent': 'BitToolsApp/1.0'})
+          .timeout(const Duration(seconds: 4));
       if (res.statusCode == 200) {
         final list = json.decode(res.body) as List;
         if (list.isNotEmpty) {
@@ -303,7 +362,12 @@ class _WeatherScreenState extends State<WeatherScreen> {
           final lat = double.parse(item['lat']);
           final lon = double.parse(item['lon']);
           final addr = item['address'];
-          final city = addr['city'] ?? addr['town'] ?? addr['village'] ?? addr['state'] ?? query;
+          final city =
+              addr['city'] ??
+              addr['town'] ??
+              addr['village'] ??
+              addr['state'] ??
+              query;
           final country = addr['country'] ?? addr['state'] ?? '';
 
           await _fetchWeatherFromCoordinates(lat, lon, city, country);
@@ -339,11 +403,21 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
   IconData _getWeatherIcon(String condition) {
     final c = condition.toLowerCase();
-    if (c.contains('thunder')) return Icons.flash_on_rounded;
-    if (c.contains('rain') || c.contains('shower') || c.contains('drizzle')) return Icons.water_drop_rounded;
-    if (c.contains('snow')) return Icons.ac_unit_rounded;
-    if (c.contains('cloud') || c.contains('overcast')) return Icons.cloud_rounded;
-    if (c.contains('fog')) return Icons.blur_on_rounded;
+    if (c.contains('thunder')) {
+      return Icons.flash_on_rounded;
+    }
+    if (c.contains('rain') || c.contains('shower') || c.contains('drizzle')) {
+      return Icons.water_drop_rounded;
+    }
+    if (c.contains('snow')) {
+      return Icons.ac_unit_rounded;
+    }
+    if (c.contains('cloud') || c.contains('overcast')) {
+      return Icons.cloud_rounded;
+    }
+    if (c.contains('fog')) {
+      return Icons.blur_on_rounded;
+    }
     return Icons.wb_sunny_rounded;
   }
 
@@ -382,10 +456,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     child: _buildCurrentWeatherHeroCard(isDark),
                   ),
                   const SizedBox(width: 20),
-                  Expanded(
-                    flex: 4,
-                    child: _buildTodayHighlightsCard(isDark),
-                  ),
+                  Expanded(flex: 4, child: _buildTodayHighlightsCard(isDark)),
                 ],
               ),
             )
@@ -495,7 +566,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   color: isDark ? const Color(0xFF1E293B) : Colors.white,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFE2E8F0),
                   ),
                 ),
                 child: Icon(
@@ -512,17 +585,24 @@ class _WeatherScreenState extends State<WeatherScreen> {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                  color: isDark
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFFEFF6FF),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFBFDBFE),
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFBFDBFE),
                   ),
                 ),
                 child: _isLoading
                     ? const SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF2563EB)),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Color(0xFF2563EB),
+                        ),
                       )
                     : const Icon(
                         Icons.my_location_rounded,
@@ -551,7 +631,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
               },
               borderRadius: BorderRadius.circular(20),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? const Color(0xFF2563EB)
@@ -560,7 +643,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   border: Border.all(
                     color: isSelected
                         ? const Color(0xFF2563EB)
-                        : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                        : (isDark
+                              ? const Color(0xFF334155)
+                              : const Color(0xFFE2E8F0)),
                   ),
                 ),
                 child: Text(
@@ -570,7 +655,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                     color: isSelected
                         ? Colors.white
-                        : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
+                        : (isDark
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF475569)),
                   ),
                 ),
               ),
@@ -600,15 +687,28 @@ class _WeatherScreenState extends State<WeatherScreen> {
       ),
       child: Row(
         children: [
-          Icon(Icons.search_rounded, color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8), size: 20),
+          Icon(
+            Icons.search_rounded,
+            color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+            size: 20,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: TextField(
               controller: _searchController,
-              style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontSize: 14),
+              style: TextStyle(
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                fontSize: 14,
+              ),
               decoration: InputDecoration(
-                hintText: 'Search city or airport (e.g., Chennai, Bengaluru, Mumbai, London)...',
-                hintStyle: TextStyle(color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8), fontSize: 13),
+                hintText:
+                    'Search city or airport (e.g., Chennai, Bengaluru, Mumbai, London)...',
+                hintStyle: TextStyle(
+                  color: isDark
+                      ? const Color(0xFF64748B)
+                      : const Color(0xFF94A3B8),
+                  fontSize: 13,
+                ),
                 border: InputBorder.none,
               ),
               onSubmitted: (val) => _searchCity(val),
@@ -619,11 +719,16 @@ class _WeatherScreenState extends State<WeatherScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF2563EB),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               elevation: 0,
             ),
-            child: const Text('Search', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Search',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -643,7 +748,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: (isDark ? const Color(0xFF1E3A8A) : const Color(0xFF2563EB)).withValues(alpha: 0.28),
+            color: (isDark ? const Color(0xFF1E3A8A) : const Color(0xFF2563EB))
+                .withValues(alpha: 0.28),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -663,7 +769,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
@@ -779,7 +888,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
   Widget _buildTodayHighlightsCard(bool isDark) {
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
-    final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final borderColor = isDark
+        ? const Color(0xFF334155)
+        : const Color(0xFFE2E8F0);
     final subColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
     return Container(
@@ -802,7 +913,11 @@ class _WeatherScreenState extends State<WeatherScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.wb_twilight_rounded, color: Color(0xFFF59E0B), size: 20),
+              const Icon(
+                Icons.wb_twilight_rounded,
+                color: Color(0xFFF59E0B),
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 "Today's Highlights",
@@ -821,12 +936,19 @@ class _WeatherScreenState extends State<WeatherScreen> {
             children: [
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 12,
+                  ),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF0F172A) : const Color(0xFFFFFBEB),
+                    color: isDark
+                        ? const Color(0xFF0F172A)
+                        : const Color(0xFFFFFBEB),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: isDark ? const Color(0xFF334155) : const Color(0xFFFEF3C7),
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFFEF3C7),
                     ),
                   ),
                   child: Column(
@@ -834,7 +956,11 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     children: [
                       const Row(
                         children: [
-                          Icon(Icons.wb_sunny_rounded, color: Color(0xFFD97706), size: 16),
+                          Icon(
+                            Icons.wb_sunny_rounded,
+                            color: Color(0xFFD97706),
+                            size: 16,
+                          ),
                           SizedBox(width: 4),
                           Text(
                             'SUNRISE',
@@ -863,12 +989,19 @@ class _WeatherScreenState extends State<WeatherScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 12,
+                  ),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF0F172A) : const Color(0xFFEEF2FF),
+                    color: isDark
+                        ? const Color(0xFF0F172A)
+                        : const Color(0xFFEEF2FF),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE0E7FF),
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE0E7FF),
                     ),
                   ),
                   child: Column(
@@ -876,7 +1009,11 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     children: [
                       const Row(
                         children: [
-                          Icon(Icons.nights_stay_rounded, color: Color(0xFF6366F1), size: 16),
+                          Icon(
+                            Icons.nights_stay_rounded,
+                            color: Color(0xFF6366F1),
+                            size: 16,
+                          ),
                           SizedBox(width: 4),
                           Text(
                             'SUNSET',
@@ -920,7 +1057,11 @@ class _WeatherScreenState extends State<WeatherScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.arrow_downward_rounded, size: 14, color: Color(0xFF2563EB)),
+                    const Icon(
+                      Icons.arrow_downward_rounded,
+                      size: 14,
+                      color: Color(0xFF2563EB),
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       'Min ${_minTemp.round()}°C',
@@ -944,7 +1085,11 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 ),
                 Row(
                   children: [
-                    const Icon(Icons.arrow_upward_rounded, size: 14, color: Color(0xFFEF4444)),
+                    const Icon(
+                      Icons.arrow_upward_rounded,
+                      size: 14,
+                      color: Color(0xFFEF4444),
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       'Max ${_maxTemp.round()}°C',
@@ -968,7 +1113,11 @@ class _WeatherScreenState extends State<WeatherScreen> {
               Expanded(
                 child: Text(
                   'AQI $_aqi • UV $_uvIndex • ${_pressure}hPa • ${_visibility.round()}km vis',
-                  style: TextStyle(fontSize: 11, color: subColor, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: subColor,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
               Container(
@@ -996,7 +1145,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
   Widget _buildHourlyForecastCard(bool isDark) {
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
-    final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final borderColor = isDark
+        ? const Color(0xFF334155)
+        : const Color(0xFFE2E8F0);
     final subColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
     return Container(
@@ -1018,7 +1169,11 @@ class _WeatherScreenState extends State<WeatherScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.access_time_rounded, color: Color(0xFF3B82F6), size: 18),
+              const Icon(
+                Icons.access_time_rounded,
+                color: Color(0xFF3B82F6),
+                size: 18,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Hourly Forecast',
@@ -1046,17 +1201,19 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   decoration: BoxDecoration(
                     color: isNow
                         ? const Color(0xFF2563EB)
-                        : (isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)),
+                        : (isDark
+                              ? const Color(0xFF0F172A)
+                              : const Color(0xFFF8FAFC)),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isNow
-                          ? const Color(0xFF2563EB)
-                          : borderColor,
+                      color: isNow ? const Color(0xFF2563EB) : borderColor,
                     ),
                     boxShadow: isNow
                         ? [
                             BoxShadow(
-                              color: const Color(0xFF2563EB).withValues(alpha: 0.35),
+                              color: const Color(
+                                0xFF2563EB,
+                              ).withValues(alpha: 0.35),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -1080,7 +1237,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         size: 20,
                         color: isNow
                             ? const Color(0xFFFDE047)
-                            : (isDay ? const Color(0xFFFBBF24) : const Color(0xFF93C5FD)),
+                            : (isDay
+                                  ? const Color(0xFFFBBF24)
+                                  : const Color(0xFF93C5FD)),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -1098,7 +1257,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
                           Icon(
                             Icons.water_drop_rounded,
                             size: 10,
-                            color: isNow ? Colors.white70 : const Color(0xFF3B82F6),
+                            color: isNow
+                                ? Colors.white70
+                                : const Color(0xFF3B82F6),
                           ),
                           const SizedBox(width: 2),
                           Text(
@@ -1125,7 +1286,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
   Widget _buildDailyForecastCard(bool isDark) {
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
-    final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final borderColor = isDark
+        ? const Color(0xFF334155)
+        : const Color(0xFFE2E8F0);
     final subColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
     return Container(
@@ -1147,7 +1310,11 @@ class _WeatherScreenState extends State<WeatherScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.calendar_today_rounded, color: Color(0xFF3B82F6), size: 18),
+              const Icon(
+                Icons.calendar_today_rounded,
+                color: Color(0xFF3B82F6),
+                size: 18,
+              ),
               const SizedBox(width: 8),
               Text(
                 '7-Day Extended Forecast',
@@ -1164,7 +1331,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: _dailyForecast.length,
-            separatorBuilder: (_, __) => Divider(color: borderColor, height: 16),
+            separatorBuilder: (_, __) =>
+                Divider(color: borderColor, height: 16),
             itemBuilder: (context, i) {
               final day = _dailyForecast[i];
               final condition = day['condition'] as String;
@@ -1210,11 +1378,19 @@ class _WeatherScreenState extends State<WeatherScreen> {
                       width: 55,
                       child: Row(
                         children: [
-                          const Icon(Icons.water_drop_rounded, size: 12, color: Color(0xFF3B82F6)),
+                          const Icon(
+                            Icons.water_drop_rounded,
+                            size: 12,
+                            color: Color(0xFF3B82F6),
+                          ),
                           const SizedBox(width: 2),
                           Text(
                             '${day['pop']}%',
-                            style: const TextStyle(fontSize: 11, color: Color(0xFF3B82F6), fontWeight: FontWeight.w600),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF3B82F6),
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ],
                       ),

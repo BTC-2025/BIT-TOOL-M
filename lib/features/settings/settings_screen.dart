@@ -23,7 +23,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       themeProvider = null;
     }
 
-    final bool isDark = themeProvider?.isDarkMode ??
+    final bool isDark =
+        themeProvider?.isDarkMode ??
         (Theme.of(context).brightness == Brightness.dark || _fallbackDarkMode);
 
     return LayoutBuilder(
@@ -64,10 +65,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      flex: 6,
-                      child: _buildProfileCard(isDark),
-                    ),
+                    Expanded(flex: 6, child: _buildProfileCard(isDark)),
                     const SizedBox(width: 20),
                     Expanded(
                       flex: 5,
@@ -192,7 +190,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                color: isDark
+                    ? const Color(0xFF0F172A)
+                    : const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
                   color: isDark
@@ -393,8 +393,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     backgroundColor: isDark
                         ? const Color(0xFF334155)
                         : const Color(0xFFE2E8F0),
-                    valueColor:
-                        const AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      Color(0xFF2563EB),
+                    ),
                   ),
                 ),
               ],
@@ -595,9 +596,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     Color getBorderColor() {
       if (isSelected) {
-        return isDarkScreen
-            ? const Color(0xFF3B82F6)
-            : const Color(0xFF2563EB);
+        return isDarkScreen ? const Color(0xFF3B82F6) : const Color(0xFF2563EB);
       }
       return isDarkScreen ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
     }
@@ -606,20 +605,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (isSelected) {
         return isDarkScreen ? Colors.white : const Color(0xFF0F172A);
       }
-      return isDarkScreen
-          ? const Color(0xFFCBD5E1)
-          : const Color(0xFF475569);
+      return isDarkScreen ? const Color(0xFFCBD5E1) : const Color(0xFF475569);
     }
 
     Color getIconColor() {
       if (isSelected) {
-        return isDarkScreen
-            ? const Color(0xFF60A5FA)
-            : const Color(0xFF2563EB);
+        return isDarkScreen ? const Color(0xFF60A5FA) : const Color(0xFF2563EB);
       }
-      return isDarkScreen
-          ? const Color(0xFF64748B)
-          : const Color(0xFF64748B);
+      return isDarkScreen ? const Color(0xFF64748B) : const Color(0xFF64748B);
     }
 
     return InkWell(
@@ -638,11 +631,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 19,
-              color: getIconColor(),
-            ),
+            Icon(icon, size: 19, color: getIconColor()),
             const SizedBox(width: 12),
             Text(
               title,
@@ -663,11 +652,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 border: Border.all(
                   color: isSelected
                       ? (isDarkScreen
-                          ? const Color(0xFF3B82F6)
-                          : const Color(0xFF2563EB))
+                            ? const Color(0xFF3B82F6)
+                            : const Color(0xFF2563EB))
                       : (isDarkScreen
-                          ? const Color(0xFF475569)
-                          : const Color(0xFFCBD5E1)),
+                            ? const Color(0xFF475569)
+                            : const Color(0xFFCBD5E1)),
                   width: isSelected ? 5.5 : 1.5,
                 ),
                 color: isSelected
@@ -759,9 +748,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             style: TextStyle(
               fontSize: 13.5,
               height: 1.55,
-              color: isDark
-                  ? const Color(0xFFCBD5E1)
-                  : const Color(0xFF475569),
+              color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
               fontWeight: FontWeight.w400,
             ),
           ),

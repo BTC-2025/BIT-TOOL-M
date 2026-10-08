@@ -20,25 +20,19 @@ Widget _createTestWidget() {
             previous ?? CalculatorProvider(session),
       ),
       ChangeNotifierProxyProvider<SessionProvider, CalendarProvider>(
-        create: (context) =>
-            CalendarProvider(context.read<SessionProvider>()),
-        update: (_, session, previous) =>
-            previous ?? CalendarProvider(session),
+        create: (context) => CalendarProvider(context.read<SessionProvider>()),
+        update: (_, session, previous) => previous ?? CalendarProvider(session),
       ),
       ChangeNotifierProxyProvider<SessionProvider, NotesProvider>(
         create: (context) => NotesProvider(context.read<SessionProvider>()),
         update: (_, session, previous) => previous ?? NotesProvider(session),
       ),
       ChangeNotifierProxyProvider<SessionProvider, ContactsProvider>(
-        create: (context) =>
-            ContactsProvider(context.read<SessionProvider>()),
-        update: (_, session, previous) =>
-            previous ?? ContactsProvider(session),
+        create: (context) => ContactsProvider(context.read<SessionProvider>()),
+        update: (_, session, previous) => previous ?? ContactsProvider(session),
       ),
     ],
-    child: const MaterialApp(
-      home: ResponsiveShell(),
-    ),
+    child: const MaterialApp(home: ResponsiveShell()),
   );
 }
 
@@ -63,65 +57,72 @@ void main() {
       expect(find.text('Search tools, contacts...'), findsOneWidget);
     });
 
-    testWidgets('typing query in search field displays matching results overlay', (
-      WidgetTester tester,
-    ) async {
-      tester.view.physicalSize = const Size(1200, 900);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
+    testWidgets(
+      'typing query in search field displays matching results overlay',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1200, 900);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
 
-      await tester.pumpWidget(_createTestWidget());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(_createTestWidget());
+        await tester.pumpAndSettle();
 
-      // Enter search query
-      final searchField = find.byKey(const ValueKey('HeaderSearchField'));
-      await tester.tap(searchField);
-      await tester.enterText(searchField, 'Notes');
-      await tester.pumpAndSettle();
+        // Enter search query
+        final searchField = find.byKey(const ValueKey('HeaderSearchField'));
+        await tester.tap(searchField);
+        await tester.enterText(searchField, 'Notes');
+        await tester.pumpAndSettle();
 
-      // Results overlay should show matching tools and category
-      expect(find.text('TOOLS'), findsOneWidget);
-      expect(find.text('Personal notes, scratchpad & markdown docs'), findsOneWidget);
+        // Results overlay should show matching tools and category
+        expect(find.text('TOOLS'), findsOneWidget);
+        expect(
+          find.text('Personal notes, scratchpad & markdown docs'),
+          findsOneWidget,
+        );
 
-      // Tap on the result to navigate to Notes
-      await tester.tap(find.text('Personal notes, scratchpad & markdown docs'));
-      await tester.pumpAndSettle();
+        // Tap on the result to navigate to Notes
+        await tester.tap(
+          find.text('Personal notes, scratchpad & markdown docs'),
+        );
+        await tester.pumpAndSettle();
 
-      // Screen should now display NotesScreen
-      expect(find.byType(NotesScreen), findsOneWidget);
-    });
+        // Screen should now display NotesScreen
+        expect(find.byType(NotesScreen), findsOneWidget);
+      },
+    );
 
-    testWidgets('searching for contacts displays matching contacts and navigates', (
-      WidgetTester tester,
-    ) async {
-      tester.view.physicalSize = const Size(1200, 900);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
+    testWidgets(
+      'searching for contacts displays matching contacts and navigates',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1200, 900);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
 
-      await tester.pumpWidget(_createTestWidget());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(_createTestWidget());
+        await tester.pumpAndSettle();
 
-      // Enter search query for seeded contact
-      final searchField = find.byKey(const ValueKey('HeaderSearchField'));
-      await tester.tap(searchField);
-      await tester.enterText(searchField, 'virat');
-      await tester.pumpAndSettle();
+        // Enter search query for seeded contact
+        final searchField = find.byKey(const ValueKey('HeaderSearchField'));
+        await tester.tap(searchField);
+        await tester.enterText(searchField, 'virat');
+        await tester.pumpAndSettle();
 
-      expect(find.text('CONTACTS'), findsOneWidget);
-      expect(find.text('virat kholi'), findsOneWidget);
+        expect(find.text('CONTACTS'), findsOneWidget);
+        expect(find.text('virat kholi'), findsOneWidget);
 
-      // Tap the contact
-      await tester.tap(find.text('virat kholi'));
-      await tester.pumpAndSettle();
+        // Tap the contact
+        await tester.tap(find.text('virat kholi'));
+        await tester.pumpAndSettle();
 
-      // Switched to Contacts screen
-      expect(find.byType(ContactsScreen), findsOneWidget);
-    });
+        // Switched to Contacts screen
+        expect(find.byType(ContactsScreen), findsOneWidget);
+      },
+    );
   });
 }
