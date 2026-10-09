@@ -112,6 +112,61 @@ class ApiConfig {
   static Uri contactDeleteUri(String id) =>
       buildContactUri(contactDeleteEndpoint(id));
 
+  /// Notes endpoints
+  static const String notesGetEndpoint = '';
+  static String noteGetByIdEndpoint(String id) => '/$id';
+  static const String noteCreateEndpoint = '/create';
+  static String noteUpdateEndpoint(String id) => '/update/$id';
+  static String noteDeleteEndpoint(String id) => '/delete/$id';
+
+  /// Base URL for the Notes API.
+  /// Configurable via VITE_NOTES_API_BASE_URL environment define with https://api.bit-tool.com/api/notes as default.
+  static const String _rawNotesBaseUrl = String.fromEnvironment(
+    'VITE_NOTES_API_BASE_URL',
+    defaultValue: 'https://api.bit-tool.com/api/notes',
+  );
+
+  /// Normalized notes base URL without trailing slash.
+  static String get notesBaseUrl {
+    var url = _rawNotesBaseUrl.trim();
+    while (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    return url;
+  }
+
+  /// Builds a URI targeting the Notes service.
+  static Uri buildNotesUri(
+    String endpoint, [
+    Map<String, dynamic>? queryParameters,
+  ]) {
+    final cleanEndpoint = endpoint.isEmpty || endpoint == '/'
+        ? ''
+        : (endpoint.startsWith('/') ? endpoint : '/$endpoint');
+    final baseUri = Uri.parse('$notesBaseUrl$cleanEndpoint');
+    if (queryParameters != null && queryParameters.isNotEmpty) {
+      final sanitizedParams = <String, String>{};
+      queryParameters.forEach((key, value) {
+        if (value != null) {
+          sanitizedParams[key] = value.toString();
+        }
+      });
+      return baseUri.replace(queryParameters: sanitizedParams);
+    }
+    return baseUri;
+  }
+
+  /// Notes URIs
+  static Uri notesGetUri({bool allApps = true}) =>
+      buildNotesUri(notesGetEndpoint, allApps ? {'allApps': 'true'} : null);
+  static Uri noteGetByIdUri(String id) =>
+      buildNotesUri(noteGetByIdEndpoint(id));
+  static Uri get noteCreateUri => buildNotesUri(noteCreateEndpoint);
+  static Uri noteUpdateUri(String id) =>
+      buildNotesUri(noteUpdateEndpoint(id));
+  static Uri noteDeleteUri(String id) =>
+      buildNotesUri(noteDeleteEndpoint(id));
+
   /// Standard request timeout.
   static const Duration requestTimeout = Duration(seconds: 15);
 }

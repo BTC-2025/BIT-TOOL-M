@@ -47,9 +47,14 @@ class BITToolApp extends StatelessWidget {
           update: (_, session, previous) =>
               previous ?? CalendarProvider(session),
         ),
-        ChangeNotifierProxyProvider<SessionProvider, NotesProvider>(
-          create: (context) => NotesProvider(context.read<SessionProvider>()),
-          update: (_, session, previous) => previous ?? NotesProvider(session),
+        ChangeNotifierProxyProvider2<AuthProvider, SessionProvider, NotesProvider>(
+          create: (context) => NotesProvider(
+            context.read<SessionProvider>(),
+            null,
+            context.read<AuthProvider>(),
+          ),
+          update: (_, auth, session, previous) =>
+              (previous ?? NotesProvider(session))..updateAuth(auth),
         ),
         ChangeNotifierProxyProvider2<AuthProvider, SessionProvider, ContactsProvider>(
           create: (context) => ContactsProvider(

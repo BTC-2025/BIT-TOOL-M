@@ -8,6 +8,7 @@ import 'package:bit_tools_backend/core/widgets/responsive_shell.dart';
 import 'package:bit_tools_backend/features/notes/notes_screen.dart';
 import 'package:bit_tools_backend/features/contacts/contacts_screen.dart';
 import 'package:bit_tools_backend/core/models/contact_model.dart';
+import 'package:bit_tools_backend/core/models/note_model.dart';
 
 Widget _createTestWidget() {
   return MultiProvider(
@@ -25,7 +26,19 @@ Widget _createTestWidget() {
         update: (_, session, previous) => previous ?? CalendarProvider(session),
       ),
       ChangeNotifierProxyProvider<SessionProvider, NotesProvider>(
-        create: (context) => NotesProvider(context.read<SessionProvider>()),
+        create: (context) => NotesProvider(
+          context.read<SessionProvider>(),
+          null,
+          null,
+          const [
+            NoteModel(
+              id: 'n1',
+              title: 'Personal note',
+              content: 'Test content',
+              applicationName: 'Bit Tool',
+            ),
+          ],
+        ),
         update: (_, session, previous) => previous ?? NotesProvider(session),
       ),
       ChangeNotifierProxyProvider<SessionProvider, ContactsProvider>(
