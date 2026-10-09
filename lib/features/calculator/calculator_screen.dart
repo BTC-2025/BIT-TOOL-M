@@ -26,23 +26,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   void _loadCrossAppTape(CrossAppTape tape, CalculatorProvider calc) {
-    calc.clearAll();
-    for (int i = 0; i < tape.steps.length; i++) {
-      final step = tape.steps[i];
-      final strVal = step.value.toStringAsFixed(step.value % 1 == 0 ? 0 : 2);
-      if (i == 0 || step.operator == '=') {
-        for (int c = 0; c < strVal.length; c++) {
-          calc.enterDigit(strVal[c]);
-        }
-        calc.commitEntry();
-      } else {
-        calc.setOperator(step.operator);
-        for (int c = 0; c < strVal.length; c++) {
-          calc.enterDigit(strVal[c]);
-        }
-        calc.commitEntry();
-      }
-    }
+    calc.loadFromCrossAppTape(tape);
+    _scrollTapeToBottom();
   }
 
   void _scrollTapeToBottom() {
@@ -365,12 +350,75 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
           ),
           const Spacer(),
-          _headerAction(Icons.save_alt_rounded, 'Save', () {
-            calc.saveCurrentToHistory();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Saved to history logs')),
-            );
-          }),
+          if (calc.isSavingTape || calc.isSavingCompare)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              child: SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          else
+            _headerAction(Icons.save_alt_rounded, 'Save to Cloud History', () async {
+              if (calc.activeMode == CalcMode.compare) {
+                if (calc.comparisonRows.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('No comparison rows to save')),
+                  );
+                  return;
+                }
+                calc.saveCurrentToHistory();
+                try {
+                  await calc.saveCompareSession();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Comparison session saved successfully'),
+                        backgroundColor: Color(0xFF10B981),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to save comparison: $e'),
+                        backgroundColor: Colors.red.shade700,
+                      ),
+                    );
+                  }
+                }
+              } else {
+                if (calc.tapeEntries.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('No tape entries to save')),
+                  );
+                  return;
+                }
+                calc.saveCurrentToHistory();
+                try {
+                  await calc.saveTapeSession();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Tape session saved successfully'),
+                        backgroundColor: Color(0xFF10B981),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to save tape session: $e'),
+                        backgroundColor: Colors.red.shade700,
+                      ),
+                    );
+                  }
+                }
+              }
+            }),
           _headerAction(
             _showHistoryList
                 ? Icons.history_toggle_off_rounded

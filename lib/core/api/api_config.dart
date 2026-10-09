@@ -167,6 +167,141 @@ class ApiConfig {
   static Uri noteDeleteUri(String id) =>
       buildNotesUri(noteDeleteEndpoint(id));
 
+  /// Base URL for the Calendar API.
+  /// Configurable via VITE_CALENDAR_API_BASE_URL environment define with https://api.bit-tool.com/api/calendar as default.
+  static const String _rawCalendarBaseUrl = String.fromEnvironment(
+    'VITE_CALENDAR_API_BASE_URL',
+    defaultValue: 'https://api.bit-tool.com/api/calendar',
+  );
+
+  /// Normalized calendar base URL without trailing slash.
+  static String get calendarBaseUrl {
+    var url = _rawCalendarBaseUrl.trim();
+    while (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    return url;
+  }
+
+  /// Builds a URI targeting the Calendar service.
+  static Uri buildCalendarUri(
+    String endpoint, [
+    Map<String, dynamic>? queryParameters,
+  ]) {
+    final cleanEndpoint = endpoint.isEmpty || endpoint == '/'
+        ? ''
+        : (endpoint.startsWith('/') ? endpoint : '/$endpoint');
+    final baseUri = Uri.parse('$calendarBaseUrl$cleanEndpoint');
+    if (queryParameters != null && queryParameters.isNotEmpty) {
+      final sanitizedParams = <String, String>{};
+      queryParameters.forEach((key, value) {
+        if (value != null) {
+          sanitizedParams[key] = value.toString();
+        }
+      });
+      return baseUri.replace(queryParameters: sanitizedParams);
+    }
+    return baseUri;
+  }
+
+  /// Calendar Categories URIs
+  static Uri get calendarCategoriesUri => buildCalendarUri('/categories');
+  static Uri get calendarCategoryCreateUri => buildCalendarUri('/categories');
+
+  /// Calendar Events URIs
+  static Uri calendarEventsMonthUri(int year, int month) =>
+      buildCalendarUri('/events/month', {
+        'year': year.toString(),
+        'month': month.toString().padLeft(2, '0'),
+      });
+  static Uri get calendarEventCreateUri => buildCalendarUri('/events');
+  static Uri calendarEventUpdateUri(String id) =>
+      buildCalendarUri('/events/$id');
+  static Uri calendarEventDeleteUri(String id) =>
+      buildCalendarUri('/events/$id');
+
+  /// Calendar Reminders URIs
+  static Uri calendarRemindersUri(String date) =>
+      buildCalendarUri('/reminders', {'date': date});
+  static Uri get calendarReminderCreateUri => buildCalendarUri('/reminders');
+  static Uri calendarReminderUpdateUri(String id) =>
+      buildCalendarUri('/reminders/$id');
+  static Uri calendarReminderCompleteUri(String id) =>
+      buildCalendarUri('/reminders/$id/complete');
+  static Uri calendarReminderDeleteUri(String id) =>
+      buildCalendarUri('/reminders/$id');
+
+  /// Calendar Date-linked Notes URIs
+  static Uri calendarNotesUri(String date) =>
+      buildCalendarUri('/notes', {'date': date});
+  static Uri get calendarNoteCreateUri => buildCalendarUri('/notes');
+  static Uri calendarNoteUpdateUri(String id) =>
+      buildCalendarUri('/notes/$id');
+  static Uri calendarNoteDeleteUri(String id) =>
+      buildCalendarUri('/notes/$id');
+
+  /// Calendar Search URI
+  static Uri calendarSearchUri(String query) =>
+      buildCalendarUri('/search', {'query': query});
+
+  /// Base URL for the Calculator API.
+  /// Configurable via VITE_CALCULATOR_API_BASE_URL environment define with https://api.bit-tool.com/api/calculator as default.
+  static const String _rawCalculatorBaseUrl = String.fromEnvironment(
+    'VITE_CALCULATOR_API_BASE_URL',
+    defaultValue: 'https://api.bit-tool.com/api/calculator',
+  );
+
+  /// Normalized calculator base URL without trailing slash.
+  static String get calculatorBaseUrl {
+    var url = _rawCalculatorBaseUrl.trim();
+    while (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    return url;
+  }
+
+  /// Builds a URI targeting the Calculator service.
+  static Uri buildCalculatorUri(
+    String endpoint, [
+    Map<String, dynamic>? queryParameters,
+  ]) {
+    final cleanEndpoint = endpoint.isEmpty || endpoint == '/'
+        ? ''
+        : (endpoint.startsWith('/') ? endpoint : '/$endpoint');
+    final baseUri = Uri.parse('$calculatorBaseUrl$cleanEndpoint');
+    if (queryParameters != null && queryParameters.isNotEmpty) {
+      final sanitizedParams = <String, String>{};
+      queryParameters.forEach((key, value) {
+        if (value != null) {
+          sanitizedParams[key] = value.toString();
+        }
+      });
+      return baseUri.replace(queryParameters: sanitizedParams);
+    }
+    return baseUri;
+  }
+
+  /// Standard Calculator URIs
+  static Uri get calculatorHistoryUri => buildCalculatorUri('/history');
+  static Uri get calculatorHistoryAllUri => buildCalculatorUri('/history/all');
+  static Uri get calculatorSessionsUri => buildCalculatorUri('/sessions');
+  static Uri calculatorSessionUri(String id) =>
+      buildCalculatorUri('/sessions/$id');
+  static Uri calculatorSessionItemsUri(String sessionId) =>
+      buildCalculatorUri('/sessions/$sessionId/items');
+
+  /// Compare Mode URIs
+  static Uri get calculatorCompareHistoryUri =>
+      buildCalculatorUri('/compare/history');
+  static Uri get calculatorCompareSessionsUri =>
+      buildCalculatorUri('/compare/sessions');
+  static Uri calculatorCompareSessionUri(String id) =>
+      buildCalculatorUri('/compare/sessions/$id');
+  static Uri calculatorCompareSessionItemsUri(String sessionId) =>
+      buildCalculatorUri('/compare/sessions/$sessionId/items');
+  static Uri calculatorCompareSessionItemUri(String sessionId, String itemId) =>
+      buildCalculatorUri('/compare/sessions/$sessionId/items/$itemId');
+
   /// Standard request timeout.
   static const Duration requestTimeout = Duration(seconds: 15);
 }

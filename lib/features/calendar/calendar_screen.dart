@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/providers/app_providers.dart';
-import '../../core/models/app_models.dart';
+import '../../core/models/calendar_models.dart';
+import '../../core/providers/calendar_provider.dart';
+
+enum CreateItemTab { event, note, reminder }
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -10,9 +12,8 @@ class CalendarScreen extends StatefulWidget {
   State<CalendarScreen> createState() => _CalendarScreenState();
 }
 
-class _CalendarScreenState extends State<CalendarScreen> {
-  DateTime _currentMonth = DateTime(2026, 10, 1);
-  DateTime _selectedDate = DateTime(2026, 10, 8);
+class _CalendarScreenState extends State<CalendarScreen>
+    with WidgetsBindingObserver {
   String _selectedAppFilter = 'All Apps';
   final TextEditingController _searchController = TextEditingController();
 
@@ -49,193 +50,238 @@ class _CalendarScreenState extends State<CalendarScreen> {
     'December',
   ];
 
+  static const List<String> _fullWeekDays = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final provider = context.read<CalendarProvider>();
+      if (provider.status == CalendarStatus.initial) {
+        provider.fetchInitialData();
+      } else if (!provider.isLoading) {
+        provider.fetchMonthEvents();
+      }
+    });
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
     super.dispose();
   }
 
-  void _previousMonth() {
-    setState(() {
-      _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1, 1);
-    });
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      final provider = context.read<CalendarProvider>();
+      if (!provider.isLoading) {
+        provider.fetchMonthEvents();
+      }
+    }
   }
 
-  void _nextMonth() {
-    setState(() {
-      _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1, 1);
-    });
+  Color _parseColor(String? colorStr, [Color fallback = const Color(0xFF2563EB)]) {
+    if (colorStr == null || colorStr.trim().isEmpty) return fallback;
+    var hex = colorStr.replaceAll('#', '').trim();
+    if (hex.length == 6) hex = 'FF$hex';
+    final val = int.tryParse(hex, radix: 16);
+    if (val != null) return Color(val);
+    return fallback;
   }
 
-  void _goToToday() {
-    setState(() {
-      _currentMonth = DateTime(DateTime.now().year, DateTime.now().month, 1);
-      _selectedDate = DateTime.now();
-    });
+  String _formatTime12h(TimeOfDay time) {
+    final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.period == DayPeriod.am ? 'AM' : 'PM';
+    final hourStr = hour.toString().padLeft(2, '0');
+    return '$hourStr:$minute $period';
   }
 
-  void _showAddEventDialog([DateTime? initialDate]) {
-    final titleController = TextEditingController();
-    final descController = TextEditingController();
-    final locController = TextEditingController();
-    String category = 'Meeting';
-    DateTime eventDate = initialDate ?? _selectedDate;
+  String _formatDateOverviewTitle(DateTime date) {
+    final dayName = _fullWeekDays[date.weekday - 1];
+    final monthName = _months[date.month - 1];
+    return '$dayName, ${date.day} $monthName ${date.year}';
+  }
 
+  // ==========================================
+  // Dialog: Date Overview (Matching Image 5)
+  // ==========================================
+
+  void _showDateOverviewDialog(DateTime cellDate) {
     showDialog(
       context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
+      builder: (overviewCtx) {
+        return Consumer<CalendarProvider>(
+          builder: (context, provider, _) {
+            // Find events for this cell date
+            final dayEvents = provider.events.where((e) {
+              if (!e.matchesDate(cellDate)) return false;
+              return e.matchesApp(_selectedAppFilter);
+            }).toList();
+
+            final dateFormatted = _formatDateOverviewTitle(cellDate);
+
+            return Dialog(
               backgroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              title: const Text(
-                'Schedule New Event',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: Color(0xFF0F172A),
-                ),
-              ),
-              content: SingleChildScrollView(
-                child: SizedBox(
-                  width: 420,
+              insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextField(
-                        controller: titleController,
-                        decoration: InputDecoration(
-                          hintText: 'Event Title',
-                          filled: true,
-                          fillColor: const Color(0xFFF8FAFC),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color(0xFFE2E8F0),
+                      // Header: Date + Close Button
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              dateFormatted,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0F172A),
+                              ),
                             ),
                           ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color(0xFFE2E8F0),
+                          InkWell(
+                            onTap: () => Navigator.pop(overviewCtx),
+                            borderRadius: BorderRadius.circular(20),
+                            child: const Padding(
+                              padding: EdgeInsets.all(4.0),
+                              child: Icon(
+                                Icons.close_rounded,
+                                size: 20,
+                                color: Color(0xFF94A3B8),
+                              ),
                             ),
                           ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+
+                      // Section Header: EVENTS
+                      const Text(
+                        'EVENTS',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF64748B),
+                          letterSpacing: 0.5,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: descController,
-                        decoration: InputDecoration(
-                          hintText: 'Description',
-                          filled: true,
-                          fillColor: const Color(0xFFF8FAFC),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color(0xFFE2E8F0),
+                      const SizedBox(height: 10),
+
+                      // List of Events
+                      if (dayEvents.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: Text(
+                            'No events scheduled for this day',
+                            style: TextStyle(
+                              color: Color(0xFF94A3B8),
+                              fontSize: 13,
                             ),
                           ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color(0xFFE2E8F0),
+                        )
+                      else
+                        ...dayEvents.map((e) {
+                          final timeStr =
+                              '${e.startTime.hour.toString().padLeft(2, '0')}:${e.startTime.minute.toString().padLeft(2, '0')}';
+
+                          return InkWell(
+                            onTap: () {
+                              Navigator.pop(overviewCtx);
+                              _showEditEventDialog(e);
+                            },
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              width: double.infinity,
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEFF6FF),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.calendar_today_rounded,
+                                    size: 14,
+                                    color: Color(0xFF2563EB),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      '$timeStr ${e.title}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF2563EB),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+
+                      const SizedBox(height: 20),
+
+                      // Add New Item Button (Image 5)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.add_rounded, size: 18),
+                          label: const Text(
+                            'Add New Item',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2563EB),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(overviewCtx);
+                            _showCreateItemDialog(initialDate: cellDate);
+                          },
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: locController,
-                        decoration: InputDecoration(
-                          hintText: 'Location (e.g. Teams, Room 101)',
-                          filled: true,
-                          fillColor: const Color(0xFFF8FAFC),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color(0xFFE2E8F0),
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color(0xFFE2E8F0),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<String>(
-                        initialValue: category,
-                        decoration: InputDecoration(
-                          labelText: 'Category',
-                          filled: true,
-                          fillColor: const Color(0xFFF8FAFC),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: Color(0xFFE2E8F0),
-                            ),
-                          ),
-                        ),
-                        items: ['Meeting', 'Birthday', 'Holiday', 'Reminder']
-                            .map((cat) {
-                              return DropdownMenuItem(
-                                value: cat,
-                                child: Text(cat),
-                              );
-                            })
-                            .toList(),
-                        onChanged: (val) {
-                          if (val != null) {
-                            setDialogState(() {
-                              category = val;
-                            });
-                          }
-                        },
                       ),
                     ],
                   ),
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(color: Color(0xFF64748B)),
-                  ),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onPressed: () {
-                    if (titleController.text.trim().isEmpty) return;
-                    final newEvent = CalendarEvent(
-                      id: DateTime.now().millisecondsSinceEpoch.toString(),
-                      title: titleController.text.trim(),
-                      description: descController.text.trim(),
-                      startTime: eventDate,
-                      endTime: eventDate.add(const Duration(hours: 1)),
-                      isRecurring: false,
-                      colorHex: category == 'Holiday' ? 'FFFF9800' : 'FF3B82F6',
-                      category: category,
-                      location: locController.text.trim(),
-                    );
-                    context.read<CalendarProvider>().addEvent(newEvent);
-                    Navigator.pop(ctx);
-                  },
-                  child: const Text('Schedule'),
-                ),
-              ],
             );
           },
         );
@@ -243,74 +289,1520 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  void _showEventDetailsDialog(CalendarEvent event) {
+  // ==========================================
+  // Dialog: Create New Item (Matching Images 1, 2, 3, 4)
+  // ==========================================
+
+  void _showCreateItemDialog({
+    DateTime? initialDate,
+    CreateItemTab initialTab = CreateItemTab.event,
+  }) {
+    final provider = context.read<CalendarProvider>();
+    CreateItemTab activeTab = initialTab;
+
+    final titleController = TextEditingController();
+    final descController = TextEditingController();
+    final contentController = TextEditingController();
+
+    final DateTime eventDate = initialDate ?? provider.selectedDate;
+
+    TimeOfDay startTime = const TimeOfDay(hour: 9, minute: 0); // 09:00 AM (Image 1)
+    TimeOfDay endTime = const TimeOfDay(hour: 10, minute: 0); // 10:00 AM (Image 1)
+    TimeOfDay reminderTime = const TimeOfDay(hour: 9, minute: 0); // 09:00 AM (Image 3)
+
+    String? selectedCategoryId;
+    bool isAddingCategory = false;
+    final newCatNameController = TextEditingController();
+
     showDialog(
       context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: Text(
-            event.title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (event.description.isNotEmpty) ...[
-                Text(
-                  event.description,
-                  style: const TextStyle(color: Color(0xFF475569)),
+      builder: (dialogCtx) {
+        return StatefulBuilder(
+          builder: (dialogCtx, setDialogState) {
+            return Dialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header: Title + Close Button
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Create New Item',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0F172A),
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () => Navigator.pop(dialogCtx),
+                              borderRadius: BorderRadius.circular(20),
+                              child: const Padding(
+                                padding: EdgeInsets.all(4.0),
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  size: 20,
+                                  color: Color(0xFF94A3B8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Pill Segmented Tab Bar: Event | Note | Reminder
+                        Container(
+                          height: 44,
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              _buildSegmentedTab(
+                                label: 'Event',
+                                isSelected: activeTab == CreateItemTab.event,
+                                onTap: () => setDialogState(
+                                  () => activeTab = CreateItemTab.event,
+                                ),
+                              ),
+                              _buildSegmentedTab(
+                                label: 'Note',
+                                isSelected: activeTab == CreateItemTab.note,
+                                onTap: () => setDialogState(
+                                  () => activeTab = CreateItemTab.note,
+                                ),
+                              ),
+                              _buildSegmentedTab(
+                                label: 'Reminder',
+                                isSelected: activeTab == CreateItemTab.reminder,
+                                onTap: () => setDialogState(
+                                  () => activeTab = CreateItemTab.reminder,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Title Field
+                        const Text(
+                          'Title',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: titleController,
+                          decoration: InputDecoration(
+                            hintText: '',
+                            filled: true,
+                            fillColor: const Color(0xFFF8FAFC),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFF2563EB)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Tab-Specific Content:
+                        // ==========================================
+                        // EVENT TAB (Image 1)
+                        // ==========================================
+                        if (activeTab == CreateItemTab.event) ...[
+                          // Start Time and End Time Row
+                          Row(
+                            children: [
+                              // Start Time
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Start Time',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF1E293B),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    InkWell(
+                                      onTap: () async {
+                                        final picked = await showTimePicker(
+                                          context: context,
+                                          initialTime: startTime,
+                                        );
+                                        if (picked != null) {
+                                          setDialogState(() => startTime = picked);
+                                        }
+                                      },
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 14,
+                                          vertical: 12,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFF8FAFC),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: const Color(0xFFE2E8F0),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              _formatTime12h(startTime),
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w500,
+                                                color: Color(0xFF1E293B),
+                                              ),
+                                            ),
+                                            const Icon(
+                                              Icons.access_time_rounded,
+                                              size: 18,
+                                              color: Color(0xFF64748B),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+
+                              // End Time
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'End Time',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF1E293B),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    InkWell(
+                                      onTap: () async {
+                                        final picked = await showTimePicker(
+                                          context: context,
+                                          initialTime: endTime,
+                                        );
+                                        if (picked != null) {
+                                          setDialogState(() => endTime = picked);
+                                        }
+                                      },
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 14,
+                                          vertical: 12,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFF8FAFC),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: const Color(0xFFE2E8F0),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              _formatTime12h(endTime),
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w500,
+                                                color: Color(0xFF1E293B),
+                                              ),
+                                            ),
+                                            const Icon(
+                                              Icons.access_time_rounded,
+                                              size: 18,
+                                              color: Color(0xFF64748B),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Category Selector (with manual typing support, no red options)
+                          _buildCategorySelector(
+                            provider: provider,
+                            selectedCategoryId: selectedCategoryId,
+                            isAddingCategory: isAddingCategory,
+                            newCatNameController: newCatNameController,
+                            onAddingCategoryChanged: (adding) {
+                              setDialogState(() => isAddingCategory = adding);
+                            },
+                            onCategorySelected: (catId) {
+                              setDialogState(() => selectedCategoryId = catId);
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Description Field
+                          const Text(
+                            'Description',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF1E293B),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          TextField(
+                            controller: descController,
+                            maxLines: 4,
+                            minLines: 3,
+                            decoration: InputDecoration(
+                              hintText: 'Add details...',
+                              hintStyle: const TextStyle(
+                                color: Color(0xFF94A3B8),
+                                fontSize: 13,
+                              ),
+                              filled: true,
+                              fillColor: const Color(0xFFF8FAFC),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 12,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: Color(0xFF2563EB)),
+                              ),
+                            ),
+                          ),
+                        ]
+                        // ==========================================
+                        // NOTE TAB (Image 2)
+                        // ==========================================
+                        else if (activeTab == CreateItemTab.note) ...[
+                          _buildCategorySelector(
+                            provider: provider,
+                            selectedCategoryId: selectedCategoryId,
+                            isAddingCategory: isAddingCategory,
+                            newCatNameController: newCatNameController,
+                            onAddingCategoryChanged: (adding) {
+                              setDialogState(() => isAddingCategory = adding);
+                            },
+                            onCategorySelected: (catId) {
+                              setDialogState(() => selectedCategoryId = catId);
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          const Text(
+                            'Content',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF1E293B),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          TextField(
+                            controller: contentController,
+                            maxLines: 5,
+                            minLines: 4,
+                            decoration: InputDecoration(
+                              hintText: 'Write your note here...',
+                              hintStyle: const TextStyle(
+                                color: Color(0xFF94A3B8),
+                                fontSize: 13,
+                              ),
+                              filled: true,
+                              fillColor: const Color(0xFFF8FAFC),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 12,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: Color(0xFF2563EB)),
+                              ),
+                            ),
+                          ),
+                        ]
+                        // ==========================================
+                        // REMINDER TAB (Image 3)
+                        // ==========================================
+                        else if (activeTab == CreateItemTab.reminder) ...[
+                          // Reminder Time
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Reminder Time',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF1E293B),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              InkWell(
+                                onTap: () async {
+                                  final picked = await showTimePicker(
+                                    context: context,
+                                    initialTime: reminderTime,
+                                  );
+                                  if (picked != null) {
+                                    setDialogState(() => reminderTime = picked);
+                                  }
+                                },
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF8FAFC),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: const Color(0xFFE2E8F0),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        _formatTime12h(reminderTime),
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xFF1E293B),
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.access_time_rounded,
+                                        size: 18,
+                                        color: Color(0xFF64748B),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          _buildCategorySelector(
+                            provider: provider,
+                            selectedCategoryId: selectedCategoryId,
+                            isAddingCategory: isAddingCategory,
+                            newCatNameController: newCatNameController,
+                            onAddingCategoryChanged: (adding) {
+                              setDialogState(() => isAddingCategory = adding);
+                            },
+                            onCategorySelected: (catId) {
+                              setDialogState(() => selectedCategoryId = catId);
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          const Text(
+                            'Description',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF1E293B),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          TextField(
+                            controller: descController,
+                            maxLines: 4,
+                            minLines: 3,
+                            decoration: InputDecoration(
+                              hintText: 'Add details...',
+                              hintStyle: const TextStyle(
+                                color: Color(0xFF94A3B8),
+                                fontSize: 13,
+                              ),
+                              filled: true,
+                              fillColor: const Color(0xFFF8FAFC),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 12,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: Color(0xFF2563EB)),
+                              ),
+                            ),
+                          ),
+                        ],
+
+                        const SizedBox(height: 24),
+
+                        // Bottom Actions: Cancel & Save
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(dialogCtx),
+                              child: const Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  color: Color(0xFF475569),
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            ElevatedButton(
+                              onPressed: () async {
+                                if (titleController.text.trim().isEmpty) return;
+
+                                try {
+                                  if (activeTab == CreateItemTab.event) {
+                                    String catId = selectedCategoryId ?? '';
+                                    if (isAddingCategory &&
+                                        newCatNameController.text.trim().isNotEmpty) {
+                                      final createdCat =
+                                          await provider.createCategory(
+                                        name: newCatNameController.text.trim(),
+                                        color: '#2563EB',
+                                      );
+                                      catId = createdCat.id;
+                                    } else if (catId.isEmpty) {
+                                      final validCats = provider.categories
+                                          .where((c) =>
+                                              c.name.trim().toLowerCase() != 'red')
+                                          .toList();
+                                      if (validCats.isEmpty) {
+                                        final createdCat =
+                                            await provider.createCategory(
+                                          name: 'General',
+                                          color: '#3B82F6',
+                                        );
+                                        catId = createdCat.id;
+                                      } else {
+                                        catId = validCats.first.id;
+                                      }
+                                    }
+
+                                    final startDt = DateTime(
+                                      eventDate.year,
+                                      eventDate.month,
+                                      eventDate.day,
+                                      startTime.hour,
+                                      startTime.minute,
+                                    );
+                                    final endDt = DateTime(
+                                      eventDate.year,
+                                      eventDate.month,
+                                      eventDate.day,
+                                      endTime.hour,
+                                      endTime.minute,
+                                    );
+
+                                    await provider.createEvent(
+                                      title: titleController.text.trim(),
+                                      description: descController.text.trim(),
+                                      categoryId: catId,
+                                      startTime: startDt,
+                                      endTime: endDt,
+                                    );
+                                  } else if (activeTab == CreateItemTab.note) {
+                                    await provider.createDateNote(
+                                      title: titleController.text.trim(),
+                                      date: CalendarProvider.formatDate(eventDate),
+                                      content: contentController.text.trim(),
+                                    );
+                                  } else if (activeTab ==
+                                      CreateItemTab.reminder) {
+                                    final timeStr =
+                                        '${reminderTime.hour.toString().padLeft(2, '0')}:${reminderTime.minute.toString().padLeft(2, '0')}';
+
+                                    await provider.createReminder(
+                                      title: titleController.text.trim(),
+                                      date: CalendarProvider.formatDate(eventDate),
+                                      time: timeStr,
+                                      description: descController.text.trim(),
+                                    );
+                                  }
+
+                                  if (dialogCtx.mounted) {
+                                    Navigator.pop(dialogCtx);
+                                  }
+                                } catch (e) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Failed: $e')),
+                                    );
+                                  }
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF2563EB),
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 12,
+                                ),
+                              ),
+                              child: Text(
+                                activeTab == CreateItemTab.event
+                                    ? 'Save event'
+                                    : activeTab == CreateItemTab.note
+                                        ? 'Save note'
+                                        : 'Save reminder',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 12),
-              ],
-              Text(
-                'Category: ${event.category}',
-                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
-              if (event.location.isNotEmpty)
-                Text('Location: ${event.location}'),
-              Text(
-                'Date: ${event.startTime.day}/${event.startTime.month}/${event.startTime.year}',
-                style: const TextStyle(color: Color(0xFF64748B)),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Close'),
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
-              onPressed: () {
-                context.read<CalendarProvider>().deleteEvent(event.id);
-                Navigator.pop(ctx);
-              },
-            ),
-          ],
+            );
+          },
         );
       },
     );
   }
 
+  // ==========================================
+  // Dialog: Edit Event
+  // ==========================================
+
+  void _showEditEventDialog(CalendarEvent event) {
+    final provider = context.read<CalendarProvider>();
+    final titleController = TextEditingController(text: event.title);
+    final descController = TextEditingController(text: event.description);
+    final locController = TextEditingController(text: event.location);
+
+    TimeOfDay startTime = TimeOfDay(
+      hour: event.startTime.hour,
+      minute: event.startTime.minute,
+    );
+    TimeOfDay endTime = TimeOfDay(
+      hour: event.endTime.hour,
+      minute: event.endTime.minute,
+    );
+
+    String? selectedCategoryId =
+        event.categoryId != null && event.categoryId!.isNotEmpty
+            ? event.categoryId
+            : null;
+    bool isAddingCategory = false;
+    final newCatNameController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return StatefulBuilder(
+          builder: (dialogCtx, setDialogState) {
+            return Dialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Edit Event',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0F172A),
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () => Navigator.pop(dialogCtx),
+                              borderRadius: BorderRadius.circular(20),
+                              child: const Padding(
+                                padding: EdgeInsets.all(4.0),
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  size: 20,
+                                  color: Color(0xFF94A3B8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+
+                        const Text(
+                          'Title',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: titleController,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: const Color(0xFFF8FAFC),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFF2563EB)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Start Time',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF1E293B),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  InkWell(
+                                    onTap: () async {
+                                      final picked = await showTimePicker(
+                                        context: context,
+                                        initialTime: startTime,
+                                      );
+                                      if (picked != null) {
+                                        setDialogState(() => startTime = picked);
+                                      }
+                                    },
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 12,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF8FAFC),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: const Color(0xFFE2E8F0),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            _formatTime12h(startTime),
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xFF1E293B),
+                                            ),
+                                          ),
+                                          const Icon(
+                                            Icons.access_time_rounded,
+                                            size: 18,
+                                            color: Color(0xFF64748B),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'End Time',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF1E293B),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  InkWell(
+                                    onTap: () async {
+                                      final picked = await showTimePicker(
+                                        context: context,
+                                        initialTime: endTime,
+                                      );
+                                      if (picked != null) {
+                                        setDialogState(() => endTime = picked);
+                                      }
+                                    },
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 12,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF8FAFC),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: const Color(0xFFE2E8F0),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            _formatTime12h(endTime),
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xFF1E293B),
+                                            ),
+                                          ),
+                                          const Icon(
+                                            Icons.access_time_rounded,
+                                            size: 18,
+                                            color: Color(0xFF64748B),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        _buildCategorySelector(
+                          provider: provider,
+                          selectedCategoryId: selectedCategoryId,
+                          isAddingCategory: isAddingCategory,
+                          newCatNameController: newCatNameController,
+                          onAddingCategoryChanged: (adding) {
+                            setDialogState(() => isAddingCategory = adding);
+                          },
+                          onCategorySelected: (catId) {
+                            setDialogState(() => selectedCategoryId = catId);
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
+                        const Text(
+                          'Description',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: descController,
+                          maxLines: 4,
+                          minLines: 3,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: const Color(0xFFF8FAFC),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFF2563EB)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () async {
+                                try {
+                                  await provider.deleteEvent(event.id);
+                                  if (dialogCtx.mounted) {
+                                    Navigator.pop(dialogCtx);
+                                  }
+                                } catch (e) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Failed to delete event: $e'),
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFFEF2F2),
+                                foregroundColor: const Color(0xFFEF4444),
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 10,
+                                ),
+                              ),
+                              child: const Text(
+                                'Delete',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(dialogCtx),
+                                  child: const Text(
+                                    'Cancel',
+                                    style: TextStyle(
+                                      color: Color(0xFF475569),
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    if (titleController.text.trim().isEmpty) return;
+
+                                    final startDt = DateTime(
+                                      event.startTime.year,
+                                      event.startTime.month,
+                                      event.startTime.day,
+                                      startTime.hour,
+                                      startTime.minute,
+                                    );
+                                    final endDt = DateTime(
+                                      event.startTime.year,
+                                      event.startTime.month,
+                                      event.startTime.day,
+                                      endTime.hour,
+                                      endTime.minute,
+                                    );
+
+                                    try {
+                                      String? updateCatId = selectedCategoryId;
+                                      if (isAddingCategory &&
+                                          newCatNameController.text.trim().isNotEmpty) {
+                                        final createdCat =
+                                            await provider.createCategory(
+                                          name: newCatNameController.text.trim(),
+                                          color: '#2563EB',
+                                        );
+                                        updateCatId = createdCat.id;
+                                      }
+                                      await provider.updateEvent(
+                                        event.id,
+                                        title: titleController.text.trim(),
+                                        description: descController.text.trim(),
+                                        location: locController.text.trim(),
+                                        categoryId: updateCatId,
+                                        startTime: startDt,
+                                        endTime: endDt,
+                                      );
+                                      if (dialogCtx.mounted) {
+                                        Navigator.pop(dialogCtx);
+                                      }
+                                    } catch (e) {
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Failed: $e')),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF2563EB),
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Save event',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // ==========================================
+  // Helper: Segmented Tab
+  // ==========================================
+
+  Widget _buildSegmentedTab({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 36,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: isSelected
+                ? Border.all(color: const Color(0xFF2563EB), width: 1.5)
+                : null,
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ==========================================
+  // Helper: Category Selector & Inline Creator (Images 1 & 4)
+  // ==========================================
+
+  Widget _buildCategorySelector({
+    required CalendarProvider provider,
+    required String? selectedCategoryId,
+    required bool isAddingCategory,
+    required TextEditingController newCatNameController,
+    required ValueChanged<bool> onAddingCategoryChanged,
+    required ValueChanged<String?> onCategorySelected,
+  }) {
+    // Filter out options like "red"
+    final validCats = provider.categories
+        .where((c) => c.name.trim().toLowerCase() != 'red')
+        .toList();
+
+    final selectedCat = validCats.cast<CalendarCategory?>().firstWhere(
+          (c) => c?.id == selectedCategoryId,
+          orElse: () => null,
+        );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Row(
+          children: [
+            Icon(Icons.sell_outlined, size: 16, color: Color(0xFF64748B)),
+            SizedBox(width: 6),
+            Text(
+              'Category (Optional)',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+
+        // Inline Category Creator Mode (Allows manual typing of category name without color picker or options like "red")
+        if (isAddingCategory)
+          Row(
+            children: [
+              // Category Name Input
+              Expanded(
+                child: TextField(
+                  controller: newCatNameController,
+                  autofocus: true,
+                  textInputAction: TextInputAction.done,
+                  decoration: InputDecoration(
+                    hintText: 'Enter category name...',
+                    hintStyle: const TextStyle(
+                      color: Color(0xFF94A3B8),
+                      fontSize: 13,
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF2563EB),
+                        width: 1.5,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF2563EB),
+                        width: 1.5,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF2563EB),
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                  onSubmitted: (val) async {
+                    if (val.trim().isEmpty) return;
+                    try {
+                      final created = await provider.createCategory(
+                        name: val.trim(),
+                        color: '#2563EB',
+                      );
+                      onCategorySelected(created.id);
+                      onAddingCategoryChanged(false);
+                      newCatNameController.clear();
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Failed to add category: $e')),
+                        );
+                      }
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+
+              // Add Button
+              ElevatedButton(
+                onPressed: () async {
+                  if (newCatNameController.text.trim().isEmpty) return;
+                  try {
+                    final created = await provider.createCategory(
+                      name: newCatNameController.text.trim(),
+                      color: '#2563EB',
+                    );
+                    onCategorySelected(created.id);
+                    onAddingCategoryChanged(false);
+                    newCatNameController.clear();
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to add category: $e')),
+                      );
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2563EB),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                child: const Text(
+                  'Add',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(width: 4),
+
+              // Cancel Button (X)
+              IconButton(
+                icon: const Icon(
+                  Icons.close_rounded,
+                  size: 20,
+                  color: Color(0xFF94A3B8),
+                ),
+                onPressed: () {
+                  onAddingCategoryChanged(false);
+                  newCatNameController.clear();
+                },
+              ),
+            ],
+          )
+        // Standard Dropdown Mode with "+ Add New Category" (Excludes any options like "red")
+        else
+          PopupMenuButton<String?>(
+            tooltip: 'Select Category',
+            offset: const Offset(0, 48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+              side: const BorderSide(color: Color(0xFFE2E8F0)),
+            ),
+            color: Colors.white,
+            elevation: 8,
+            onSelected: (val) {
+              if (val == '__ADD_NEW__') {
+                onAddingCategoryChanged(true);
+              } else {
+                onCategorySelected(val);
+              }
+            },
+            itemBuilder: (context) {
+              return [
+                // No Category option
+                PopupMenuItem<String?>(
+                  value: null,
+                  child: Row(
+                    children: [
+                      if (selectedCategoryId == null)
+                        const Icon(
+                          Icons.check_rounded,
+                          size: 16,
+                          color: Color(0xFF0F172A),
+                        )
+                      else
+                        const SizedBox(width: 16),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'No Category',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF1E293B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Existing Categories (excluding "red")
+                ...validCats.map((cat) {
+                  final isCurrent = cat.id == selectedCategoryId;
+                  return PopupMenuItem<String?>(
+                    value: cat.id,
+                    child: Row(
+                      children: [
+                        if (isCurrent)
+                          const Icon(
+                            Icons.check_rounded,
+                            size: 16,
+                            color: Color(0xFF0F172A),
+                          )
+                        else
+                          const SizedBox(width: 16),
+                        const SizedBox(width: 8),
+                        Container(
+                          width: 10,
+                          height: 10,
+                          margin: const EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            color: _parseColor(cat.color),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        Text(
+                          cat.name,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+
+                if (validCats.isNotEmpty)
+                  const PopupMenuDivider(height: 1),
+
+                // + Add New Category option (Image 1 blue action button)
+                PopupMenuItem<String?>(
+                  value: '__ADD_NEW__',
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2563EB),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.add_rounded, size: 16, color: Colors.white),
+                        SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            'Add New Category',
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ];
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 12,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: Row(
+                children: [
+                  if (selectedCat != null) ...[
+                    Container(
+                      width: 10,
+                      height: 10,
+                      margin: const EdgeInsets.only(right: 8),
+                      decoration: BoxDecoration(
+                        color: _parseColor(selectedCat.color),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    Text(
+                      selectedCat.name,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF1E293B),
+                      ),
+                    ),
+                  ] else ...[
+                    const Text(
+                      'No Category',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF1E293B),
+                      ),
+                    ),
+                  ],
+                  const Spacer(),
+                  const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 20,
+                    color: Color(0xFF64748B),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  // ==========================================
+  // Main Screen Build Methods
+  // ==========================================
+
   @override
   Widget build(BuildContext context) {
-    final calendarProvider = Provider.of<CalendarProvider>(context);
-    final events = calendarProvider.events;
+    final provider = context.watch<CalendarProvider>();
+    final events = provider.events;
 
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ─── Header ──────────────────────────────────────────────────────────
-          _buildHeader(),
+          // Header
+          _buildHeader(provider),
           const SizedBox(height: 20),
 
-          // ─── Main Calendar Card ──────────────────────────────────────────────
+          // Search Results View (if active)
+          if (provider.searchResults != null) ...[
+            _buildSearchResultsCard(provider),
+            const SizedBox(height: 20),
+          ],
+
+          // Error State with Retry
+          if (provider.hasError && events.isEmpty)
+            Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEE2E2),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFFCA5A5)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Color(0xFFDC2626)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      provider.errorMessage ?? 'Failed to load calendar events',
+                      style: const TextStyle(
+                        color: Color(0xFFB91C1C),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => provider.fetchInitialData(),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+
+          // Main Calendar Card
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -326,11 +1818,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
             child: Column(
               children: [
-                // Weekday Row
                 _buildWeekdayHeader(),
-
-                // Calendar Grid
-                _buildMonthDaysGrid(events),
+                if (provider.isLoading && events.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 60),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else
+                  _buildMonthDaysGrid(events, provider),
               ],
             ),
           ),
@@ -340,10 +1835,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(CalendarProvider provider) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final bool isCompact = constraints.maxWidth < 750;
+        final bool isCompact = constraints.maxWidth < 1150;
 
         return isCompact
             ? Column(
@@ -355,7 +1850,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     spacing: 8,
                     runSpacing: 8,
                     crossAxisAlignment: WrapCrossAlignment.center,
-                    children: _buildHeaderControls(),
+                    children: _buildHeaderControls(provider),
                   ),
                 ],
               )
@@ -363,7 +1858,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _buildHeaderTitle(),
-                  Row(children: _buildHeaderControls()),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(children: _buildHeaderControls(provider)),
+                      ),
+                    ),
+                  ),
                 ],
               );
       },
@@ -372,6 +1876,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Widget _buildHeaderTitle() {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           padding: const EdgeInsets.all(10),
@@ -386,30 +1891,34 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
         ),
         const SizedBox(width: 14),
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Calendar',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF0F172A),
-                letterSpacing: -0.3,
+        const Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Calendar',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0F172A),
+                  letterSpacing: -0.3,
+                ),
               ),
-            ),
-            SizedBox(height: 2),
-            Text(
-              'Manage your events, notes, and reminders',
-              style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
-            ),
-          ],
+              SizedBox(height: 2),
+              Text(
+                'Manage your events, notes, and reminders',
+                style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  List<Widget> _buildHeaderControls() {
+  List<Widget> _buildHeaderControls(CalendarProvider provider) {
     return [
       // All Apps Filter Dropdown
       Container(
@@ -480,10 +1989,52 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   hintStyle: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
                 ),
                 style: const TextStyle(fontSize: 12),
-                onChanged: (_) => setState(() {}),
+                onChanged: (val) {
+                  provider.searchCalendar(val);
+                },
               ),
             ),
+            if (_searchController.text.isNotEmpty)
+              GestureDetector(
+                onTap: () {
+                  _searchController.clear();
+                  provider.clearSearch();
+                },
+                child: const Icon(Icons.close, size: 14, color: Color(0xFF94A3B8)),
+              ),
           ],
+        ),
+      ),
+      const SizedBox(width: 8),
+
+      // Explicit Refresh Button
+      Tooltip(
+        message: 'Refresh calendar',
+        child: InkWell(
+          onTap: () => provider.refresh(),
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: provider.isLoading
+                ? const Center(
+                    child: SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
+                : const Icon(
+                    Icons.refresh_rounded,
+                    size: 18,
+                    color: Color(0xFF64748B),
+                  ),
+          ),
         ),
       ),
       const SizedBox(width: 8),
@@ -501,7 +2052,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             InkWell(
-              onTap: _previousMonth,
+              onTap: provider.previousMonth,
               borderRadius: BorderRadius.circular(16),
               child: const Padding(
                 padding: EdgeInsets.all(4.0),
@@ -515,7 +2066,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
-                '${_months[_currentMonth.month - 1]} ${_currentMonth.year}',
+                '${_months[provider.currentMonth.month - 1]} ${provider.currentMonth.year}',
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
@@ -524,7 +2075,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ),
             ),
             InkWell(
-              onTap: _nextMonth,
+              onTap: provider.nextMonth,
               borderRadius: BorderRadius.circular(16),
               child: const Padding(
                 padding: EdgeInsets.all(4.0),
@@ -542,7 +2093,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
       // Today Button Pill
       InkWell(
-        onTap: _goToToday,
+        onTap: provider.goToToday,
         borderRadius: BorderRadius.circular(20),
         child: Container(
           height: 38,
@@ -591,17 +2142,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  Widget _buildMonthDaysGrid(List<CalendarEvent> allEvents) {
-    final year = _currentMonth.year;
-    final month = _currentMonth.month;
+  Widget _buildMonthDaysGrid(
+    List<CalendarEvent> allEvents,
+    CalendarProvider provider,
+  ) {
+    final year = provider.currentMonth.year;
+    final month = provider.currentMonth.month;
 
-    // First day of month weekday (1 = Mon, 7 = Sun)
-    final firstDayWeekday = DateTime(year, month, 1).weekday % 7; // 0 = Sun
+    final firstDayWeekday = DateTime(year, month, 1).weekday % 7;
     final daysInMonth = DateTime(year, month + 1, 0).day;
-
-    final searchQuery = _searchController.text.trim().toLowerCase();
-
     final totalGridCells = ((firstDayWeekday + daysInMonth + 6) ~/ 7) * 7;
+
+    final monthLeaves = HolidayHelper.getLeavesForMonth(year, month);
+    final now = DateTime.now();
 
     return Table(
       border: const TableBorder.symmetric(
@@ -614,75 +2167,95 @@ class _CalendarScreenState extends State<CalendarScreen> {
             final dayNumber = cellIndex - firstDayWeekday + 1;
 
             if (dayNumber < 1 || dayNumber > daysInMonth) {
-              // Empty padding cell outside current month
-              return Container(height: 105, color: const Color(0xFFF8FAFC));
+              return Container(height: 110, color: const Color(0xFFFAFAFA));
             }
 
             final cellDate = DateTime(year, month, dayNumber);
-            final isSelected =
-                cellDate.year == _selectedDate.year &&
-                cellDate.month == _selectedDate.month &&
-                cellDate.day == _selectedDate.day;
+            final isToday = cellDate.year == now.year &&
+                cellDate.month == now.month &&
+                cellDate.day == now.day;
+            final isSelected = cellDate.year == provider.selectedDate.year &&
+                cellDate.month == provider.selectedDate.month &&
+                cellDate.day == provider.selectedDate.day;
 
-            final isOct2026 = year == 2026 && month == 10;
-            final isGandhiJayanti = isOct2026 && dayNumber == 2;
-            final isColumbusDay = isOct2026 && dayNumber == 12;
-
-            // Events for this date
             final dayEvents = allEvents.where((e) {
-              final matchDate =
-                  e.startTime.year == year &&
-                  e.startTime.month == month &&
-                  e.startTime.day == dayNumber;
-              if (!matchDate) return false;
-              if (searchQuery.isNotEmpty) {
-                return e.title.toLowerCase().contains(searchQuery);
-              }
-              return true;
+              if (!e.matchesDay(year, month, dayNumber)) return false;
+              return e.matchesApp(_selectedAppFilter);
             }).toList();
+
+            final dayLeaves = monthLeaves
+                .where((h) => h.date.day == dayNumber)
+                .toList();
 
             return InkWell(
               onTap: () {
-                setState(() => _selectedDate = cellDate);
+                provider.selectDate(cellDate);
+                provider.fetchSelectedDateItems(cellDate);
+                _showDateOverviewDialog(cellDate);
               },
               child: Container(
-                height: 105,
+                height: 110,
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Day number + '+' icon
+                    // Day Number Header + Add (+) button
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        isSelected
-                            ? Container(
-                                width: 24,
-                                height: 24,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF2563EB),
-                                  shape: BoxShape.circle,
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  '$dayNumber',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              )
-                            : Text(
-                                '$dayNumber',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF1E293B),
-                                ),
+                        if (isToday)
+                          Container(
+                            width: 24,
+                            height: 24,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF2563EB),
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              '$dayNumber',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
                               ),
+                            ),
+                          )
+                        else if (isSelected)
+                          Container(
+                            width: 24,
+                            height: 24,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFE2E8F0),
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              '$dayNumber',
+                              style: const TextStyle(
+                                color: Color(0xFF334155),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          )
+                        else
+                          Padding(
+                            padding: const EdgeInsets.only(left: 2),
+                            child: Text(
+                              '$dayNumber',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF1E293B),
+                              ),
+                            ),
+                          ),
                         InkWell(
-                          onTap: () => _showAddEventDialog(cellDate),
+                          onTap: () {
+                            provider.selectDate(cellDate);
+                            _showCreateItemDialog(initialDate: cellDate);
+                          },
                           borderRadius: BorderRadius.circular(10),
                           child: const Padding(
                             padding: EdgeInsets.all(2.0),
@@ -695,97 +2268,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 3),
 
-                    // Gandhi Jayanti Chip (Mockup exact display)
-                    if (isGandhiJayanti)
-                      Container(
-                        margin: const EdgeInsets.only(top: 2),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFEF3C7),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: const Color(0xFFFDE68A)),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '🇮🇳 Gandhi Jayanti',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF9A3412),
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
+                    // Leaves/Holidays (Green chips)
+                    ...dayLeaves.map((h) => _buildLeaveChip(h)),
 
-                    // Columbus Day Chip (Mockup exact display)
-                    if (isColumbusDay)
-                      Container(
-                        margin: const EdgeInsets.only(top: 2),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFDCFCE7),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: const Color(0xFFBBF7D0)),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '🌍 Columbus Day',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF166534),
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-
-                    // User Events
-                    ...dayEvents.take(2).map((e) {
-                      if ((isGandhiJayanti && e.title.contains('Gandhi')) ||
-                          (isColumbusDay && e.title.contains('Columbus'))) {
-                        return const SizedBox.shrink();
-                      }
-                      return InkWell(
-                        onTap: () => _showEventDetailsDialog(e),
-                        child: Container(
-                          margin: const EdgeInsets.only(top: 2),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEFF6FF),
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          child: Text(
-                            e.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF1D4ED8),
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
+                    // Real Events (Blue chips)
+                    ...dayEvents.take(2).map((e) => _buildEventChip(e)),
                   ],
                 ),
               ),
@@ -793,6 +2282,187 @@ class _CalendarScreenState extends State<CalendarScreen> {
           }),
         );
       }),
+    );
+  }
+
+  Widget _buildLeaveChip(CalendarHoliday holiday) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2.5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFECFDF5),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: const Color(0xFFD1FAE5), width: 0.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('🌍 ', style: TextStyle(fontSize: 10)),
+          Expanded(
+            child: Text(
+              holiday.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF16A34A),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEventChip(CalendarEvent e) {
+    final startTimeStr =
+        '${e.startTime.hour.toString().padLeft(2, '0')}:${e.startTime.minute.toString().padLeft(2, '0')}';
+    final isBnx = e.applicationName.toLowerCase().contains('bnx');
+
+    return InkWell(
+      onTap: () => _showEditEventDialog(e),
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(top: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2.5),
+        decoration: BoxDecoration(
+          color: const Color(0xFFEFF6FF),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: const Color(0xFFDBEAFE), width: 0.5),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.calendar_today_rounded,
+              size: 10,
+              color: Color(0xFF2563EB),
+            ),
+            const SizedBox(width: 3),
+            if (isBnx) ...[
+              const Icon(
+                Icons.flight_takeoff_rounded,
+                size: 10,
+                color: Color(0xFF2563EB),
+              ),
+              const SizedBox(width: 2),
+              const Text(
+                'BNX ',
+                style: TextStyle(
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2563EB),
+                ),
+              ),
+            ],
+            Expanded(
+              child: Text(
+                '$startTimeStr ${e.title}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF2563EB),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==========================================
+  // Search Results Overlay / Card
+  // ==========================================
+
+  Widget _buildSearchResultsCard(CalendarProvider provider) {
+    final res = provider.searchResults!;
+    final total = res.events.length + res.reminders.length + res.notes.length;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFF6FF),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFBFDBFE)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Search Results for "${provider.searchQuery}" ($total found)',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: Color(0xFF1E40AF),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close, size: 16),
+                onPressed: () {
+                  _searchController.clear();
+                  provider.clearSearch();
+                },
+              ),
+            ],
+          ),
+          if (res.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                'No matching calendar records found.',
+                style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+              ),
+            )
+          else ...[
+            if (res.events.isNotEmpty) ...[
+              const Text('Events:',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+              ...res.events.map((e) => Material(
+                    type: MaterialType.transparency,
+                    child: ListTile(
+                      dense: true,
+                      title: Text(e.title),
+                      subtitle: Text(
+                          '${e.startTime.day}/${e.startTime.month}/${e.startTime.year} - ${e.categoryName}'),
+                      onTap: () => _showEditEventDialog(e),
+                    ),
+                  )),
+            ],
+            if (res.reminders.isNotEmpty) ...[
+              const Text('Reminders:',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+              ...res.reminders.map((r) => Material(
+                    type: MaterialType.transparency,
+                    child: ListTile(
+                      dense: true,
+                      title: Text(r.title),
+                      subtitle: Text('${r.date} ${r.time}'),
+                    ),
+                  )),
+            ],
+            if (res.notes.isNotEmpty) ...[
+              const Text('Date Notes:',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+              ...res.notes.map((n) => Material(
+                    type: MaterialType.transparency,
+                    child: ListTile(
+                      dense: true,
+                      title: Text(n.title),
+                      subtitle: Text(n.content),
+                    ),
+                  )),
+            ],
+          ],
+        ],
+      ),
     );
   }
 }
