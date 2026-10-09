@@ -7,6 +7,7 @@ import 'package:bit_tools_backend/core/providers/theme_provider.dart';
 import 'package:bit_tools_backend/core/widgets/responsive_shell.dart';
 import 'package:bit_tools_backend/features/notes/notes_screen.dart';
 import 'package:bit_tools_backend/features/contacts/contacts_screen.dart';
+import 'package:bit_tools_backend/core/models/contact_model.dart';
 
 Widget _createTestWidget() {
   return MultiProvider(
@@ -28,7 +29,20 @@ Widget _createTestWidget() {
         update: (_, session, previous) => previous ?? NotesProvider(session),
       ),
       ChangeNotifierProxyProvider<SessionProvider, ContactsProvider>(
-        create: (context) => ContactsProvider(context.read<SessionProvider>()),
+        create: (context) => ContactsProvider(
+          context.read<SessionProvider>(),
+          null,
+          null,
+          const [
+            ContactModel(
+              id: 'c1',
+              firstName: 'virat',
+              lastName: 'kholi',
+              company: 'Cliks Business',
+              role: 'Chithappa',
+            ),
+          ],
+        ),
         update: (_, session, previous) => previous ?? ContactsProvider(session),
       ),
     ],

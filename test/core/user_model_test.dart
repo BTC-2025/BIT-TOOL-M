@@ -131,7 +131,10 @@ void main() {
 
       expect(user.profilePictureUrl, '/uploads/photo99.png');
       expect(user.hasValidProfilePicture, isTrue);
-      expect(user.resolvedProfilePictureUrl, 'https://api.bnxmail.com/uploads/photo99.png');
+      expect(
+        user.resolvedProfilePictureUrl,
+        'https://api.bnxmail.com/uploads/photo99.png',
+      );
     });
   });
 }

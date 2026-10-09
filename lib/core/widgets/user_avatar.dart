@@ -29,8 +29,9 @@ class UserAvatar extends StatelessWidget {
       if (picUrl != null && picUrl.isNotEmpty) {
         if (picUrl.startsWith('data:image/') || picUrl.startsWith('base64,')) {
           try {
-            final base64String =
-                picUrl.contains(',') ? picUrl.split(',').last : picUrl;
+            final base64String = picUrl.contains(',')
+                ? picUrl.split(',').last
+                : picUrl;
             final bytes = base64Decode(base64String.trim());
             return ClipOval(
               child: Image.memory(

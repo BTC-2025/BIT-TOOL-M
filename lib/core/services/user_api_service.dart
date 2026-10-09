@@ -64,10 +64,7 @@ class UserApiService {
   }) async {
     final dynamic rawResponse = await _apiClient.post(
       ApiConfig.loginUri,
-      body: {
-        'email': email.trim(),
-        'password': password,
-      },
+      body: {'email': email.trim(), 'password': password},
     );
 
     if (rawResponse is! Map<String, dynamic>) {
@@ -90,7 +87,8 @@ class UserApiService {
     final data = rawResponse['data'];
     String? token;
     if (data is Map<String, dynamic>) {
-      token = data['token']?.toString() ??
+      token =
+          data['token']?.toString() ??
           data['accessToken']?.toString() ??
           data['jwt']?.toString();
     } else if (data is String) {

@@ -18,9 +18,8 @@ class UnauthorizedException extends ApiException {
 
 /// Invalid credentials provided during sign in.
 class InvalidCredentialsException extends ApiException {
-  const InvalidCredentialsException([
-    super.message = 'Invalid Credentials',
-  ]) : super(statusCode: 400);
+  const InvalidCredentialsException([super.message = 'Invalid Credentials'])
+    : super(statusCode: 400);
 }
 
 /// 403 Forbidden: user does not have permission.
@@ -37,11 +36,23 @@ class NotFoundException extends ApiException {
   ]) : super(statusCode: 404);
 }
 
+/// 409 Conflict: resource conflict, e.g. duplicate email.
+class ConflictException extends ApiException {
+  const ConflictException([
+    super.message = 'A conflict occurred with this resource.',
+  ]) : super(statusCode: 409);
+}
+
 /// 500-504 Server Error: backend failure.
 class ServerException extends ApiException {
+  final String? responseBody;
+  final String? correlationId;
+
   const ServerException([
     super.message = 'Unable to connect to Bit Tool services right now.',
     int? statusCode,
+    this.responseBody,
+    this.correlationId,
   ]) : super(statusCode: statusCode);
 }
 

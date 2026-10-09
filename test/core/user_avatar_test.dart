@@ -80,7 +80,10 @@ void main() {
         ),
       );
 
-      expect(user.resolvedProfilePictureUrl, 'https://api.bnxmail.com/uploads/avatars/user3.jpg');
+      expect(
+        user.resolvedProfilePictureUrl,
+        'https://api.bnxmail.com/uploads/avatars/user3.jpg',
+      );
       expect(find.byType(Image), findsOneWidget);
     });
 

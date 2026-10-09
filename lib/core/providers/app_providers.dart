@@ -4,6 +4,8 @@ import '../models/app_models.dart';
 import '../models/calculator_models.dart';
 import 'session_provider.dart';
 
+export 'contacts_provider.dart';
+
 // --- CALENDAR PROVIDER ---
 class CalendarProvider extends ChangeNotifier {
   final SessionProvider sessionProvider;
@@ -1025,148 +1027,7 @@ class CalculatorProvider extends ChangeNotifier {
 }
 
 // --- CONTACTS PROVIDER ---
-class ContactsProvider extends ChangeNotifier {
-  final SessionProvider sessionProvider;
-  final List<ContactItem> _contacts = [];
-
-  ContactsProvider(this.sessionProvider) {
-    _seedContacts();
-  }
-
-  List<ContactItem> get contacts => List.unmodifiable(_contacts);
-
-  void toggleFavorite(String id) {
-    final index = _contacts.indexWhere((c) => c.id == id);
-    if (index != -1) {
-      _contacts[index].isFavorite = !_contacts[index].isFavorite;
-      sessionProvider.logActivity(
-        iconName: 'favorite',
-        device: 'Current Device',
-        module: 'Contacts',
-        duration: '100ms',
-        status: 'Success',
-        description: 'Toggled favorite for: ${_contacts[index].name}',
-        category: 'Contacts',
-      );
-      notifyListeners();
-    }
-  }
-
-  void toggleBlocked(String id) {
-    final index = _contacts.indexWhere((c) => c.id == id);
-    if (index != -1) {
-      _contacts[index].isBlocked = !_contacts[index].isBlocked;
-      sessionProvider.logActivity(
-        iconName: 'block',
-        device: 'Current Device',
-        module: 'Contacts',
-        duration: '110ms',
-        status: 'Success',
-        description: 'Toggled block status for: ${_contacts[index].name}',
-        category: 'Contacts',
-      );
-      notifyListeners();
-    }
-  }
-
-  void addContact(ContactItem contact) {
-    _contacts.add(contact);
-    sessionProvider.logActivity(
-      iconName: 'person_add',
-      device: 'Current Device',
-      module: 'Contacts',
-      duration: '320ms',
-      status: 'Success',
-      description: 'Added new contact: "${contact.name}"',
-      category: 'Contacts',
-    );
-    notifyListeners();
-  }
-
-  void deleteContact(String id) {
-    final index = _contacts.indexWhere((c) => c.id == id);
-    if (index != -1) {
-      final contact = _contacts[index];
-      _contacts.removeAt(index);
-      sessionProvider.logActivity(
-        iconName: 'person_remove',
-        device: 'Current Device',
-        module: 'Contacts',
-        duration: '210ms',
-        status: 'Success',
-        description: 'Deleted contact: "${contact.name}"',
-        category: 'Contacts',
-      );
-      notifyListeners();
-    }
-  }
-
-  void _seedContacts() {
-    _contacts.addAll([
-      ContactItem(
-        id: 'c1',
-        photoUrl: '',
-        name: 'virat kholi',
-        company: 'Cliks Business',
-        designation: 'Chithappa',
-        phone: '8984724747',
-        email: 'aruntest@bnxmail.com',
-        department: 'Operations',
-        location: 'Added 18/09/2026',
-        notes: 'Cliks Business • Added 18/09/2026',
-        isFavorite: true,
-      ),
-      ContactItem(
-        id: 'c2',
-        photoUrl: '',
-        name: 'legal',
-        company: 'Cliks Business',
-        designation: 'Supplier',
-        phone: '6374943436',
-        email: 'vincent1182003@bnxmail.com',
-        department: 'Legal',
-        location: 'Added 15/09/2026',
-        notes: 'Cliks Business • Added 15/09/2026',
-      ),
-      ContactItem(
-        id: 'c3',
-        photoUrl: '',
-        name: 'jeni fancy 5050',
-        company: 'Cliks Business',
-        designation: 'Supplier',
-        phone: '6374943436',
-        email: 'jenifancy5050@bnxmail.com',
-        department: 'Procurement',
-        location: 'Added 29/08/2026',
-        notes: 'Cliks Business • Added 29/08/2026',
-      ),
-      ContactItem(
-        id: 'c4',
-        photoUrl: '',
-        name: 'NIIT400',
-        company: 'Cliks Business',
-        designation: 'Customer',
-        phone: '9456161498',
-        email: 'aruntest@bnxmail.com',
-        department: 'Accounts',
-        location: 'Added 21/08/2026',
-        notes: 'Cliks Business • Added 21/08/2026',
-      ),
-      ContactItem(
-        id: 'c5',
-        photoUrl: '',
-        name: 'santo',
-        company: 'Cliks Business',
-        designation: 'Supplier',
-        phone: '6374943436',
-        email: 'santhoshhhhhh@bnxmail.com',
-        department: 'Logistics',
-        location: 'Added 20/08/2026',
-        notes: 'Cliks Business • Added 20/08/2026',
-      ),
-    ]);
-  }
-}
+// ContactsProvider has been extracted to contacts_provider.dart with full API integration.
 
 // --- NOTES PROVIDER ---
 class NotesProvider extends ChangeNotifier {

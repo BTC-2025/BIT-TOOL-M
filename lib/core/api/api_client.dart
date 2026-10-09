@@ -34,12 +34,14 @@ class ApiClient {
 
     _logRequest('GET', uri, headers);
 
+    final stopwatch = Stopwatch()..start();
     try {
       final response = await _client
           .get(uri, headers: headers)
           .timeout(ApiConfig.requestTimeout);
+      stopwatch.stop();
 
-      _logResponse('GET', uri, response.statusCode);
+      _logResponse('GET', uri, response, stopwatch.elapsedMilliseconds);
       return _handleResponse(response);
     } on TimeoutException {
       throw const RequestTimeoutException();
@@ -82,6 +84,7 @@ class ApiClient {
 
     _logRequest('POST', uri, headers);
 
+    final stopwatch = Stopwatch()..start();
     try {
       final response = await _client
           .post(
@@ -90,8 +93,115 @@ class ApiClient {
             body: body != null ? jsonEncode(body) : null,
           )
           .timeout(ApiConfig.requestTimeout);
+      stopwatch.stop();
 
-      _logResponse('POST', uri, response.statusCode);
+      _logResponse('POST', uri, response, stopwatch.elapsedMilliseconds);
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw const RequestTimeoutException();
+    } on http.ClientException {
+      throw const NetworkException();
+    } on FormatException catch (e) {
+      throw InvalidResponseException('Malformed JSON response: ${e.message}');
+    } catch (e) {
+      if (e.toString().contains('SocketException') ||
+          e.toString().contains('Failed host lookup') ||
+          e.toString().contains('Connection refused') ||
+          e.toString().contains('Network is unreachable')) {
+        throw const NetworkException();
+      }
+      if (e is ApiException) rethrow;
+      throw ApiException(e.toString());
+    }
+  }
+
+  /// Executes an authenticated or unauthenticated PUT request.
+  Future<dynamic> put(
+    Uri uri, {
+    Map<String, dynamic>? body,
+    String? token,
+    Map<String, String>? extraHeaders,
+  }) async {
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+
+    if (token != null && token.trim().isNotEmpty) {
+      headers['Authorization'] = 'Bearer ${token.trim()}';
+    }
+
+    if (extraHeaders != null) {
+      headers.addAll(extraHeaders);
+    }
+
+    _logRequest('PUT', uri, headers);
+
+    final stopwatch = Stopwatch()..start();
+    try {
+      final response = await _client
+          .put(
+            uri,
+            headers: headers,
+            body: body != null ? jsonEncode(body) : null,
+          )
+          .timeout(ApiConfig.requestTimeout);
+      stopwatch.stop();
+
+      _logResponse('PUT', uri, response, stopwatch.elapsedMilliseconds);
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw const RequestTimeoutException();
+    } on http.ClientException {
+      throw const NetworkException();
+    } on FormatException catch (e) {
+      throw InvalidResponseException('Malformed JSON response: ${e.message}');
+    } catch (e) {
+      if (e.toString().contains('SocketException') ||
+          e.toString().contains('Failed host lookup') ||
+          e.toString().contains('Connection refused') ||
+          e.toString().contains('Network is unreachable')) {
+        throw const NetworkException();
+      }
+      if (e is ApiException) rethrow;
+      throw ApiException(e.toString());
+    }
+  }
+
+  /// Executes an authenticated or unauthenticated DELETE request.
+  Future<dynamic> delete(
+    Uri uri, {
+    Map<String, dynamic>? body,
+    String? token,
+    Map<String, String>? extraHeaders,
+  }) async {
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+
+    if (token != null && token.trim().isNotEmpty) {
+      headers['Authorization'] = 'Bearer ${token.trim()}';
+    }
+
+    if (extraHeaders != null) {
+      headers.addAll(extraHeaders);
+    }
+
+    _logRequest('DELETE', uri, headers);
+
+    final stopwatch = Stopwatch()..start();
+    try {
+      final response = await _client
+          .delete(
+            uri,
+            headers: headers,
+            body: body != null ? jsonEncode(body) : null,
+          )
+          .timeout(ApiConfig.requestTimeout);
+      stopwatch.stop();
+
+      _logResponse('DELETE', uri, response, stopwatch.elapsedMilliseconds);
       return _handleResponse(response);
     } on TimeoutException {
       throw const RequestTimeoutException();
@@ -159,10 +269,34 @@ class ApiClient {
       throw const NotFoundException();
     }
 
+    if (statusCode == 409) {
+      if (decoded is Map<String, dynamic>) {
+        final msg = decoded['message']?.toString() ?? '';
+        if (msg.isNotEmpty) {
+          throw ConflictException(msg);
+        }
+      }
+      throw const ConflictException();
+    }
+
     if (statusCode >= 500 && statusCode <= 599) {
+      String? backendMsg;
+      if (decoded is Map<String, dynamic>) {
+        backendMsg =
+            decoded['message']?.toString() ?? decoded['error']?.toString();
+      }
+      final correlationId =
+          response.headers['x-request-id'] ??
+          response.headers['x-correlation-id'] ??
+          response.headers['traceparent'] ??
+          response.headers['x-trace-id'];
       throw ServerException(
-        'Unable to connect to Bit Tool services right now.',
+        backendMsg != null && backendMsg.isNotEmpty
+            ? backendMsg
+            : 'Unable to connect to Bit Tool services right now.',
         statusCode,
+        bodyString,
+        correlationId,
       );
     }
 
@@ -201,10 +335,37 @@ class ApiClient {
     }
   }
 
-  /// Logs response status without leaking sensitive payload data.
-  void _logResponse(String method, Uri uri, int statusCode) {
+  /// Logs response status, duration, content-type, correlation ID, and sanitized error body.
+  void _logResponse(
+    String method,
+    Uri uri,
+    http.Response response,
+    int durationMs,
+  ) {
     if (kDebugMode) {
-      debugPrint('[API] $method $uri -> Status: $statusCode');
+      final statusCode = response.statusCode;
+      final contentType = response.headers['content-type'] ?? 'unknown';
+      final correlationId =
+          response.headers['x-request-id'] ??
+          response.headers['x-correlation-id'] ??
+          response.headers['traceparent'] ??
+          response.headers['x-trace-id'];
+
+      final buffer = StringBuffer(
+        '[API] $method $uri -> Status: $statusCode (${durationMs}ms) | Content-Type: $contentType',
+      );
+      if (correlationId != null) {
+        buffer.write(' | RequestId: $correlationId');
+      }
+      debugPrint(buffer.toString());
+
+      if (statusCode >= 400 && response.body.trim().isNotEmpty) {
+        final body = response.body.trim();
+        final sanitizedBody = body.length > 500
+            ? '${body.substring(0, 500)}... (truncated)'
+            : body;
+        debugPrint('[API] Response Body: $sanitizedBody');
+      }
     }
   }
 

@@ -6,6 +6,7 @@ import 'core/theme/app_theme.dart';
 
 // Providers
 import 'core/providers/auth_provider.dart';
+import 'core/providers/notification_provider.dart';
 import 'core/providers/session_provider.dart';
 import 'core/providers/app_providers.dart';
 import 'core/providers/theme_provider.dart';
@@ -26,6 +27,13 @@ class BITToolApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()..initializeAuth()),
+        ChangeNotifierProxyProvider<AuthProvider, NotificationProvider>(
+          create: (context) =>
+              NotificationProvider(authProvider: context.read<AuthProvider>()),
+          update: (_, auth, previous) =>
+              (previous ?? NotificationProvider(authProvider: auth))
+                ..updateAuth(auth),
+        ),
         ChangeNotifierProvider(create: (_) => SessionProvider()),
         ChangeNotifierProxyProvider<SessionProvider, CalculatorProvider>(
           create: (context) =>
@@ -43,11 +51,14 @@ class BITToolApp extends StatelessWidget {
           create: (context) => NotesProvider(context.read<SessionProvider>()),
           update: (_, session, previous) => previous ?? NotesProvider(session),
         ),
-        ChangeNotifierProxyProvider<SessionProvider, ContactsProvider>(
-          create: (context) =>
-              ContactsProvider(context.read<SessionProvider>()),
-          update: (_, session, previous) =>
-              previous ?? ContactsProvider(session),
+        ChangeNotifierProxyProvider2<AuthProvider, SessionProvider, ContactsProvider>(
+          create: (context) => ContactsProvider(
+            context.read<SessionProvider>(),
+            null,
+            context.read<AuthProvider>(),
+          ),
+          update: (_, auth, session, previous) =>
+              (previous ?? ContactsProvider(session))..updateAuth(auth),
         ),
       ],
       child: Consumer<ThemeProvider>(

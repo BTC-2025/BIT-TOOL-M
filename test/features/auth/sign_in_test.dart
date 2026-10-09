@@ -19,57 +19,97 @@ void main() {
   });
 
   group('UserApiService Login Tests', () {
-    test('login success saves token and retrieves current user profile', () async {
-      final mockClient = MockClient((request) async {
-        if (request.url.path == '/api/auth/login') {
-          return http.Response(
-            jsonEncode({
-              'success': true,
-              'message': 'Login successful',
-              'data': {'token': 'valid_jwt_token_123'},
-            }),
-            200,
-          );
-        } else if (request.url.path == '/api/users/me') {
-          return http.Response(
-            jsonEncode({
-              'success': true,
-              'message': 'User retrieved successfully',
-              'data': {
-                'id': 'usr_1',
-                'name': 'John Doe',
-                'email': 'john@bnxmail.com',
-                'role': 'user',
-                'organizations': [],
-              },
-            }),
-            200,
-          );
-        }
-        return http.Response('Not Found', 404);
-      });
+    test(
+      'login success saves token and retrieves current user profile',
+      () async {
+        final mockClient = MockClient((request) async {
+          if (request.url.path == '/api/auth/login') {
+            return http.Response(
+              jsonEncode({
+                'success': true,
+                'message': 'Login successful',
+                'data': {'token': 'valid_jwt_token_123'},
+              }),
+              200,
+            );
+          } else if (request.url.path == '/api/users/me') {
+            return http.Response(
+              jsonEncode({
+                'success': true,
+                'message': 'User retrieved successfully',
+                'data': {
+                  'id': 'usr_1',
+                  'name': 'John Doe',
+                  'email': 'john@bnxmail.com',
+                  'role': 'user',
+                  'organizations': [],
+                },
+              }),
+              200,
+            );
+          }
+          return http.Response('Not Found', 404);
+        });
 
-      final storage = AuthStorage();
-      final apiClient = ApiClient(client: mockClient);
-      final service = UserApiService(
-        apiClient: apiClient,
-        authStorage: storage,
-      );
+        final storage = AuthStorage();
+        final apiClient = ApiClient(client: mockClient);
+        final service = UserApiService(
+          apiClient: apiClient,
+          authStorage: storage,
+        );
 
-      final user = await service.login(
-        email: 'john@bnxmail.com',
-        password: 'password123',
-      );
+        final user = await service.login(
+          email: 'john@bnxmail.com',
+          password: 'password123',
+        );
 
-      expect(user.displayName, 'John Doe');
-      expect(user.email, 'john@bnxmail.com');
-      final savedToken = await storage.getToken();
-      expect(savedToken, 'valid_jwt_token_123');
-    });
+        expect(user.displayName, 'John Doe');
+        expect(user.email, 'john@bnxmail.com');
+        final savedToken = await storage.getToken();
+        expect(savedToken, 'valid_jwt_token_123');
+      },
+    );
 
-    test('login failure on invalid credentials throws InvalidCredentialsException', () async {
-      final mockClient = MockClient((request) async {
-        if (request.url.path == '/api/auth/login') {
+    test(
+      'login failure on invalid credentials throws InvalidCredentialsException',
+      () async {
+        final mockClient = MockClient((request) async {
+          if (request.url.path == '/api/auth/login') {
+            return http.Response(
+              jsonEncode({
+                'success': false,
+                'message': 'Invalid credentials',
+                'data': null,
+              }),
+              400,
+            );
+          }
+          return http.Response('Not Found', 404);
+        });
+
+        final storage = AuthStorage();
+        final apiClient = ApiClient(client: mockClient);
+        final service = UserApiService(
+          apiClient: apiClient,
+          authStorage: storage,
+        );
+
+        expect(
+          () => service.login(
+            email: 'wrong@bnxmail.com',
+            password: 'wrongpassword',
+          ),
+          throwsA(isA<InvalidCredentialsException>()),
+        );
+      },
+    );
+  });
+
+  group('AuthProvider SignIn Workflow Tests', () {
+    test(
+      'signIn with invalid credentials sets Invalid Credentials error',
+      () async {
+        final mockClient = MockClient((request) async {
           return http.Response(
             jsonEncode({
               'success': false,
@@ -78,58 +118,30 @@ void main() {
             }),
             400,
           );
-        }
-        return http.Response('Not Found', 404);
-      });
+        });
 
-      final storage = AuthStorage();
-      final apiClient = ApiClient(client: mockClient);
-      final service = UserApiService(
-        apiClient: apiClient,
-        authStorage: storage,
-      );
-
-      expect(
-        () => service.login(
-          email: 'wrong@bnxmail.com',
-          password: 'wrongpassword',
-        ),
-        throwsA(isA<InvalidCredentialsException>()),
-      );
-    });
-  });
-
-  group('AuthProvider SignIn Workflow Tests', () {
-    test('signIn with invalid credentials sets Invalid Credentials error', () async {
-      final mockClient = MockClient((request) async {
-        return http.Response(
-          jsonEncode({
-            'success': false,
-            'message': 'Invalid credentials',
-            'data': null,
-          }),
-          400,
+        final storage = AuthStorage();
+        final apiClient = ApiClient(client: mockClient);
+        final service = UserApiService(
+          apiClient: apiClient,
+          authStorage: storage,
         );
-      });
+        final authProvider = AuthProvider(
+          authStorage: storage,
+          userApiService: service,
+        );
 
-      final storage = AuthStorage();
-      final apiClient = ApiClient(client: mockClient);
-      final service = UserApiService(apiClient: apiClient, authStorage: storage);
-      final authProvider = AuthProvider(
-        authStorage: storage,
-        userApiService: service,
-      );
+        final success = await authProvider.signIn(
+          email: 'wrong@bnxmail.com',
+          password: 'badpass',
+        );
 
-      final success = await authProvider.signIn(
-        email: 'wrong@bnxmail.com',
-        password: 'badpass',
-      );
-
-      expect(success, isFalse);
-      expect(authProvider.status, AuthStatus.authenticationError);
-      expect(authProvider.errorMessage, 'Invalid Credentials');
-      expect(authProvider.user, isNull);
-    });
+        expect(success, isFalse);
+        expect(authProvider.status, AuthStatus.authenticationError);
+        expect(authProvider.errorMessage, 'Invalid Credentials');
+        expect(authProvider.user, isNull);
+      },
+    );
 
     test('signIn with valid credentials succeeds and populates user', () async {
       final mockClient = MockClient((request) async {
@@ -163,7 +175,10 @@ void main() {
 
       final storage = AuthStorage();
       final apiClient = ApiClient(client: mockClient);
-      final service = UserApiService(apiClient: apiClient, authStorage: storage);
+      final service = UserApiService(
+        apiClient: apiClient,
+        authStorage: storage,
+      );
       final authProvider = AuthProvider(
         authStorage: storage,
         userApiService: service,
@@ -188,7 +203,10 @@ void main() {
       });
       final storage = AuthStorage();
       final apiClient = ApiClient(client: mockClient);
-      final service = UserApiService(apiClient: apiClient, authStorage: storage);
+      final service = UserApiService(
+        apiClient: apiClient,
+        authStorage: storage,
+      );
       final authProvider = AuthProvider(
         authStorage: storage,
         userApiService: service,
@@ -217,7 +235,9 @@ void main() {
       expect(find.text('Report Issue'), findsOneWidget);
     });
 
-    testWidgets('shows Invalid Credentials when invalid credentials entered', (tester) async {
+    testWidgets('shows Invalid Credentials when invalid credentials entered', (
+      tester,
+    ) async {
       final mockClient = MockClient((request) async {
         return http.Response(
           jsonEncode({
@@ -230,7 +250,10 @@ void main() {
       });
       final storage = AuthStorage();
       final apiClient = ApiClient(client: mockClient);
-      final service = UserApiService(apiClient: apiClient, authStorage: storage);
+      final service = UserApiService(
+        apiClient: apiClient,
+        authStorage: storage,
+      );
       final authProvider = AuthProvider(
         authStorage: storage,
         userApiService: service,

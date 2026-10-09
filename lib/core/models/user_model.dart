@@ -91,7 +91,8 @@ class UserModel {
       );
     }
 
-    final rawPic = json['profilePictureUrl'] ??
+    final rawPic =
+        json['profilePictureUrl'] ??
         json['profile_picture_url'] ??
         json['avatarUrl'] ??
         json['avatar_url'] ??
@@ -100,7 +101,8 @@ class UserModel {
         json['photoUrl'] ??
         json['picture'] ??
         json['image'];
-    final profilePic = (rawPic != null &&
+    final profilePic =
+        (rawPic != null &&
             rawPic.toString().trim().isNotEmpty &&
             rawPic.toString().trim() != 'null')
         ? rawPic.toString().trim()

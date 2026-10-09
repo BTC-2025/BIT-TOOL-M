@@ -32,6 +32,7 @@ class AuthProvider extends ChangeNotifier {
           userApiService ??
           UserApiService(authStorage: authStorage ?? AuthStorage());
 
+  AuthStorage get authStorage => _authStorage;
   AuthStatus get status => _status;
   UserModel? get user => _user;
   String? get errorMessage => _errorMessage;
@@ -138,10 +139,7 @@ class AuthProvider extends ChangeNotifier {
 
   /// Authenticates using email and password.
   /// Sets error message to 'Invalid Credentials' on credential failure.
-  Future<bool> signIn({
-    required String email,
-    required String password,
-  }) async {
+  Future<bool> signIn({required String email, required String password}) async {
     _status = AuthStatus.authenticating;
     _errorMessage = null;
     notifyListeners();
@@ -180,7 +178,8 @@ class AuthProvider extends ChangeNotifier {
       return false;
     } on ApiException catch (e) {
       _status = AuthStatus.authenticationError;
-      _errorMessage = e.message.toLowerCase().contains('credential') ||
+      _errorMessage =
+          e.message.toLowerCase().contains('credential') ||
               e.message.toLowerCase().contains('invalid')
           ? 'Invalid Credentials'
           : e.message;

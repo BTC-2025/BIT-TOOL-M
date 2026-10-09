@@ -1,11 +1,13 @@
 # Bit Tool — Current User API Integration
 
 ## 1. Overview
+
 This document specifies the first API integration for Bit Tool: retrieving the currently authenticated user profile via `GET https://api.bnxmail.com/api/users/me`.
 
 ---
 
 ## 2. API Configuration
+
 - **Base URL**: `https://api.bnxmail.com`
 - **Current Endpoint**: `/api/users/me`
 - **Full URI**: `https://api.bnxmail.com/api/users/me`
@@ -16,22 +18,26 @@ This document specifies the first API integration for Bit Tool: retrieving the c
 ---
 
 ## 3. Authentication Mechanism
+
 - **SSO URL Redirect**: When users redirect to Bit Tool, the SSO token is delivered via query parameter:
   `https://your-bit-tool-app.com/?token=BNX_AUTH_TOKEN`
 - **Detection & Extraction**: [`lib/core/auth/url_token_helper.dart`](file:///Users/btrldev004/Desktop/BIT-TOOL-M/lib/core/auth/url_token_helper.dart) extracts the token on app startup.
 - **URL Sanitization**: On web platforms, the token is stripped from the visible browser address bar via `window.history.replaceState` without reloading or resetting routes.
 - **Headers Sent**:
+
   ```http
   Content-Type: application/json
   Accept: application/json
   Authorization: Bearer <bnx_auth_token>
   ```
+
 - **Logging Security**:
   Authorization headers, Bearer tokens, and SSO credentials are strictly redacted (`[REDACTED]`) in all debug logs.
 
 ---
 
 ## 4. Token Storage
+
 - **Storage Key**: `bnx_auth_token`
 - **Abstraction**: [`lib/core/auth/auth_storage.dart`](file:///Users/btrldev004/Desktop/BIT-TOOL-M/lib/core/auth/auth_storage.dart)
   - **Flutter Web**: Stored directly in `window.localStorage['bnx_auth_token']`.
@@ -45,7 +51,9 @@ This document specifies the first API integration for Bit Tool: retrieving the c
 ---
 
 ## 5. User & Organization Models
+
 Defined in [`lib/core/models/user_model.dart`](file:///Users/btrldev004/Desktop/BIT-TOOL-M/lib/core/models/user_model.dart):
+
 - **`UserModel` Fields**:
   - `id` (int)
   - `email` (String)
@@ -74,6 +82,7 @@ Defined in [`lib/core/models/user_model.dart`](file:///Users/btrldev004/Desktop/
 ---
 
 ## 6. API Service & Client
+
 - **`ApiClient`** ([`lib/core/api/api_client.dart`](file:///Users/btrldev004/Desktop/BIT-TOOL-M/lib/core/api/api_client.dart)):
   Handles request timeouts, sanitized debug logging, standard headers, and maps HTTP status codes to typed exceptions.
 - **`UserApiService`** ([`lib/core/services/user_api_service.dart`](file:///Users/btrldev004/Desktop/BIT-TOOL-M/lib/core/services/user_api_service.dart)):
@@ -82,6 +91,7 @@ Defined in [`lib/core/models/user_model.dart`](file:///Users/btrldev004/Desktop/
 ---
 
 ## 7. Authentication State Management
+
 - **`AuthProvider`** ([`lib/core/providers/auth_provider.dart`](file:///Users/btrldev004/Desktop/BIT-TOOL-M/lib/core/providers/auth_provider.dart)):
   - State Enum: `AuthStatus`
     - `unauthenticated`: No token stored.
@@ -100,6 +110,7 @@ Defined in [`lib/core/models/user_model.dart`](file:///Users/btrldev004/Desktop/
 ---
 
 ## 8. Error Handling Matrix
+
 | Scenario | Status Code / Exception | Action Taken | UI Behavior |
 | :--- | :--- | :--- | :--- |
 | **Invalid / Expired Token** | 401 `UnauthorizedException` | Token cleared from `AuthStorage`, user state reset, no infinite retries | Shows unauthenticated state |
@@ -113,11 +124,15 @@ Defined in [`lib/core/models/user_model.dart`](file:///Users/btrldev004/Desktop/
 ---
 
 ## 9. Verification & Testing
+
 Run the comprehensive test suite:
+
 ```bash
 flutter test
 ```
-### Covered Tests:
+
+### Covered Tests
+
 - **TEST 1**: Valid token -> 200 -> user parsed -> authenticated state
 - **TEST 2**: No token -> no API request -> unauthenticated state
 - **TEST 3**: Invalid token (401) -> clears storage -> resets user -> no retry loop

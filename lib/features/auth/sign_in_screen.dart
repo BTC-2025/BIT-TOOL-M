@@ -70,11 +70,7 @@ class _SignInScreenState extends State<SignInScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFEBF3FC),
-              Color(0xFFE2EDF9),
-              Color(0xFFF1F6FC),
-            ],
+            colors: [Color(0xFFEBF3FC), Color(0xFFE2EDF9), Color(0xFFF1F6FC)],
           ),
         ),
         child: SafeArea(
@@ -392,8 +388,9 @@ class _SignInScreenState extends State<SignInScreen> {
                           onPressed: isLoading ? null : _handleLogin,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF1D6EE5),
-                            disabledBackgroundColor:
-                                const Color(0xFF1D6EE5).withValues(alpha: 0.6),
+                            disabledBackgroundColor: const Color(
+                              0xFF1D6EE5,
+                            ).withValues(alpha: 0.6),
                             foregroundColor: Colors.white,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
@@ -484,10 +481,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget _footerText(String text) {
     return Text(
       text,
-      style: const TextStyle(
-        fontSize: 12,
-        color: Color(0xFF64748B),
-      ),
+      style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
     );
   }
 }
