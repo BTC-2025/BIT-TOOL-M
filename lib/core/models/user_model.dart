@@ -199,11 +199,19 @@ class UserModel {
   bool get hasValidProfilePicture {
     if (profilePictureUrl == null) return false;
     final url = profilePictureUrl!.trim();
-    if (url.isEmpty || url.toLowerCase() == 'null') return false;
+    if (url.isEmpty ||
+        url.toLowerCase() == 'null' ||
+        url.toLowerCase() == 'undefined') {
+      return false;
+    }
     return url.startsWith('http://') ||
         url.startsWith('https://') ||
-        url.startsWith('data:image/') ||
-        url.startsWith('/');
+        url.startsWith('data:') ||
+        url.startsWith('base64,') ||
+        url.startsWith('blob:') ||
+        url.startsWith('assets/') ||
+        url.startsWith('/') ||
+        url.contains('.');
   }
 
   /// Returns the fully qualified URL for network images, or raw data URL for base64 images.
@@ -212,7 +220,10 @@ class UserModel {
     final url = profilePictureUrl!.trim();
     if (url.startsWith('http://') ||
         url.startsWith('https://') ||
-        url.startsWith('data:image/')) {
+        url.startsWith('data:') ||
+        url.startsWith('base64,') ||
+        url.startsWith('blob:') ||
+        url.startsWith('assets/')) {
       return url;
     }
     if (url.startsWith('/')) {

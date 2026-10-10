@@ -779,7 +779,7 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -788,17 +788,21 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF0F172A),
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : const Color(0xFF0F172A),
                         letterSpacing: -0.5,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text(
                       'Tactile on-screen virtual keyboard with smart input',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF64748B),
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF64748B),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

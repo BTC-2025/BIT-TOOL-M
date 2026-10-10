@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/models/user_model.dart';
 import '../../core/providers/theme_provider.dart';
 import '../../core/providers/auth_provider.dart';
 import '../../core/widgets/user_avatar.dart';
+import '../auth/sign_in_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -13,7 +15,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _fallbackDarkMode = false;
-  bool _isProfileExpanded = false;
+  bool _isRefreshing = false;
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +95,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  String _formatStorageString(UserModel? user) {
+    if (user == null) return '0.00 GB / 15.00 GB';
+    final num usedBytes = user.storageUsed ?? 0;
+    final num limitBytes = (user.storageLimit != null && user.storageLimit! > 0)
+        ? user.storageLimit!
+        : (15 * 1024 * 1024 * 1024);
+    final double usedGb = usedBytes / (1024 * 1024 * 1024);
+    final double limitGb = limitBytes / (1024 * 1024 * 1024);
+    return '${usedGb.toStringAsFixed(2)} GB / ${limitGb.toStringAsFixed(2)} GB';
+  }
+
+  double _getStorageProgress(UserModel? user) {
+    if (user == null) return 0.0;
+    final num usedBytes = user.storageUsed ?? 0;
+    final num limitBytes = (user.storageLimit != null && user.storageLimit! > 0)
+        ? user.storageLimit!
+        : (15 * 1024 * 1024 * 1024);
+    if (limitBytes <= 0) return 0.0;
+    return (usedBytes / limitBytes).clamp(0.0, 1.0).toDouble();
+  }
+
   // ── Profile Card ──────────────────────────────────────────────────────────
   Widget _buildProfileCard(bool isDark) {
     AuthProvider? authProvider;
@@ -103,15 +126,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
 
     final user = authProvider?.user;
-    final displayName = user?.displayName ?? 'Ravi Kumar C';
-    final email = (user != null && user.email.isNotEmpty)
-        ? user.email
-        : 'ravinew2004@bnxmail.com';
-    final accountType = user?.accountType ?? 'BUSINESS';
-    final phoneNumber = user?.phoneNumber ?? '8072909876';
-    final recoveryEmail = user?.recoveryEmail ?? 'chandran123@bnxmail.com';
-    final dob = user?.dob ?? 'Not set';
-    final initials = user?.initials ?? 'R';
+    final isLoading = authProvider?.isLoading ?? false;
+    final hasError = authProvider?.hasError ?? false;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -142,9 +158,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF0F172A)
-                      : const Color(0xFF0F172A),
+                  color: const Color(0xFF0F172A),
                   borderRadius: BorderRadius.circular(12),
                   border: isDark
                       ? Border.all(color: const Color(0xFF334155))
@@ -173,17 +187,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Profile',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF0F172A),
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          'Profile',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          ),
+                        ),
+                        if (user != null && user.isPrimary) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: const Text(
+                              'Primary',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF10B981),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Your personal information',
+                      user != null
+                          ? 'Active account and personal credentials'
+                          : 'Your personal information',
                       style: TextStyle(
                         fontSize: 13,
                         color: isDark
@@ -194,234 +238,601 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
               ),
+              if (user != null)
+                IconButton(
+                  tooltip: 'Refresh Profile',
+                  onPressed: (_isRefreshing || isLoading)
+                      ? null
+                      : () async {
+                          setState(() => _isRefreshing = true);
+                          try {
+                            await authProvider?.fetchCurrentUser(isRetry: true);
+                          } finally {
+                            if (mounted) setState(() => _isRefreshing = false);
+                          }
+                        },
+                  icon: (_isRefreshing || isLoading)
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Icon(
+                          Icons.refresh_rounded,
+                          size: 20,
+                          color: isDark
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF64748B),
+                        ),
+                ),
             ],
           ),
           const SizedBox(height: 18),
 
-          // User Identity Card
-          InkWell(
-            onTap: () {
-              setState(() {
-                _isProfileExpanded = !_isProfileExpanded;
-              });
-            },
-            borderRadius: BorderRadius.circular(14),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? const Color(0xFF0F172A)
-                    : const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: isDark
-                      ? const Color(0xFF334155)
-                      : const Color(0xFFF1F5F9),
-                ),
-              ),
-              child: Row(
-                children: [
-                  // Avatar Circle / Image
-                  user?.hasValidProfilePicture == true
-                      ? UserAvatar(user: user, radius: 22)
-                      : Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? const Color(0xFF1E3A8A).withValues(alpha: 0.6)
-                                : const Color(0xFFDBEAFE),
-                            shape: BoxShape.circle,
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            initials,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: isDark
-                                  ? const Color(0xFF93C5FD)
-                                  : const Color(0xFF2563EB),
-                            ),
-                          ),
-                        ),
-                  const SizedBox(width: 12),
-                  // Name and Email
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              displayName,
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                color: isDark
-                                    ? Colors.white
-                                    : const Color(0xFF0F172A),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Container(
-                              width: 16,
-                              height: 16,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF10B981),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.check,
-                                color: Colors.white,
-                                size: 11,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          email,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: isDark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF64748B),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    _isProfileExpanded
-                        ? Icons.keyboard_arrow_up_rounded
-                        : Icons.keyboard_arrow_down_rounded,
-                    color: isDark
-                        ? const Color(0xFF94A3B8)
-                        : const Color(0xFF94A3B8),
-                    size: 20,
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // User Identity Card / Guest Banner
+          if (user != null)
+            _buildAuthenticatedIdentity(isDark, user, authProvider)
+          else
+            _buildGuestIdentity(isDark, isLoading, hasError, authProvider),
           const SizedBox(height: 14),
 
-          // 2x2 Info Tiles Grid
-          Row(
-            children: [
-              Expanded(
-                child: _buildInfoTile(
-                  isDark: isDark,
-                  icon: Icons.work_outline_rounded,
-                  label: 'ACCOUNT TYPE',
-                  value: accountType,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _buildInfoTile(
-                  isDark: isDark,
-                  icon: Icons.phone_outlined,
-                  label: 'PHONE NUMBER',
-                  value: phoneNumber,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: _buildInfoTile(
-                  isDark: isDark,
-                  icon: Icons.mail_outline_rounded,
-                  label: 'RECOVERY EMAIL',
-                  value: recoveryEmail,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _buildInfoTile(
-                  isDark: isDark,
-                  icon: Icons.calendar_today_outlined,
-                  label: 'DATE OF BIRTH',
-                  value: dob,
-                ),
-              ),
-            ],
-          ),
+          // Dynamic Info Tiles Grid
+          _buildInfoGrid(isDark, user),
+
           const SizedBox(height: 16),
 
           // Storage Bar Section
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          _buildStorageSection(isDark, user),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAuthenticatedIdentity(
+    bool isDark,
+    UserModel user,
+    AuthProvider? authProvider,
+  ) {
+    final displayName = user.displayName;
+    final email = user.email;
+    final orgName = user.organization?.name;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Dynamic Profile Picture with UserAvatar
+          Container(
+            padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(14),
+              shape: BoxShape.circle,
               border: Border.all(
                 color: isDark
-                    ? const Color(0xFF334155)
-                    : const Color(0xFFF1F5F9),
+                    ? const Color(0xFF3B82F6)
+                    : const Color(0xFF2563EB),
+                width: 2,
               ),
             ),
+            child: UserAvatar(
+              user: user,
+              radius: 22,
+            ),
+          ),
+          const SizedBox(width: 14),
+
+          // Name, Verification, and Email
+          Expanded(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.dns_outlined,
-                          size: 16,
-                          color: isDark
-                              ? const Color(0xFF94A3B8)
-                              : const Color(0xFF94A3B8),
+                    Flexible(
+                      child: Text(
+                        displayName,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Storage',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: isDark
-                                ? const Color(0xFFE2E8F0)
-                                : const Color(0xFF334155),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Icon(
+                      Icons.verified_rounded,
+                      size: 16,
+                      color: Color(0xFF10B981),
+                    ),
+                    if (orgName != null && orgName.trim().isNotEmpty) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: (isDark
+                                  ? const Color(0xFF3B82F6)
+                                  : const Color(0xFF2563EB))
+                              .withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: (isDark
+                                    ? const Color(0xFF3B82F6)
+                                    : const Color(0xFF2563EB))
+                                .withValues(alpha: 0.25),
                           ),
                         ),
-                      ],
+                        child: Text(
+                          orgName,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? const Color(0xFF93C5FD)
+                                : const Color(0xFF1D4ED8),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  email,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+
+          // Account Options Dropdown
+          PopupMenuButton<String>(
+            tooltip: 'Account Options',
+            offset: const Offset(0, 42),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+              side: BorderSide(
+                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              ),
+            ),
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xFF1E293B)
+                    : const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 18,
+                color: isDark
+                    ? const Color(0xFF94A3B8)
+                    : const Color(0xFF64748B),
+              ),
+            ),
+            onSelected: (value) {
+              if (value == 'switch') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SignInScreen()),
+                );
+              } else if (value == 'sign_out') {
+                _confirmSignOut(authProvider);
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem<String>(
+                value: 'switch',
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.swap_horiz_rounded,
+                      size: 18,
+                      color: isDark
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF64748B),
                     ),
+                    const SizedBox(width: 10),
                     Text(
-                      '0.02 GB / 15.00 GB',
+                      'Switch Account',
                       style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: isDark
-                            ? const Color(0xFF94A3B8)
-                            : const Color(0xFF64748B),
+                        fontSize: 13,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 9),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(
-                    value: 0.02 / 15.00,
-                    minHeight: 5,
-                    backgroundColor: isDark
-                        ? const Color(0xFF334155)
-                        : const Color(0xFFE2E8F0),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      Color(0xFF2563EB),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem<String>(
+                value: 'sign_out',
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.logout_rounded,
+                      size: 18,
+                      color: Color(0xFFEF4444),
                     ),
+                    SizedBox(width: 10),
+                    Text(
+                      'Sign Out',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFEF4444),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGuestIdentity(
+    bool isDark,
+    bool isLoading,
+    bool hasError,
+    AuthProvider? authProvider,
+  ) {
+    if (isLoading) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+          ),
+        ),
+        child: Row(
+          children: [
+            const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            const SizedBox(width: 14),
+            Text(
+              'Connecting to B2Auth...',
+              style: TextStyle(
+                fontSize: 13,
+                color: isDark
+                    ? const Color(0xFF94A3B8)
+                    : const Color(0xFF64748B),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.person_outline_rounded,
+              size: 22,
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Guest Account',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  hasError
+                      ? 'Session expired or offline'
+                      : 'Sign in to sync your tools & preferences',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
                   ),
                 ),
               ],
             ),
+          ),
+          const SizedBox(width: 12),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SignInScreen()),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2563EB),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            icon: const Icon(Icons.login_rounded, size: 16),
+            label: const Text(
+              'Sign In',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoGrid(bool isDark, UserModel? user) {
+    String accountType = user?.accountType?.trim() ?? '';
+    if (accountType.isEmpty) {
+      accountType = user != null ? 'STANDARD' : 'GUEST';
+    } else {
+      accountType = accountType.toUpperCase();
+    }
+
+    final phoneNumber = (user?.phoneNumber?.trim().isNotEmpty ?? false)
+        ? user!.phoneNumber!.trim()
+        : 'Not set';
+
+    final recoveryEmail = (user?.recoveryEmail?.trim().isNotEmpty ?? false)
+        ? user!.recoveryEmail!.trim()
+        : 'Not set';
+
+    final dob =
+        (user?.dob?.trim().isNotEmpty ?? false) ? user!.dob!.trim() : 'Not set';
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _buildInfoTile(
+                isDark: isDark,
+                icon: Icons.work_outline_rounded,
+                label: 'ACCOUNT TYPE',
+                value: accountType,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildInfoTile(
+                isDark: isDark,
+                icon: Icons.phone_outlined,
+                label: 'PHONE NUMBER',
+                value: phoneNumber,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _buildInfoTile(
+                isDark: isDark,
+                icon: Icons.mail_outline_rounded,
+                label: 'RECOVERY EMAIL',
+                value: recoveryEmail,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildInfoTile(
+                isDark: isDark,
+                icon: Icons.calendar_today_outlined,
+                label: 'DATE OF BIRTH',
+                value: dob,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStorageSection(bool isDark, UserModel? user) {
+    final storageString = _formatStorageString(user);
+    final progress = _getStorageProgress(user);
+    final percent = (progress * 100).round();
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.dns_outlined,
+                    size: 16,
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF94A3B8),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Storage',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: isDark
+                          ? const Color(0xFFE2E8F0)
+                          : const Color(0xFF334155),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Text(
+                    storageString,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: isDark
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF64748B),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 1.5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: (isDark
+                              ? const Color(0xFF3B82F6)
+                              : const Color(0xFF2563EB))
+                          .withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      '$percent%',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: isDark
+                            ? const Color(0xFF60A5FA)
+                            : const Color(0xFF2563EB),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 9),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: isDark
+                  ? const Color(0xFF334155)
+                  : const Color(0xFFE2E8F0),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                progress > 0.9 ? const Color(0xFFEF4444) : const Color(0xFF2563EB),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmSignOut(AuthProvider? authProvider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Sign Out',
+          style: TextStyle(
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to sign out of this account on Bit Tool?',
+          style: TextStyle(
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            fontSize: 14,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(dialogCtx);
+              await authProvider?.signOut();
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Successfully signed out'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Sign Out'),
           ),
         ],
       ),

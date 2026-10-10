@@ -186,21 +186,22 @@ class _NotesScreenState extends State<NotesScreen> {
               child: Container(
                 width: 460,
                 padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Edit Note',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: textColor,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Edit Note',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: textColor,
+                            ),
                           ),
-                        ),
                         IconButton(
                           icon: const Icon(Icons.close_rounded, size: 20),
                           onPressed: () => Navigator.pop(ctx),
@@ -312,6 +313,7 @@ class _NotesScreenState extends State<NotesScreen> {
                       ],
                     ),
                   ],
+                ),
                 ),
               ),
             );
@@ -661,9 +663,7 @@ class _NotesScreenState extends State<NotesScreen> {
                       ElevatedButton(
                         onPressed: _isSavingInline ? null : _saveInlineNote,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: isDark
-                              ? const Color(0xFF2563EB)
-                              : const Color(0xFF0F172A),
+                          backgroundColor: const Color(0xFF2563EB),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 18,
@@ -722,16 +722,12 @@ class _NotesScreenState extends State<NotesScreen> {
                       ),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? (isDark
-                                  ? const Color(0xFF2563EB)
-                                  : const Color(0xFF0F172A))
+                            ? const Color(0xFF2563EB)
                             : (isDark ? const Color(0xFF1E293B) : Colors.white),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: isSelected
-                              ? (isDark
-                                    ? const Color(0xFF2563EB)
-                                    : const Color(0xFF0F172A))
+                              ? const Color(0xFF2563EB)
                               : (isDark
                                     ? const Color(0xFF334155)
                                     : const Color(0xFFE2E8F0)),

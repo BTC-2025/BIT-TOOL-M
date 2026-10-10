@@ -27,12 +27,25 @@ class UserAvatar extends StatelessWidget {
     if (user != null && user!.hasValidProfilePicture) {
       final picUrl = user!.resolvedProfilePictureUrl;
       if (picUrl != null && picUrl.isNotEmpty) {
-        if (picUrl.startsWith('data:image/') || picUrl.startsWith('base64,')) {
+        if (picUrl.startsWith('assets/')) {
+          return ClipOval(
+            child: Image.asset(
+              picUrl,
+              width: radius * 2,
+              height: radius * 2,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _buildFallback(bgColor),
+            ),
+          );
+        }
+
+        if (picUrl.startsWith('data:') || picUrl.startsWith('base64,')) {
           try {
             final base64String = picUrl.contains(',')
                 ? picUrl.split(',').last
                 : picUrl;
-            final bytes = base64Decode(base64String.trim());
+            final cleanBase64 = base64String.replaceAll(RegExp(r'\s+'), '');
+            final bytes = base64Decode(cleanBase64);
             return ClipOval(
               child: Image.memory(
                 bytes,

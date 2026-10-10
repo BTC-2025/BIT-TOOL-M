@@ -57,46 +57,49 @@ class NotificationApiService {
 
       if (rawResponse is List) {
         notifications = rawResponse
-            .whereType<Map<String, dynamic>>()
-            .map((item) => NotificationModel.fromJson(item))
+            .whereType<Map>()
+            .map((item) => NotificationModel.fromJson(Map<String, dynamic>.from(item)))
             .toList();
-      } else if (rawResponse is Map<String, dynamic>) {
-        final success = rawResponse['success'];
-        final status = rawResponse['status']?.toString().toLowerCase();
+      } else if (rawResponse is Map) {
+        final map = Map<String, dynamic>.from(rawResponse);
+        final success = map['success'];
+        final status = map['status']?.toString().toLowerCase();
         if (success == false || status == 'error') {
           final message =
-              rawResponse['message']?.toString() ??
+              map['message']?.toString() ??
               'Failed to retrieve notifications.';
           throw ApiException(message);
         }
 
         var listData =
-            rawResponse['data'] ??
-            rawResponse['notifications'] ??
-            rawResponse['results'] ??
-            rawResponse['items'];
+            map['data'] ??
+            map['notifications'] ??
+            map['results'] ??
+            map['items'];
 
-        if (listData is Map<String, dynamic>) {
+        if (listData is Map) {
+          final nestedMap = Map<String, dynamic>.from(listData);
           listData =
-              listData['notifications'] ??
-              listData['items'] ??
-              listData['results'] ??
-              listData['data'];
+              nestedMap['notifications'] ??
+              nestedMap['items'] ??
+              nestedMap['results'] ??
+              nestedMap['data'];
         }
 
         if (listData is List) {
           notifications = listData
-              .whereType<Map<String, dynamic>>()
-              .map((item) => NotificationModel.fromJson(item))
+              .whereType<Map>()
+              .map((item) => NotificationModel.fromJson(Map<String, dynamic>.from(item)))
               .toList();
-        } else if (rawResponse.containsKey('data') &&
-            rawResponse['data'] == null) {
+        } else if (map.containsKey('data') && map['data'] == null) {
           notifications = [];
         } else {
           throw const InvalidResponseException(
             'Server returned an unexpected notifications response format.',
           );
         }
+      } else if (rawResponse == null) {
+        notifications = [];
       } else {
         throw const InvalidResponseException(
           'Server returned an unexpected notifications response format.',
@@ -169,9 +172,10 @@ class NotificationApiService {
         token: token,
       );
 
-      if (rawResponse is Map<String, dynamic>) {
-        final status = rawResponse['status']?.toString().toLowerCase();
-        final success = rawResponse['success'];
+      if (rawResponse is Map) {
+        final map = Map<String, dynamic>.from(rawResponse);
+        final status = map['status']?.toString().toLowerCase();
+        final success = map['success'];
         if (status == 'success' || success == true) {
           if (kDebugMode) {
             debugPrint(
@@ -180,10 +184,13 @@ class NotificationApiService {
           }
           return true;
         }
-        final message =
-            rawResponse['message']?.toString() ??
-            'Failed to mark notification as read.';
-        throw ApiException(message);
+        if (status == 'error' || success == false) {
+          final message =
+              map['message']?.toString() ??
+              'Failed to mark notification as read.';
+          throw ApiException(message);
+        }
+        return true;
       }
 
       if (kDebugMode) {
@@ -243,19 +250,23 @@ class NotificationApiService {
         token: token,
       );
 
-      if (rawResponse is Map<String, dynamic>) {
-        final status = rawResponse['status']?.toString().toLowerCase();
-        final success = rawResponse['success'];
+      if (rawResponse is Map) {
+        final map = Map<String, dynamic>.from(rawResponse);
+        final status = map['status']?.toString().toLowerCase();
+        final success = map['success'];
         if (status == 'success' || success == true) {
           if (kDebugMode) {
             debugPrint('[NotificationAPI] Read-all request succeeded.');
           }
           return true;
         }
-        final message =
-            rawResponse['message']?.toString() ??
-            'Failed to mark all notifications as read.';
-        throw ApiException(message);
+        if (status == 'error' || success == false) {
+          final message =
+              map['message']?.toString() ??
+              'Failed to mark all notifications as read.';
+          throw ApiException(message);
+        }
+        return true;
       }
 
       if (kDebugMode) {

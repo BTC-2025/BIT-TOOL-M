@@ -71,6 +71,8 @@ class NotificationModel {
     Map<String, dynamic>? metadata;
     if (json['metadata'] is Map<String, dynamic>) {
       metadata = json['metadata'] as Map<String, dynamic>;
+    } else if (json['metadata'] is Map) {
+      metadata = Map<String, dynamic>.from(json['metadata'] as Map);
     }
 
     return NotificationModel(

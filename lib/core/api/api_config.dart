@@ -1,11 +1,48 @@
 class ApiConfig {
   ApiConfig._();
 
-  /// Base URL for the Bit Tool APIs.
-  /// Configurable via VITE_API_BASE_URL environment define with https://api.bnxmail.com as default.
+  /// Base URL for BNX Mail SSO / Auth APIs.
+  /// Configurable via VITE_AUTH_API_BASE_URL environment define with https://api.bnxmail.com as default.
+  static const String _rawAuthBaseUrl = String.fromEnvironment(
+    'VITE_AUTH_API_BASE_URL',
+    defaultValue: 'https://api.bnxmail.com',
+  );
+
+  /// Normalized auth base URL without trailing slash.
+  static String get authBaseUrl {
+    var url = _rawAuthBaseUrl.trim();
+    while (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    return url;
+  }
+
+  /// Builds a URI targeting the BNX Auth service.
+  static Uri buildAuthUri(String endpoint) {
+    final cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/$endpoint';
+    if (authBaseUrl.endsWith('/api') && cleanEndpoint.startsWith('/api/')) {
+      return Uri.parse('$authBaseUrl${cleanEndpoint.substring(4)}');
+    }
+    return Uri.parse('$authBaseUrl$cleanEndpoint');
+  }
+
+  /// Endpoint to authenticate user with credentials.
+  static const String loginEndpoint = '/api/auth/login';
+
+  /// Endpoint to fetch current authenticated user profile.
+  static const String currentUserEndpoint = '/api/users/me';
+
+  /// Full URI for the login endpoint.
+  static Uri get loginUri => buildAuthUri(loginEndpoint);
+
+  /// Full URI for the current user endpoint.
+  static Uri get currentUserUri => buildAuthUri(currentUserEndpoint);
+
+  /// Base URL for the Bit Tool APIs (including Notifications).
+  /// Configurable via VITE_API_BASE_URL environment define with https://api.bit-tool.com/api as default.
   static const String _rawBaseUrl = String.fromEnvironment(
     'VITE_API_BASE_URL',
-    defaultValue: 'https://api.bnxmail.com',
+    defaultValue: 'https://api.bit-tool.com/api',
   );
 
   /// Normalized base URL without trailing slash.
@@ -20,30 +57,24 @@ class ApiConfig {
   /// Normalizes an endpoint with baseUrl, ensuring `/api` prefix consistency without duplicates.
   static Uri buildUri(String endpoint) {
     final cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/$endpoint';
-    if (baseUrl.endsWith('/api') && cleanEndpoint.startsWith('/api/')) {
-      return Uri.parse('$baseUrl${cleanEndpoint.substring(4)}');
+    if (baseUrl.endsWith('/api')) {
+      if (cleanEndpoint.startsWith('/api/')) {
+        return Uri.parse('$baseUrl${cleanEndpoint.substring(4)}');
+      }
+      return Uri.parse('$baseUrl$cleanEndpoint');
+    }
+    if (!cleanEndpoint.startsWith('/api/') && cleanEndpoint != '/api') {
+      return Uri.parse('$baseUrl/api$cleanEndpoint');
     }
     return Uri.parse('$baseUrl$cleanEndpoint');
   }
 
-  /// Endpoint to authenticate user with credentials.
-  static const String loginEndpoint = '/api/auth/login';
-
-  /// Endpoint to fetch current authenticated user profile.
-  static const String currentUserEndpoint = '/api/users/me';
-
-  /// Full URI for the login endpoint.
-  static Uri get loginUri => buildUri(loginEndpoint);
-
-  /// Full URI for the current user endpoint.
-  static Uri get currentUserUri => buildUri(currentUserEndpoint);
-
   /// Notifications endpoints
-  static const String notificationsEndpoint = '/api/notifications';
+  static const String notificationsEndpoint = '/notifications';
   static String notificationReadEndpoint(String id) =>
-      '/api/notifications/$id/read';
+      '/notifications/$id/read';
   static const String notificationsReadAllEndpoint =
-      '/api/notifications/read-all';
+      '/notifications/read-all';
 
   /// Full URI for the notifications endpoint.
   static Uri get notificationsUri => buildUri(notificationsEndpoint);
@@ -301,6 +332,33 @@ class ApiConfig {
       buildCalculatorUri('/compare/sessions/$sessionId/items');
   static Uri calculatorCompareSessionItemUri(String sessionId, String itemId) =>
       buildCalculatorUri('/compare/sessions/$sessionId/items/$itemId');
+
+  /// Section 7: External Third-Party APIs (No Auth Required)
+  /// Weather Data Endpoint (Open-Meteo)
+  static Uri weatherForecastUri({
+    required double latitude,
+    required double longitude,
+  }) {
+    return Uri.parse(
+      'https://api.open-meteo.com/v1/forecast'
+      '?latitude=$latitude&longitude=$longitude'
+      '&daily=weathercode,temperature_2m_max,temperature_2m_min'
+      '&hourly=temperature_2m'
+      '&current=temperature_2m,is_day,relative_humidity_2m,wind_speed_10m'
+      '&timezone=auto',
+    );
+  }
+
+  /// Reverse Geocoding Endpoint (BigDataCloud)
+  static Uri reverseGeocodingUri({
+    required double latitude,
+    required double longitude,
+  }) {
+    return Uri.parse(
+      'https://api.bigdatacloud.net/data/reverse-geocode-client'
+      '?latitude=$latitude&longitude=$longitude&localityLanguage=en',
+    );
+  }
 
   /// Standard request timeout.
   static const Duration requestTimeout = Duration(seconds: 15);

@@ -53,6 +53,9 @@ class ComparisonRow {
   double qtyB;
   double discountA; // Percentage discount for Side A
   double discountB; // Percentage discount for Side B
+  final Map<String, double?> extraValues;
+  final Map<String, double> extraQtys;
+  final Map<String, double> extraDiscounts;
 
   ComparisonRow({
     this.description = '',
@@ -62,7 +65,12 @@ class ComparisonRow {
     this.qtyB = 1.0,
     this.discountA = 0.0,
     this.discountB = 0.0,
-  });
+    Map<String, double?>? extraValues,
+    Map<String, double>? extraQtys,
+    Map<String, double>? extraDiscounts,
+  })  : extraValues = extraValues ?? {},
+        extraQtys = extraQtys ?? {},
+        extraDiscounts = extraDiscounts ?? {};
 
   double get finalA {
     final base = (valueA ?? 0.0) * qtyA;
@@ -74,6 +82,84 @@ class ComparisonRow {
     return base - (base * (discountB / 100.0));
   }
 
+  double? getValue(String side) {
+    if (side == 'A') return valueA;
+    if (side == 'B') return valueB;
+    return extraValues[side];
+  }
+
+  void setValue(String side, double? val) {
+    if (side == 'A') {
+      valueA = val;
+    } else if (side == 'B') {
+      valueB = val;
+    } else {
+      if (val == null) {
+        extraValues.remove(side);
+      } else {
+        extraValues[side] = val;
+      }
+    }
+  }
+
+  double getQty(String side) {
+    if (side == 'A') return qtyA;
+    if (side == 'B') return qtyB;
+    return extraQtys[side] ?? 1.0;
+  }
+
+  void setQty(String side, double q) {
+    if (side == 'A') {
+      qtyA = q;
+    } else if (side == 'B') {
+      qtyB = q;
+    } else {
+      extraQtys[side] = q;
+    }
+  }
+
+  double getDiscount(String side) {
+    if (side == 'A') return discountA;
+    if (side == 'B') return discountB;
+    return extraDiscounts[side] ?? 0.0;
+  }
+
+  void setDiscount(String side, double d) {
+    if (side == 'A') {
+      discountA = d;
+    } else if (side == 'B') {
+      discountB = d;
+    } else {
+      extraDiscounts[side] = d;
+    }
+  }
+
+  double getFinal(String side) {
+    if (side == 'A') return finalA;
+    if (side == 'B') return finalB;
+    final val = extraValues[side];
+    final q = extraQtys[side] ?? 1.0;
+    final d = extraDiscounts[side] ?? 0.0;
+    final base = (val ?? 0.0) * q;
+    return base - (base * (d / 100.0));
+  }
+
+  void removeSide(String side) {
+    if (side == 'A') {
+      valueA = null;
+      qtyA = 1.0;
+      discountA = 0.0;
+    } else if (side == 'B') {
+      valueB = null;
+      qtyB = 1.0;
+      discountB = 0.0;
+    } else {
+      extraValues.remove(side);
+      extraQtys.remove(side);
+      extraDiscounts.remove(side);
+    }
+  }
+
   Map<String, dynamic> toJson() => {
     'description': description,
     'valueA': valueA,
@@ -82,16 +168,28 @@ class ComparisonRow {
     'qtyB': qtyB,
     'discountA': discountA,
     'discountB': discountB,
+    if (extraValues.isNotEmpty) 'extraValues': extraValues,
+    if (extraQtys.isNotEmpty) 'extraQtys': extraQtys,
+    if (extraDiscounts.isNotEmpty) 'extraDiscounts': extraDiscounts,
   };
 
   factory ComparisonRow.fromJson(Map<String, dynamic> json) => ComparisonRow(
-    description: json['description'],
-    valueA: json['valueA'],
-    valueB: json['valueB'],
-    qtyA: json['qtyA'],
-    qtyB: json['qtyB'],
-    discountA: json['discountA'],
-    discountB: json['discountB'],
+    description: json['description'] ?? '',
+    valueA: json['valueA'] != null ? (json['valueA'] as num).toDouble() : null,
+    valueB: json['valueB'] != null ? (json['valueB'] as num).toDouble() : null,
+    qtyA: json['qtyA'] != null ? (json['qtyA'] as num).toDouble() : 1.0,
+    qtyB: json['qtyB'] != null ? (json['qtyB'] as num).toDouble() : 1.0,
+    discountA: json['discountA'] != null ? (json['discountA'] as num).toDouble() : 0.0,
+    discountB: json['discountB'] != null ? (json['discountB'] as num).toDouble() : 0.0,
+    extraValues: (json['extraValues'] as Map<String, dynamic>?)?.map(
+      (k, v) => MapEntry(k, v != null ? (v as num).toDouble() : null),
+    ),
+    extraQtys: (json['extraQtys'] as Map<String, dynamic>?)?.map(
+      (k, v) => MapEntry(k, (v as num).toDouble()),
+    ),
+    extraDiscounts: (json['extraDiscounts'] as Map<String, dynamic>?)?.map(
+      (k, v) => MapEntry(k, (v as num).toDouble()),
+    ),
   );
 }
 

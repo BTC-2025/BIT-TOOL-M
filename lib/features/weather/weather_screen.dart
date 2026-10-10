@@ -1,12 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../../core/models/weather_model.dart';
+import '../../core/services/weather_api_service.dart';
 
 class WeatherScreen extends StatefulWidget {
-  const WeatherScreen({super.key});
+  final WeatherApiService? weatherApiService;
+  const WeatherScreen({super.key, this.weatherApiService});
 
   @override
   State<WeatherScreen> createState() => _WeatherScreenState();
@@ -14,6 +16,7 @@ class WeatherScreen extends StatefulWidget {
 
 class _WeatherScreenState extends State<WeatherScreen> {
   final TextEditingController _searchController = TextEditingController();
+  late final WeatherApiService _weatherApiService;
   bool _showSearchBar = false;
 
   // Active location and metrics
@@ -30,8 +33,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
   int _pressure = 1012;
   double _visibility = 10.0;
   bool _isLoading = false;
-  String _sunrise = '05:59 AM';
-  String _sunset = '05:55 PM';
+  final String _sunrise = '05:59 AM';
+  final String _sunset = '05:55 PM';
   double _minTemp = 26.0;
   double _maxTemp = 33.0;
 
@@ -45,6 +48,16 @@ class _WeatherScreenState extends State<WeatherScreen> {
     'London',
     'New York',
   ];
+
+  static const Map<String, List<dynamic>> _knownCityCoordinates = {
+    'tiruvallur': [13.1439, 79.9079, 'Tiruvallur', 'Tamil Nadu'],
+    'chennai': [13.0827, 80.2707, 'Chennai', 'Tamil Nadu'],
+    'bengaluru': [12.9716, 77.5946, 'Bengaluru', 'Karnataka'],
+    'mumbai': [19.0760, 72.8777, 'Mumbai', 'Maharashtra'],
+    'delhi': [28.6139, 77.2090, 'Delhi', 'Delhi'],
+    'london': [51.5074, -0.1278, 'London', 'United Kingdom'],
+    'new york': [40.7128, -74.0060, 'New York', 'United States'],
+  };
 
   // 24-hour forecast
   List<Map<String, dynamic>> _hourlyForecast = [
@@ -94,6 +107,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
   @override
   void initState() {
     super.initState();
+    _weatherApiService = widget.weatherApiService ?? WeatherApiService();
     _fetchSafeInitialWeather();
   }
 
@@ -105,14 +119,12 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
   Future<void> _fetchSafeInitialWeather() async {
     // Proactively fetch weather using IP Geolocation or default coordinates
-    // ensuring zero crashes or timeouts on macOS, Linux, Windows, Web, or Mobile
     await _tryIpGeolocationOrFallback('Initializing weather...');
   }
 
   Future<void> _detectCurrentLocation() async {
     setState(() => _isLoading = true);
 
-    // On web or desktop platforms, geolocator can fail if permissions aren't set
     try {
       if (!kIsWeb &&
           (defaultTargetPlatform == TargetPlatform.android ||
@@ -130,35 +142,22 @@ class _WeatherScreenState extends State<WeatherScreen> {
               timeLimit: const Duration(seconds: 4),
             );
 
-            // Reverse geocode
-            try {
-              List<Placemark> placemarks = await placemarkFromCoordinates(
-                position.latitude,
-                position.longitude,
-              );
-              if (placemarks.isNotEmpty) {
-                final p = placemarks[0];
-                final city =
-                    p.locality ??
-                    p.subAdministrativeArea ??
-                    p.administrativeArea ??
-                    'Local Area';
-                final country = p.country ?? '';
-                await _fetchWeatherFromCoordinates(
-                  position.latitude,
-                  position.longitude,
-                  city,
-                  country,
-                );
-                return;
-              }
-            } catch (_) {}
+            // Reverse geocode via BigDataCloud API (Section 7)
+            final geo = await _weatherApiService.reverseGeocode(
+              latitude: position.latitude,
+              longitude: position.longitude,
+            );
+
+            final city = geo['city']?.isNotEmpty == true
+                ? geo['city']!
+                : 'My Location';
+            final country = geo['country'] ?? '';
 
             await _fetchWeatherFromCoordinates(
               position.latitude,
               position.longitude,
-              'My Location',
-              '',
+              city,
+              country,
             );
             return;
           }
@@ -175,7 +174,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
     try {
       final ipRes = await http
           .get(Uri.parse('https://ipapi.co/json/'))
-          .timeout(const Duration(seconds: 4));
+          .timeout(const Duration(seconds: 3));
 
       if (ipRes.statusCode == 200) {
         final data = json.decode(ipRes.body);
@@ -189,12 +188,19 @@ class _WeatherScreenState extends State<WeatherScreen> {
       }
     } catch (_) {}
 
-    // Fallback to default coordinates for Tiruvallur / Chennai
+    // Fallback coordinates for Tiruvallur / Chennai
+    final geo = await _weatherApiService.reverseGeocode(
+      latitude: 13.1439,
+      longitude: 79.9079,
+    );
+    final city = geo['city']?.isNotEmpty == true ? geo['city']! : 'Tiruvallur';
+    final country = geo['country']?.isNotEmpty == true ? geo['country']! : 'Tamil Nadu';
+
     await _fetchWeatherFromCoordinates(
       13.1439,
       79.9079,
-      'Tiruvallur',
-      'Tamil Nadu',
+      city,
+      country,
     );
   }
 
@@ -207,151 +213,110 @@ class _WeatherScreenState extends State<WeatherScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final weatherUrl = Uri.parse(
-        'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon'
-        '&current_weather=true&hourly=temperature_2m,relativehumidity_2m,surface_pressure,visibility'
-        '&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max'
-        '&timezone=auto',
+      // If city or country is missing, attempt reverse geocoding via BigDataCloud (Section 7)
+      if (city.isEmpty || city == 'My Location' || country.isEmpty) {
+        final geo = await _weatherApiService.reverseGeocode(
+          latitude: lat,
+          longitude: lon,
+        );
+        if (geo['city']?.isNotEmpty == true) {
+          city = geo['city']!;
+        }
+        if (geo['country']?.isNotEmpty == true) {
+          country = geo['country']!;
+        }
+      }
+
+      // Fetch Weather Data via Open-Meteo API (Section 7)
+      final WeatherDataModel? weatherData = await _weatherApiService.fetchForecast(
+        latitude: lat,
+        longitude: lon,
+        city: city,
+        country: country,
       );
 
-      final response = await http
-          .get(weatherUrl)
-          .timeout(const Duration(seconds: 5));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final current = data['current_weather'];
-        final daily = data['daily'];
-        final hourly = data['hourly'];
-
-        final tempVal = (current['temperature'] as num).toDouble();
-        final windVal = (current['windspeed'] as num).toDouble();
-        final weatherCode = current['weathercode'] as int;
-
-        String conditionStr = _getConditionFromCode(weatherCode);
-
-        // Daily min / max
-        double minT = (daily['temperature_2m_min'][0] as num).toDouble();
-        double maxT = (daily['temperature_2m_max'][0] as num).toDouble();
-
-        // Sunrise & sunset
-        String srStr = daily['sunrise'][0].toString();
-        String ssStr = daily['sunset'][0].toString();
-        String formatTime(String iso) {
-          try {
-            final dt = DateTime.parse(iso);
-            final h = dt.hour > 12
-                ? dt.hour - 12
-                : (dt.hour == 0 ? 12 : dt.hour);
-            final m = dt.minute.toString().padLeft(2, '0');
-            final ampm = dt.hour >= 12 ? 'PM' : 'AM';
-            return '${h.toString().padLeft(2, '0')}:$m $ampm';
-          } catch (_) {
-            return iso;
+      if (weatherData != null && mounted) {
+        setState(() {
+          _activeCity = weatherData.city;
+          _activeCountry = weatherData.country;
+          _temp = weatherData.current.temperature;
+          _feelsLike = double.parse(
+            (weatherData.current.temperature +
+                    (weatherData.current.humidity > 60 ? 2.5 : -1.0))
+                .toStringAsFixed(1),
+          );
+          _wind = weatherData.current.windSpeed;
+          _condition = weatherData.current.condition;
+          _humidity = weatherData.current.humidity;
+          _minTemp = weatherData.minTemp;
+          _maxTemp = weatherData.maxTemp;
+          _uvIndex = (weatherData.current.temperature / 5).clamp(1, 11).round();
+          _airQuality = 'Good';
+          _aqi = 42;
+          _pressure = 1012;
+          _visibility = 10.0;
+          if (weatherData.hourly.isNotEmpty) {
+            _hourlyForecast =
+                weatherData.hourly.map((h) => h.toMap()).toList();
           }
-        }
-
-        // Humidity
-        int hum = 68;
-        if (hourly != null && hourly['relativehumidity_2m'] != null) {
-          final humList = hourly['relativehumidity_2m'] as List;
-          if (humList.isNotEmpty) {
-            hum = (humList[0] as num).toInt();
+          if (weatherData.daily.isNotEmpty) {
+            _dailyForecast =
+                weatherData.daily.map((d) => d.toMap()).toList();
           }
-        }
-
-        // Hourly forecast list
-        List<Map<String, dynamic>> newHourly = [];
-        final currentHour = DateTime.now().hour;
-        if (hourly != null &&
-            hourly['time'] != null &&
-            hourly['temperature_2m'] != null) {
-          final times = hourly['time'] as List;
-          final temps = hourly['temperature_2m'] as List;
-          for (int i = 0; i < times.length && i < 24; i += 2) {
-            final tStr = times[i].toString();
-            final hVal =
-                int.tryParse(tStr.split('T').last.split(':').first) ?? i;
-            final isNow =
-                (hVal == currentHour) ||
-                (hVal <= currentHour && hVal + 2 > currentHour);
-            final isDay = hVal >= 6 && hVal < 18;
-            newHourly.add({
-              'time': isNow ? 'Now' : '${hVal.toString().padLeft(2, '0')}:00',
-              'temp': (temps[i] as num).round(),
-              'isDay': isDay,
-              'isNow': isNow,
-              'pop': (i * 7) % 35,
-            });
-          }
-        }
-
-        // Daily forecast list
-        List<Map<String, dynamic>> newDaily = [];
-        if (daily != null && daily['time'] != null) {
-          final days = daily['time'] as List;
-          final mins = daily['temperature_2m_min'] as List;
-          final maxs = daily['temperature_2m_max'] as List;
-          final codes = daily['weathercode'] as List;
-          final weekdays = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-
-          for (int i = 0; i < days.length && i < 7; i++) {
-            final dt = DateTime.parse(days[i].toString());
-            final dayName = i == 0 ? 'TODAY' : weekdays[dt.weekday - 1];
-            newDaily.add({
-              'day': dayName,
-              'min': (mins[i] as num).round(),
-              'max': (maxs[i] as num).round(),
-              'condition': _getConditionFromCode(codes[i] as int),
-              'pop': (10 + (i * 12)) % 60,
-            });
-          }
-        }
-
-        if (mounted) {
-          setState(() {
-            _activeCity = city;
-            _activeCountry = country;
-            _temp = tempVal;
-            _feelsLike = tempVal + 2.5;
-            _wind = windVal;
-            _condition = conditionStr;
-            _humidity = hum;
-            _minTemp = minT;
-            _maxTemp = maxT;
-            _sunrise = formatTime(srStr);
-            _sunset = formatTime(ssStr);
-            _pressure = 1012;
-            _visibility = 10.0;
-            _uvIndex = (tempVal / 5).clamp(1, 11).round();
-            _airQuality = 'Good';
-            _aqi = 42;
-            if (newHourly.isNotEmpty) _hourlyForecast = newHourly;
-            if (newDaily.isNotEmpty) _dailyForecast = newDaily;
-            _isLoading = false;
-          });
-        }
+          _isLoading = false;
+        });
         return;
       }
     } catch (_) {}
 
     if (mounted) {
       setState(() {
-        _activeCity = city;
-        _activeCountry = country;
+        _activeCity = city.isNotEmpty ? city : 'Tiruvallur';
+        _activeCountry = country.isNotEmpty ? country : 'Tamil Nadu';
         _isLoading = false;
       });
     }
   }
 
   Future<void> _searchCity(String query) async {
-    if (query.trim().isEmpty) return;
+    final clean = query.trim();
+    if (clean.isEmpty) return;
     setState(() => _isLoading = true);
 
+    // 1. Check quick known cities
+    final key = clean.toLowerCase();
+    if (_knownCityCoordinates.containsKey(key)) {
+      final info = _knownCityCoordinates[key]!;
+      await _fetchWeatherFromCoordinates(
+        info[0] as double,
+        info[1] as double,
+        info[2] as String,
+        info[3] as String,
+      );
+      if (mounted) setState(() => _showSearchBar = false);
+      return;
+    }
+
+    // 2. Open-Meteo Geocoding Search
+    try {
+      final match = await _weatherApiService.searchLocation(clean);
+      if (match != null) {
+        await _fetchWeatherFromCoordinates(
+          match['latitude'] as double,
+          match['longitude'] as double,
+          match['city'] as String,
+          match['country'] as String,
+        );
+        if (mounted) setState(() => _showSearchBar = false);
+        return;
+      }
+    } catch (_) {}
+
+    // 3. Fallback Nominatim Search
     try {
       final searchUrl = Uri.parse(
-        'https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(query)}&format=json&limit=1&addressdetails=1',
+        'https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(clean)}&format=json&limit=1&addressdetails=1',
       );
-
       final res = await http
           .get(searchUrl, headers: {'User-Agent': 'BitToolsApp/1.0'})
           .timeout(const Duration(seconds: 4));
@@ -367,11 +332,11 @@ class _WeatherScreenState extends State<WeatherScreen> {
               addr['town'] ??
               addr['village'] ??
               addr['state'] ??
-              query;
+              clean;
           final country = addr['country'] ?? addr['state'] ?? '';
 
           await _fetchWeatherFromCoordinates(lat, lon, city, country);
-          setState(() => _showSearchBar = false);
+          if (mounted) setState(() => _showSearchBar = false);
           return;
         }
       }
@@ -386,19 +351,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
         ),
       );
     }
-  }
-
-  String _getConditionFromCode(int code) {
-    if (code == 0) return 'Clear Sky';
-    if (code == 1 || code == 2) return 'Mostly Sunny';
-    if (code == 3) return 'Overcast';
-    if (code >= 45 && code <= 48) return 'Foggy';
-    if (code >= 51 && code <= 55) return 'Drizzle';
-    if (code >= 61 && code <= 65) return 'Rain';
-    if (code >= 71 && code <= 77) return 'Snow';
-    if (code >= 80 && code <= 82) return 'Showers';
-    if (code >= 95) return 'Thunderstorm';
-    return 'Sunny';
   }
 
   IconData _getWeatherIcon(String condition) {
@@ -489,68 +441,79 @@ class _WeatherScreenState extends State<WeatherScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF2563EB).withValues(alpha: 0.28),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+        Expanded(
+          child: Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                ],
-              ),
-              child: const Icon(
-                Icons.cloud_sync_rounded,
-                color: Colors.white,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Weather Forecast',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.location_on_rounded,
-                      size: 14,
-                      color: Color(0xFF3B82F6),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '$_activeCity${_activeCountry.isNotEmpty ? ", $_activeCountry" : ""}',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: subColor,
-                      ),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF2563EB).withValues(alpha: 0.28),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-              ],
-            ),
-          ],
+                child: const Icon(
+                  Icons.cloud_sync_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Weather Forecast',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                        letterSpacing: -0.5,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on_rounded,
+                          size: 14,
+                          color: Color(0xFF3B82F6),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            '$_activeCity${_activeCountry.isNotEmpty ? ", $_activeCountry" : ""}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: subColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
+        const SizedBox(width: 10),
 
         // Action Buttons
         Row(

@@ -71,6 +71,7 @@ class BITToolApp extends StatelessWidget {
           update: (_, auth, session, previous) =>
               (previous ?? ContactsProvider(session))..updateAuth(auth),
         ),
+        ChangeNotifierProvider(create: (_) => CurrencyConverterProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

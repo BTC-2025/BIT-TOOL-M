@@ -41,6 +41,7 @@ class CalculatorProvider extends ChangeNotifier {
 
   // --- Workspace: Price Comparison ---
   final List<ComparisonRow> _comparisonRows = [];
+  final List<String> _comparisonSides = ['A', 'B'];
 
   // --- Currency conversion rate ---
   final double _simulatedUsdRate = 83.0;
@@ -100,6 +101,7 @@ class CalculatorProvider extends ChangeNotifier {
   bool get showScientific => _showScientific;
   String get setBaseValue => _setBaseValue;
   List<ComparisonRow> get comparisonRows => List.unmodifiable(_comparisonRows);
+  List<String> get comparisonSides => List.unmodifiable(_comparisonSides);
   double get simulatedUsdRate => _simulatedUsdRate;
 
   String get display => _display;
@@ -946,6 +948,34 @@ class CalculatorProvider extends ChangeNotifier {
     return '${getCurrencySymbol()}${_formatNumber(total)}';
   }
 
+  void addComparisonSide() {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    for (int i = 0; i < letters.length; i++) {
+      final letter = letters[i];
+      if (!_comparisonSides.contains(letter)) {
+        _comparisonSides.add(letter);
+        notifyListeners();
+        return;
+      }
+    }
+  }
+
+  void removeComparisonSide(String sideKey) {
+    if (_comparisonSides.length <= 2) return; // Keep minimum 2 sides
+    _comparisonSides.remove(sideKey);
+    for (final row in _comparisonRows) {
+      row.removeSide(sideKey);
+    }
+    saveCurrentToHistory();
+    notifyListeners();
+  }
+
+  void clearComparisonRows() {
+    _comparisonRows.clear();
+    saveCurrentToHistory();
+    notifyListeners();
+  }
+
   void addComparisonRow() {
     _comparisonRows.add(ComparisonRow());
     saveCurrentToHistory();
@@ -961,15 +991,28 @@ class CalculatorProvider extends ChangeNotifier {
     double? qtyB,
     double? discountA,
     double? discountB,
+    Map<String, double?>? sideValues,
+    Map<String, double>? sideQtys,
+    Map<String, double>? sideDiscounts,
   }) {
     if (index >= 0 && index < _comparisonRows.length) {
-      if (description != null) _comparisonRows[index].description = description;
-      if (valueA != null) _comparisonRows[index].valueA = valueA;
-      if (valueB != null) _comparisonRows[index].valueB = valueB;
-      if (qtyA != null) _comparisonRows[index].qtyA = qtyA;
-      if (qtyB != null) _comparisonRows[index].qtyB = qtyB;
-      if (discountA != null) _comparisonRows[index].discountA = discountA;
-      if (discountB != null) _comparisonRows[index].discountB = discountB;
+      final row = _comparisonRows[index];
+      if (description != null) row.description = description;
+      if (valueA != null) row.valueA = valueA;
+      if (valueB != null) row.valueB = valueB;
+      if (qtyA != null) row.qtyA = qtyA;
+      if (qtyB != null) row.qtyB = qtyB;
+      if (discountA != null) row.discountA = discountA;
+      if (discountB != null) row.discountB = discountB;
+      if (sideValues != null) {
+        sideValues.forEach((side, val) => row.setValue(side, val));
+      }
+      if (sideQtys != null) {
+        sideQtys.forEach((side, q) => row.setQty(side, q));
+      }
+      if (sideDiscounts != null) {
+        sideDiscounts.forEach((side, d) => row.setDiscount(side, d));
+      }
       saveCurrentToHistory();
       notifyListeners();
     }

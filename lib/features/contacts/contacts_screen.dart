@@ -37,9 +37,6 @@ class _ContactsScreenState extends State<ContactsScreen> {
     final nameController = TextEditingController(text: contact?.fullName ?? '');
     final emailController = TextEditingController(text: contact?.email ?? '');
     final phoneController = TextEditingController(text: contact?.phone ?? '');
-    final companyController =
-        TextEditingController(text: contact?.company ?? '');
-    final notesController = TextEditingController(text: contact?.notes ?? '');
 
     String selectedRole =
         contact != null && contact.role.isNotEmpty
@@ -301,46 +298,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 18),
-
-                      // COMPANY FIELD
-                      Text(
-                        'COMPANY',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                          color: labelColor,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: companyController,
-                        style: TextStyle(color: textColor, fontSize: 14),
-                        decoration: buildFieldDecoration('e.g. Acme Corp'),
-                      ),
-                      const SizedBox(height: 18),
-
-                      // NOTES FIELD
-                      Text(
-                        'NOTES',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                          color: labelColor,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: notesController,
-                        maxLines: 2,
-                        style: TextStyle(color: textColor, fontSize: 14),
-                        decoration: buildFieldDecoration('Additional notes...'),
-                      ),
                       const SizedBox(height: 28),
 
-                      // Actions: Cancel & Create/Update Contact
+                      // Actions: Cancel & Create Contact / Save Changes
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -411,8 +371,8 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                           lastName: lastName,
                                           email: email,
                                           phone: phoneController.text.trim(),
-                                          company: companyController.text.trim(),
-                                          notes: notesController.text.trim(),
+                                          company: '',
+                                          notes: '',
                                           role: selectedRole,
                                         );
                                       } else {
@@ -422,8 +382,8 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                           lastName: lastName,
                                           email: email,
                                           phone: phoneController.text.trim(),
-                                          company: companyController.text.trim(),
-                                          notes: notesController.text.trim(),
+                                          company: contact.company,
+                                          notes: contact.notes,
                                           role: selectedRole,
                                         );
                                       }
@@ -475,7 +435,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                 : Text(
                                     contact == null
                                         ? 'Create Contact'
-                                        : 'Update Contact',
+                                        : 'Save Changes',
                                     style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
@@ -628,40 +588,57 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // ─── Header ──────────────────────────────────────────────────────────
-          _buildHeader(),
+          _buildHeader(isDark),
           const SizedBox(height: 24),
 
           // ─── Table Card Container ────────────────────────────────────────────
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF1E293B) : Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(
+                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
               ],
             ),
-            child: Column(
-              children: [
-                // Table Header Row
-                _buildTableHeader(),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final tableWidth =
+                    constraints.maxWidth < 700 ? 700.0 : constraints.maxWidth;
 
-                // Table Content (Loading / Error / Empty / Rows)
-                Consumer<ContactsProvider>(
-                  builder: (context, provider, _) {
-                    return _buildTableContent(provider);
-                  },
-                ),
-              ],
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: tableWidth,
+                    child: Column(
+                      children: [
+                        // Table Header Row
+                        _buildTableHeader(isDark),
+
+                        // Table Content (Loading / Error / Empty / Rows)
+                        Consumer<ContactsProvider>(
+                          builder: (context, provider, _) {
+                            return _buildTableContent(provider, isDark);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(height: 32),
@@ -670,7 +647,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
     );
   }
 
-  Widget _buildTableContent(ContactsProvider provider) {
+  Widget _buildTableContent(ContactsProvider provider, bool isDark) {
     if (provider.isLoading && !provider.isRefreshing) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 48),
@@ -717,8 +694,8 @@ class _ContactsScreenState extends State<ContactsScreen> {
               Text(
                 provider.errorMessage ?? 'Unable to load contacts.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Color(0xFF0F172A),
+                style: TextStyle(
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -752,9 +729,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.people_outline_rounded,
-                color: Color(0xFF94A3B8),
+                color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
                 size: 40,
               ),
               const SizedBox(height: 12),
@@ -762,8 +739,8 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 provider.searchQuery.isNotEmpty
                     ? 'No contacts match "${provider.searchQuery}".'
                     : 'No contacts found.',
-                style: const TextStyle(
-                  color: Color(0xFF64748B),
+                style: TextStyle(
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -776,17 +753,22 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
     return Column(
       children: [
-        ...contacts.map((c) => _buildContactRow(c)),
-        if (provider.totalPages > 1) _buildPaginationBar(provider),
+        ...contacts.map((c) => _buildContactRow(c, isDark)),
+        if (provider.totalPages > 1) _buildPaginationBar(provider, isDark),
       ],
     );
   }
 
-  Widget _buildPaginationBar(ContactsProvider provider) {
+  Widget _buildPaginationBar(ContactsProvider provider, bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: Color(0xFFF1F5F9), width: 1)),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+            width: 1,
+          ),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -818,7 +800,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(bool isDark) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < 700;
@@ -827,11 +809,11 @@ class _ContactsScreenState extends State<ContactsScreen> {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeaderTitle(),
+                  _buildHeaderTitle(isDark),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Expanded(child: _buildSearchBar()),
+                      Expanded(child: _buildSearchBar(isDark)),
                       const SizedBox(width: 10),
                       _buildAddButton(),
                     ],
@@ -841,12 +823,12 @@ class _ContactsScreenState extends State<ContactsScreen> {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(child: _buildHeaderTitle()),
+                  Expanded(child: _buildHeaderTitle(isDark)),
                   const SizedBox(width: 16),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _buildSearchBar(),
+                      _buildSearchBar(isDark),
                       const SizedBox(width: 12),
                       _buildAddButton(),
                     ],
@@ -857,13 +839,15 @@ class _ContactsScreenState extends State<ContactsScreen> {
     );
   }
 
-  Widget _buildHeaderTitle() {
+  Widget _buildHeaderTitle(bool isDark) {
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: const Color(0xFFEFF6FF),
+            color: isDark
+                ? const Color(0xFF1E3A8A).withValues(alpha: 0.35)
+                : const Color(0xFFEFF6FF),
             borderRadius: BorderRadius.circular(12),
           ),
           child: const Icon(
@@ -873,7 +857,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
           ),
         ),
         const SizedBox(width: 14),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -882,15 +866,18 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0F172A),
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
                   letterSpacing: -0.3,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
-              SizedBox(height: 2),
+              const SizedBox(height: 2),
               Text(
                 'Manage your contacts across all integrated applications.',
-                style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
             ],
@@ -900,31 +887,43 @@ class _ContactsScreenState extends State<ContactsScreen> {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(bool isDark) {
     return Container(
       width: 240,
       height: 40,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+        ),
       ),
       child: Row(
         children: [
-          const Icon(Icons.search_rounded, size: 18, color: Color(0xFF94A3B8)),
+          Icon(
+            Icons.search_rounded,
+            size: 18,
+            color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Search contacts...',
                 isDense: true,
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
-                hintStyle: TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+                hintStyle: TextStyle(
+                  fontSize: 13,
+                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                ),
               ),
-              style: const TextStyle(fontSize: 13),
+              style: TextStyle(
+                fontSize: 13,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
               onChanged: (val) {
                 context.read<ContactsProvider>().setSearchQuery(val);
               },
@@ -953,13 +952,20 @@ class _ContactsScreenState extends State<ContactsScreen> {
     );
   }
 
-  Widget _buildTableHeader() {
+  Widget _buildTableHeader(bool isDark) {
+    final headerTextColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1)),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+            width: 1,
+          ),
+        ),
       ),
-      child: const Row(
+      child: Row(
         children: [
           Expanded(
             flex: 3,
@@ -968,7 +974,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF64748B),
+                color: headerTextColor,
                 letterSpacing: 0.5,
               ),
             ),
@@ -980,7 +986,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF64748B),
+                color: headerTextColor,
                 letterSpacing: 0.5,
               ),
             ),
@@ -992,7 +998,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF64748B),
+                color: headerTextColor,
                 letterSpacing: 0.5,
               ),
             ),
@@ -1005,7 +1011,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF64748B),
+                color: headerTextColor,
                 letterSpacing: 0.5,
               ),
             ),
@@ -1015,7 +1021,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
     );
   }
 
-  Widget _buildContactRow(ContactModel contact) {
+  Widget _buildContactRow(ContactModel contact, bool isDark) {
     final initial = contact.initial;
 
     // Prioritize actual integrated application source, notes, or company; never fake fallback dates
@@ -1027,8 +1033,13 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9), width: 1)),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+            width: 1,
+          ),
+        ),
       ),
       child: Row(
         children: [
@@ -1039,7 +1050,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
               children: [
                 CircleAvatar(
                   radius: 18,
-                  backgroundColor: const Color(0xFFDBEAFE),
+                  backgroundColor: isDark
+                      ? const Color(0xFF1E3A8A).withValues(alpha: 0.4)
+                      : const Color(0xFFDBEAFE),
                   child: Text(
                     initial,
                     style: const TextStyle(
@@ -1056,10 +1069,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     children: [
                       Text(
                         contact.fullName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF0F172A),
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1072,9 +1085,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
                             Expanded(
                               child: Text(
                                 sourceText,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
-                                  color: Color(0xFF64748B),
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -1098,18 +1111,18 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 if (contact.email.trim().isNotEmpty)
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.mail_outline_rounded,
                         size: 14,
-                        color: Color(0xFF64748B),
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                       ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           contact.email.trim(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
-                            color: Color(0xFF475569),
+                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -1122,18 +1135,18 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 if (contact.phone.trim().isNotEmpty)
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.phone_outlined,
                         size: 14,
-                        color: Color(0xFF64748B),
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                       ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           contact.phone.trim(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
-                            color: Color(0xFF475569),
+                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -1142,9 +1155,12 @@ class _ContactsScreenState extends State<ContactsScreen> {
                   ),
                 if (contact.email.trim().isEmpty &&
                     contact.phone.trim().isEmpty)
-                  const Text(
+                  Text(
                     '—',
-                    style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                    ),
                   ),
               ],
             ),
@@ -1163,17 +1179,19 @@ class _ContactsScreenState extends State<ContactsScreen> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
+                        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.account_balance_outlined,
                             size: 13,
-                            color: Color(0xFF64748B),
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                           ),
                           const SizedBox(width: 6),
                           Flexible(
@@ -1181,10 +1199,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
                               contact.role.trim().isNotEmpty
                                   ? contact.role.trim()
                                   : contact.company.trim(),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF334155),
+                                color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF334155),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),

@@ -1342,31 +1342,36 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
         return SafeArea(
           child: Align(
             alignment: Alignment.topRight,
-            child: Material(
-              color: Colors.transparent,
-              child: Container(
-                width: 320,
-                margin: const EdgeInsets.only(top: 64, right: 20),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  border: isDark
-                      ? Border.all(color: const Color(0xFF334155))
-                      : null,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(
-                        alpha: isDark ? 0.35 : 0.1,
-                      ),
-                      blurRadius: 30,
-                      offset: const Offset(0, 10),
+            child: Container(
+              width: 320,
+              margin: const EdgeInsets.only(top: 64, right: 20),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(
+                      alpha: isDark ? 0.35 : 0.1,
                     ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(height: 24),
+                    blurRadius: 30,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                clipBehavior: Clip.antiAlias,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    border: isDark
+                        ? Border.all(color: const Color(0xFF334155))
+                        : Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 24),
                     if (isLoading) ...[
                       SizedBox(
                         width: 72,
@@ -1641,10 +1646,11 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
               ),
             ),
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -1958,17 +1964,22 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                       ] else ...[
                         UserAvatar(user: user, radius: 14, fontSize: 11),
                         const SizedBox(width: 8),
-                        Text(
-                          user?.displayName ??
-                              (authProvider?.hasError == true
-                                  ? 'Error'
-                                  : 'Sign in'),
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isDark
-                                ? Colors.white
-                                : const Color(0xFF0F172A),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 120),
+                          child: Text(
+                            user?.displayName ??
+                                (authProvider?.hasError == true
+                                    ? 'Error'
+                                    : 'Sign in'),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF0F172A),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],

@@ -16,10 +16,14 @@ Widget _createTestWidget() {
       ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ChangeNotifierProvider(create: (_) => SessionProvider()),
       ChangeNotifierProxyProvider<SessionProvider, CalculatorProvider>(
-        create: (context) =>
-            CalculatorProvider(context.read<SessionProvider>()),
+        create: (context) => CalculatorProvider(
+          context.read<SessionProvider>(),
+          null,
+          null,
+          const [],
+        ),
         update: (_, session, previous) =>
-            previous ?? CalculatorProvider(session),
+            previous ?? CalculatorProvider(session, null, null, const []),
       ),
       ChangeNotifierProxyProvider<SessionProvider, CalendarProvider>(
         create: (context) => CalendarProvider(context.read<SessionProvider>()),
