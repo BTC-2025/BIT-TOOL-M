@@ -43,6 +43,7 @@ class ResponsiveShell extends StatefulWidget {
 
 class _ResponsiveShellState extends State<ResponsiveShell> {
   int _currentIndex = 0;
+  int _previousIndex = 0;
 
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
@@ -100,6 +101,9 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
   void _switchTab(int index) {
     _hideSearchOverlay();
     _searchFocusNode.unfocus();
+    if (_currentIndex != index && _currentIndex != 6) {
+      _previousIndex = _currentIndex;
+    }
     setState(() => _currentIndex = index);
   }
 
@@ -1339,12 +1343,16 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
         final isLoading = auth?.isLoading ?? false;
         final hasError = auth?.hasError ?? false;
 
+        final screenWidth = MediaQuery.of(dialogContext).size.width;
+        final dialogWidth = screenWidth < 360 ? (screenWidth - 24) : 320.0;
+        final rightMargin = screenWidth < 360 ? 12.0 : 20.0;
+
         return SafeArea(
           child: Align(
             alignment: Alignment.topRight,
             child: Container(
-              width: 320,
-              margin: const EdgeInsets.only(top: 64, right: 20),
+              width: dialogWidth,
+              margin: EdgeInsets.only(top: 64, right: rightMargin),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
@@ -1368,10 +1376,11 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                         ? Border.all(color: const Color(0xFF334155))
                         : Border.all(color: const Color(0xFFE2E8F0)),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 24),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 24),
                     if (isLoading) ...[
                       SizedBox(
                         width: 72,
@@ -1504,6 +1513,9 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                       OutlinedButton(
                         onPressed: () {
                           Navigator.pop(dialogContext);
+                          if (_currentIndex != 6) {
+                            _previousIndex = _currentIndex;
+                          }
                           setState(() => _currentIndex = 6);
                         },
                         style: OutlinedButton.styleFrom(
@@ -1532,35 +1544,74 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                         ),
                       ),
                     ] else ...[
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(dialogContext);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const SignInScreen(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(dialogContext);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const SignInScreen(),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF1D6EE5),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 10,
+                              ),
                             ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1D6EE5),
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            child: const Text(
+                              'Sign in to B2Auth',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 28,
-                            vertical: 10,
+                          const SizedBox(width: 8),
+                          OutlinedButton(
+                            onPressed: () {
+                              Navigator.pop(dialogContext);
+                              if (_currentIndex != 6) {
+                                _previousIndex = _currentIndex;
+                              }
+                              setState(() => _currentIndex = 6);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: isDark
+                                    ? const Color(0xFF334155)
+                                    : const Color(0xFFE2E8F0),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                            ),
+                            child: Text(
+                              'Settings',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF0F172A),
+                              ),
+                            ),
                           ),
-                        ),
-                        child: const Text(
-                          'Sign in to B2Auth',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        ],
                       ),
                     ],
                     const SizedBox(height: 16),
@@ -1569,6 +1620,42 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                           ? const Color(0xFF334155)
                           : const Color(0xFFF1F5F9),
                       height: 1,
+                    ),
+                    ListTile(
+                      leading: Icon(
+                        Icons.settings_outlined,
+                        color: isDark
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF334155),
+                        size: 20,
+                      ),
+                      title: Text(
+                        'Settings',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? const Color(0xFFE2E8F0)
+                              : const Color(0xFF334155),
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Preferences, theme & system',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isDark
+                              ? const Color(0xFF64748B)
+                              : const Color(0xFF94A3B8),
+                        ),
+                      ),
+                      dense: true,
+                      onTap: () {
+                        Navigator.pop(dialogContext);
+                        if (_currentIndex != 6) {
+                          _previousIndex = _currentIndex;
+                        }
+                        setState(() => _currentIndex = 6);
+                      },
                     ),
                     ListTile(
                       leading: Icon(
@@ -1647,7 +1734,8 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
             ),
           ),
         ),
-      );
+      ),
+    );
     },
   );
 }
@@ -1708,7 +1796,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
   Widget _buildTopNavBar(bool isWide, bool isDark) {
     return Container(
       height: 64,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: isWide ? 20 : 12),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF131A2B) : Colors.white,
         border: Border(
@@ -1720,32 +1808,56 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
       ),
       child: Row(
         children: [
-          // Logo & App Name
-          Row(
-            children: [
-              Image.asset(
-                'assets/bit_tool_logo.png',
-                height: 28,
-                width: 28,
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => const Icon(
-                  Icons.token_rounded,
-                  color: Color(0xFF2563EB),
-                  size: 28,
-                ),
+          // Logo & App Name (or Back Arrow when on Settings on mobile)
+          if (!isWide && _currentIndex == 6) ...[
+            IconButton(
+              icon: Icon(
+                Icons.arrow_back_rounded,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
               ),
-              const SizedBox(width: 10),
-              Text(
-                'Bit-tool',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: isDark ? Colors.white : const Color(0xFF0F172A),
-                  letterSpacing: -0.2,
-                ),
+              tooltip: 'Back',
+              onPressed: () {
+                _switchTab(_previousIndex);
+              },
+            ),
+            const SizedBox(width: 4),
+            Text(
+              'Settings',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                letterSpacing: -0.2,
               ),
-            ],
-          ),
+            ),
+          ] else ...[
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/bit_tool_logo.png',
+                  height: isWide ? 28 : 24,
+                  width: isWide ? 28 : 24,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => Icon(
+                    Icons.token_rounded,
+                    color: const Color(0xFF2563EB),
+                    size: isWide ? 28 : 24,
+                  ),
+                ),
+                SizedBox(width: isWide ? 10 : 8),
+                Text(
+                  'Bit-tool',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: isWide ? 18 : 16,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    letterSpacing: -0.2,
+                  ),
+                ),
+              ],
+            ),
+          ],
 
           if (isWide) const SizedBox(width: 36),
 
@@ -1859,13 +1971,16 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
           // Mobile Search Button
           if (!isWide)
             IconButton(
+              padding: const EdgeInsets.all(6),
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              visualDensity: VisualDensity.compact,
               onPressed: _showMobileSearchDialog,
               icon: Icon(
                 Icons.search_rounded,
                 color: isDark
                     ? const Color(0xFF94A3B8)
                     : const Color(0xFF64748B),
-                size: 22,
+                size: 20,
               ),
               tooltip: 'Search tools, contacts...',
             ),
@@ -1876,6 +1991,9 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
               final notifProvider = _getNotificationProvider(listen: true);
               final unreadCount = notifProvider?.unreadCount ?? 0;
               return IconButton(
+                padding: !isWide ? const EdgeInsets.all(6) : null,
+                constraints: !isWide ? const BoxConstraints(minWidth: 32, minHeight: 32) : null,
+                visualDensity: !isWide ? VisualDensity.compact : null,
                 onPressed: _showNotificationsPanel,
                 icon: Badge(
                   isLabelVisible: unreadCount > 0,
@@ -1893,7 +2011,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                     color: isDark
                         ? const Color(0xFF94A3B8)
                         : const Color(0xFF64748B),
-                    size: 22,
+                    size: 20,
                   ),
                 ),
                 tooltip: 'Notifications',
@@ -1901,7 +2019,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
             },
           ),
 
-          const SizedBox(width: 8),
+          SizedBox(width: isWide ? 8 : 4),
 
           // User Profile Pill
           Builder(
@@ -1909,6 +2027,54 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
               final authProvider = _getAuthProvider(listen: true);
               final user = authProvider?.user;
               final isLoading = authProvider?.isLoading ?? false;
+
+              if (!isWide) {
+                return Tooltip(
+                  message: 'Manage Account',
+                  child: InkWell(
+                    onTap: () {
+                      _showProfileMenu();
+                    },
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: _currentIndex == 6
+                            ? (isDark
+                                ? const Color(0xFF2563EB).withValues(alpha: 0.25)
+                                : const Color(0xFFEFF6FF))
+                            : (isDark ? const Color(0xFF1E293B) : Colors.white),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: _currentIndex == 6
+                              ? (isDark
+                                  ? const Color(0xFF60A5FA)
+                                  : const Color(0xFF2563EB))
+                              : (isDark
+                                  ? const Color(0xFF334155)
+                                  : const Color(0xFFE2E8F0)),
+                          width: _currentIndex == 6 ? 1.5 : 1,
+                        ),
+                      ),
+                      child: isLoading
+                          ? SizedBox(
+                              width: 26,
+                              height: 26,
+                              child: Padding(
+                                padding: const EdgeInsets.all(4),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: isDark
+                                      ? const Color(0xFF60A5FA)
+                                      : const Color(0xFF2563EB),
+                                ),
+                              ),
+                            )
+                          : UserAvatar(user: user, radius: 13, fontSize: 10),
+                    ),
+                  ),
+                );
+              }
 
               return InkWell(
                 onTap: () {
@@ -2228,20 +2394,27 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                         size: 22,
                       ),
                       const SizedBox(height: 3),
-                      Text(
-                        _titles[i],
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.w500,
-                          color: isSelected
-                              ? (isDark
-                                    ? const Color(0xFF60A5FA)
-                                    : const Color(0xFF2563EB))
-                              : (isDark
-                                    ? const Color(0xFF94A3B8)
-                                    : const Color(0xFF64748B)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            _titles[i],
+                            maxLines: 1,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? (isDark
+                                        ? const Color(0xFF60A5FA)
+                                        : const Color(0xFF2563EB))
+                                  : (isDark
+                                        ? const Color(0xFF94A3B8)
+                                        : const Color(0xFF64748B)),
+                            ),
+                          ),
                         ),
                       ),
                     ],

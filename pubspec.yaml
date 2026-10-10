@@ -58,15 +58,16 @@ flutter_launcher_icons:
     image_path: "assets/bit_tool_logo.png"
 
 flutter_native_splash:
-  color: "#ffffff"
-  image: "assets/bit_tool_logo.png"
-  color_dark: "#121212"
-  image_dark: "assets/bit_tool_logo.png"
+  color: "#F4F8FD"
+  image: "assets/splash_logo.png"
+  color_dark: "#0E131F"
+  image_dark: "assets/splash_logo_dark.png"
 
   android_12:
-    image: "assets/bit_tool_logo.png"
-    icon_background_color: "#ffffff"
-    image_dark: "assets/bit_tool_logo.png"
-    icon_background_color_dark: "#121212"
+    color: "#F4F8FD"
+    image: "assets/android12_splash_icon.png"
+    color_dark: "#0E131F"
+    image_dark: "assets/android12_splash_icon_dark.png"
 
-  web: true
+  web: false
+

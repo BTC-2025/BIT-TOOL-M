@@ -341,26 +341,41 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     bool isDark,
     Color primary,
   ) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isCompact = screenWidth < 360;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: isCompact ? 8.0 : 16.0,
+        vertical: 12.0,
+      ),
       child: Row(
         children: [
-          const Text(
-            '#',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
-              color: Color(0xFF10B981),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            'BETA CALC',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.5,
-              color: Theme.of(context).colorScheme.onSurface,
+          Flexible(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  '#',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF10B981),
+                  ),
+                ),
+                SizedBox(width: isCompact ? 4 : 8),
+                Flexible(
+                  child: Text(
+                    'BETA CALC',
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: isCompact ? 13 : 15,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: isCompact ? 0.2 : 0.5,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           const Spacer(),
@@ -470,14 +485,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     VoidCallback onTap, {
     Color? iconColor,
   }) {
+    final isCompact = MediaQuery.of(context).size.width < 360;
     return Tooltip(
       message: tooltip,
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(6.0),
-          child: Icon(icon, size: 18, color: iconColor ?? Colors.grey.shade600),
+          padding: EdgeInsets.all(isCompact ? 4.0 : 6.0),
+          child: Icon(
+            icon,
+            size: isCompact ? 16 : 18,
+            color: iconColor ?? Colors.grey.shade600,
+          ),
         ),
       ),
     );
@@ -1526,7 +1546,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           LayoutBuilder(
             builder: (context, constraints) {
               final sideCount = calc.comparisonSides.length;
-              final minTableWidth = sideCount <= 3
+              final minTableWidth = (sideCount <= 2 && constraints.maxWidth >= 320)
                   ? constraints.maxWidth
                   : math.max(constraints.maxWidth, 110.0 + (sideCount * 76.0) + 28.0);
               final isHorizScrollable = minTableWidth > constraints.maxWidth;

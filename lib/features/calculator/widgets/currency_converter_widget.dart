@@ -590,25 +590,32 @@ class _CurrencyConverterWidgetState extends State<CurrencyConverterWidget> {
                     const SizedBox(height: 8),
 
                     // Attribution link
-                    InkWell(
-                      onTap: _openAttributionUrl,
-                      borderRadius: BorderRadius.circular(6),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Reference rates provided by Frankfurter API (ECB)',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: primaryColor,
-                                decoration: TextDecoration.underline,
+                    Center(
+                      child: InkWell(
+                        onTap: _openAttributionUrl,
+                        borderRadius: BorderRadius.circular(6),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  'Reference rates provided by Frankfurter API (ECB)',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: primaryColor,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(Icons.open_in_new_rounded, size: 10, color: primaryColor),
-                          ],
+                              const SizedBox(width: 4),
+                              Icon(Icons.open_in_new_rounded, size: 10, color: primaryColor),
+                            ],
+                          ),
                         ),
                       ),
                     ),

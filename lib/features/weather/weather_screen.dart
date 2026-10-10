@@ -210,6 +210,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
     String city,
     String country,
   ) async {
+    if (!mounted) return;
     setState(() => _isLoading = true);
 
     try {
@@ -281,6 +282,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
   Future<void> _searchCity(String query) async {
     final clean = query.trim();
     if (clean.isEmpty) return;
+    if (!mounted) return;
     setState(() => _isLoading = true);
 
     // 1. Check quick known cities
@@ -379,7 +381,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
     final bool isDesktop = MediaQuery.of(context).size.width >= 960;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 24 : 14,
+        vertical: isDesktop ? 20 : 14,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -699,6 +704,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
   }
 
   Widget _buildCurrentWeatherHeroCard(bool isDark) {
+    final bool isDesktop = MediaQuery.of(context).size.width >= 960;
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -718,7 +724,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isDesktop ? 24 : 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -728,47 +734,56 @@ class _WeatherScreenState extends State<WeatherScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      'CURRENT WEATHER',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.8,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        'CURRENT WEATHER',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.8,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _condition,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+                    const SizedBox(height: 8),
+                    Text(
+                      _condition,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Feels like ${_feelsLike.round()}°C',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.85),
-                      fontSize: 13,
+                    const SizedBox(height: 2),
+                    Text(
+                      'Feels like ${_feelsLike.round()}°C',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontSize: 13,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 12),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -791,14 +806,19 @@ class _WeatherScreenState extends State<WeatherScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                '${_temp.round()}°',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 68,
-                  fontWeight: FontWeight.bold,
-                  height: 1.0,
-                  letterSpacing: -2,
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    '${_temp.round()}°',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 68,
+                      fontWeight: FontWeight.bold,
+                      height: 1.0,
+                      letterSpacing: -2,
+                    ),
+                  ),
                 ),
               ),
               Column(
@@ -849,6 +869,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
   }
 
   Widget _buildTodayHighlightsCard(bool isDark) {
+    final bool isDesktop = MediaQuery.of(context).size.width >= 960;
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
     final borderColor = isDark
@@ -869,7 +890,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(22),
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 22 : 14,
+        vertical: isDesktop ? 22 : 16,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -882,12 +906,15 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 size: 20,
               ),
               const SizedBox(width: 8),
-              Text(
-                "Today's Highlights",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: textColor,
+              Flexible(
+                child: Text(
+                  "Today's Highlights",
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
                 ),
               ),
             ],
@@ -900,8 +927,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 12,
+                    vertical: 10,
+                    horizontal: 10,
                   ),
                   decoration: BoxDecoration(
                     color: isDark
@@ -922,16 +949,19 @@ class _WeatherScreenState extends State<WeatherScreen> {
                           Icon(
                             Icons.wb_sunny_rounded,
                             color: Color(0xFFD97706),
-                            size: 16,
+                            size: 15,
                           ),
                           SizedBox(width: 4),
-                          Text(
-                            'SUNRISE',
-                            style: TextStyle(
-                              color: Color(0xFFD97706),
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
+                          Flexible(
+                            child: Text(
+                              'SUNRISE',
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Color(0xFFD97706),
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
                         ],
@@ -949,12 +979,12 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 12,
+                    vertical: 10,
+                    horizontal: 10,
                   ),
                   decoration: BoxDecoration(
                     color: isDark
@@ -975,16 +1005,19 @@ class _WeatherScreenState extends State<WeatherScreen> {
                           Icon(
                             Icons.nights_stay_rounded,
                             color: Color(0xFF6366F1),
-                            size: 16,
+                            size: 15,
                           ),
                           SizedBox(width: 4),
-                          Text(
-                            'SUNSET',
-                            style: TextStyle(
-                              color: Color(0xFF6366F1),
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
+                          Flexible(
+                            child: Text(
+                              'SUNSET',
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Color(0xFF6366F1),
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
                         ],
@@ -1018,51 +1051,67 @@ class _WeatherScreenState extends State<WeatherScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.arrow_downward_rounded,
-                      size: 14,
-                      color: Color(0xFF2563EB),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Min ${_minTemp.round()}°C',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.arrow_downward_rounded,
+                        size: 14,
                         color: Color(0xFF2563EB),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          'Min ${_minTemp.round()}°C',
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2563EB),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                Container(
-                  width: 50,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(2),
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF2563EB), Color(0xFFEF4444)],
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Container(
+                      height: 4,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(2),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF2563EB), Color(0xFFEF4444)],
+                        ),
+                      ),
                     ),
                   ),
                 ),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.arrow_upward_rounded,
-                      size: 14,
-                      color: Color(0xFFEF4444),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Max ${_maxTemp.round()}°C',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.arrow_upward_rounded,
+                        size: 14,
                         color: Color(0xFFEF4444),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          'Max ${_maxTemp.round()}°C',
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFEF4444),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -1106,6 +1155,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
   }
 
   Widget _buildHourlyForecastCard(bool isDark) {
+    final bool isDesktop = MediaQuery.of(context).size.width >= 960;
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
     final borderColor = isDark
@@ -1126,7 +1176,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(22),
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 22 : 14,
+        vertical: isDesktop ? 22 : 16,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1138,12 +1191,15 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 size: 18,
               ),
               const SizedBox(width: 8),
-              Text(
-                'Hourly Forecast',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: textColor,
+              Flexible(
+                child: Text(
+                  'Hourly Forecast',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
                 ),
               ),
             ],
@@ -1247,6 +1303,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
   }
 
   Widget _buildDailyForecastCard(bool isDark) {
+    final bool isDesktop = MediaQuery.of(context).size.width >= 960;
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
     final borderColor = isDark
@@ -1267,7 +1324,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(22),
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 22 : 14,
+        vertical: isDesktop ? 22 : 16,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1279,12 +1339,15 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 size: 18,
               ),
               const SizedBox(width: 8),
-              Text(
-                '7-Day Extended Forecast',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: textColor,
+              Flexible(
+                child: Text(
+                  '7-Day Extended Forecast',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
                 ),
               ),
             ],
@@ -1307,28 +1370,32 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   children: [
                     // Day of Week
                     SizedBox(
-                      width: 70,
+                      width: isDesktop ? 70 : 44,
                       child: Text(
                         day['day'] as String,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: isDesktop ? 13 : 11.5,
                           fontWeight: FontWeight.bold,
                           color: i == 0 ? const Color(0xFF2563EB) : textColor,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
 
                     // Condition Icon & Text
                     Expanded(
-                      flex: 4,
+                      flex: isDesktop ? 4 : 3,
                       child: Row(
                         children: [
                           Icon(icon, size: 18, color: const Color(0xFFF59E0B)),
-                          const SizedBox(width: 8),
+                          SizedBox(width: isDesktop ? 8 : 4),
                           Expanded(
                             child: Text(
                               condition,
-                              style: TextStyle(fontSize: 13, color: subColor),
+                              style: TextStyle(
+                                fontSize: isDesktop ? 13 : 11.5,
+                                color: subColor,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -1338,46 +1405,57 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
                     // Rain Chance
                     SizedBox(
-                      width: 55,
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.water_drop_rounded,
-                            size: 12,
-                            color: Color(0xFF3B82F6),
-                          ),
-                          const SizedBox(width: 2),
-                          Text(
-                            '${day['pop']}%',
-                            style: const TextStyle(
-                              fontSize: 11,
+                      width: isDesktop ? 55 : 40,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.water_drop_rounded,
+                              size: 12,
                               color: Color(0xFF3B82F6),
-                              fontWeight: FontWeight.w600,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 2),
+                            Text(
+                              '${day['pop']}%',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF3B82F6),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
 
                     // Min Temp
                     SizedBox(
-                      width: 38,
-                      child: Text(
-                        '${day['min']}°',
-                        textAlign: TextAlign.right,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF2563EB),
+                      width: isDesktop ? 38 : 28,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          '${day['min']}°',
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF2563EB),
+                          ),
                         ),
                       ),
                     ),
 
                     // Visual Temperature Gauge
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isDesktop ? 10 : 3,
+                      ),
                       child: Container(
-                        width: 50,
+                        width: isDesktop ? 50 : 16,
                         height: 4,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(2),
@@ -1390,13 +1468,17 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
                     // Max Temp
                     SizedBox(
-                      width: 38,
-                      child: Text(
-                        '${day['max']}°',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFFEF4444),
+                      width: isDesktop ? 38 : 28,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          '${day['max']}°',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFEF4444),
+                          ),
                         ),
                       ),
                     ),

@@ -1868,6 +1868,10 @@ class _CalendarScreenState extends State<CalendarScreen>
               ],
             ),
           ),
+          if (MediaQuery.of(context).size.width < 700) ...[
+            const SizedBox(height: 16),
+            _buildMobileAgendaCard(provider, isDark),
+          ],
           const SizedBox(height: 24),
         ],
       ),
@@ -2221,6 +2225,7 @@ class _CalendarScreenState extends State<CalendarScreen>
 
     final monthLeaves = HolidayHelper.getLeavesForMonth(year, month);
     final now = DateTime.now();
+    final bool isCompact = MediaQuery.of(context).size.width < 700;
 
     return Table(
       border: TableBorder.symmetric(
@@ -2237,7 +2242,7 @@ class _CalendarScreenState extends State<CalendarScreen>
 
             if (dayNumber < 1 || dayNumber > daysInMonth) {
               return Container(
-                height: 110,
+                height: isCompact ? 56 : 110,
                 color: isDark ? const Color(0xFF0F172A) : const Color(0xFFFAFAFA),
               );
             }
@@ -2266,55 +2271,52 @@ class _CalendarScreenState extends State<CalendarScreen>
                 _showDateOverviewDialog(cellDate);
               },
               child: Container(
-                height: 110,
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Day Number Header + Add (+) button
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        if (isToday)
-                          Container(
-                            width: 24,
-                            height: 24,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF2563EB),
-                              shape: BoxShape.circle,
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              '$dayNumber',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                height: isCompact ? 56 : 110,
+                padding: isCompact
+                    ? const EdgeInsets.symmetric(horizontal: 2, vertical: 4)
+                    : const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                child: isCompact
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (isToday)
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF2563EB),
+                                shape: BoxShape.circle,
                               ),
-                            ),
-                          )
-                        else if (isSelected)
-                          Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-                              shape: BoxShape.circle,
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              '$dayNumber',
-                              style: TextStyle(
-                                color: isDark ? Colors.white : const Color(0xFF334155),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                              alignment: Alignment.center,
+                              child: Text(
+                                '$dayNumber',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
                               ),
-                            ),
-                          )
-                        else
-                          Padding(
-                            padding: const EdgeInsets.only(left: 2),
-                            child: Text(
+                            )
+                          else if (isSelected)
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                shape: BoxShape.circle,
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                '$dayNumber',
+                                style: TextStyle(
+                                  color: isDark ? Colors.white : const Color(0xFF334155),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            )
+                          else
+                            Text(
                               '$dayNumber',
                               style: TextStyle(
                                 fontSize: 13,
@@ -2322,38 +2324,238 @@ class _CalendarScreenState extends State<CalendarScreen>
                                 color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF1E293B),
                               ),
                             ),
+                          const SizedBox(height: 3),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (dayLeaves.isNotEmpty)
+                                Container(
+                                  width: 5,
+                                  height: 5,
+                                  margin: const EdgeInsets.symmetric(horizontal: 1),
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF16A34A),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              if (dayEvents.isNotEmpty)
+                                Container(
+                                  width: 5,
+                                  height: 5,
+                                  margin: const EdgeInsets.symmetric(horizontal: 1),
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF2563EB),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                            ],
                           ),
-                        InkWell(
-                          onTap: () {
-                            provider.selectDate(cellDate);
-                            _showCreateItemDialog(initialDate: cellDate);
-                          },
-                          borderRadius: BorderRadius.circular(10),
-                          child: const Padding(
-                            padding: EdgeInsets.all(2.0),
-                            child: Icon(
-                              Icons.add_rounded,
-                              size: 16,
-                              color: Color(0xFF94A3B8),
-                            ),
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Day Number Header + Add (+) button
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              if (isToday)
+                                Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF2563EB),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    '$dayNumber',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                )
+                              else if (isSelected)
+                                Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    '$dayNumber',
+                                    style: TextStyle(
+                                      color: isDark ? Colors.white : const Color(0xFF334155),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                )
+                              else
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 2),
+                                  child: Text(
+                                    '$dayNumber',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF1E293B),
+                                    ),
+                                  ),
+                                ),
+                              InkWell(
+                                onTap: () {
+                                  provider.selectDate(cellDate);
+                                  _showCreateItemDialog(initialDate: cellDate);
+                                },
+                                borderRadius: BorderRadius.circular(10),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(2.0),
+                                  child: Icon(
+                                    Icons.add_rounded,
+                                    size: 16,
+                                    color: Color(0xFF94A3B8),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 3),
+                          const SizedBox(height: 3),
 
-                    // Leaves/Holidays (Green chips)
-                    ...dayLeaves.map((h) => _buildLeaveChip(h)),
+                          // Leaves/Holidays (Green chips)
+                          ...dayLeaves.map((h) => _buildLeaveChip(h)),
 
-                    // Real Events (Blue chips)
-                    ...dayEvents.take(2).map((e) => _buildEventChip(e)),
-                  ],
-                ),
+                          // Real Events (Blue chips)
+                          ...dayEvents.take(2).map((e) => _buildEventChip(e)),
+                        ],
+                      ),
               ),
             );
           }),
         );
       }),
+    );
+  }
+
+  Widget _buildMobileAgendaCard(CalendarProvider provider, bool isDark) {
+    final selectedDate = provider.selectedDate;
+    final dayLeaves = HolidayHelper.getLeavesForMonth(
+      selectedDate.year,
+      selectedDate.month,
+    ).where((h) => h.date.day == selectedDate.day).toList();
+
+    final dayEvents = provider.events.where((e) {
+      if (!e.matchesDate(selectedDate)) return false;
+      return e.matchesApp(_selectedAppFilter);
+    }).toList();
+
+    final dateFormatted = _formatDateOverviewTitle(selectedDate);
+    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final textCol = isDark ? Colors.white : const Color(0xFF0F172A);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'AGENDA',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      dateFormatted,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: textCol,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              InkWell(
+                onTap: () => _showCreateItemDialog(initialDate: selectedDate),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2563EB),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.add_rounded, size: 16, color: Colors.white),
+                      SizedBox(width: 4),
+                      Text(
+                        'Add',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (dayLeaves.isEmpty && dayEvents.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                'No events or holidays scheduled for this date.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                ),
+              ),
+            )
+          else ...[
+            ...dayLeaves.map((h) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: _buildLeaveChip(h),
+                )),
+            ...dayEvents.map((e) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: _buildEventChip(e),
+                )),
+          ],
+        ],
+      ),
     );
   }
 

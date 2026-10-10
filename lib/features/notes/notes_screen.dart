@@ -183,8 +183,9 @@ class _NotesScreenState extends State<NotesScreen> {
                 borderRadius: BorderRadius.circular(20),
                 side: isDark ? BorderSide(color: borderColor) : BorderSide.none,
               ),
+              insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
               child: Container(
-                width: 460,
+                constraints: const BoxConstraints(maxWidth: 460),
                 padding: const EdgeInsets.all(24),
                 child: SingleChildScrollView(
                   child: Column(
@@ -473,15 +474,22 @@ class _NotesScreenState extends State<NotesScreen> {
       return n.applicationName.toLowerCase() == _selectedFilter.toLowerCase();
     }).toList();
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth >= 768;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 20 : 12,
+        vertical: 16,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // ─── Inline Note Creation Box ────────────────────────────────────
           Center(
             child: Container(
-              width: 560,
+              constraints: const BoxConstraints(maxWidth: 560),
+              width: double.infinity,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: BorderRadius.circular(20),
@@ -498,7 +506,10 @@ class _NotesScreenState extends State<NotesScreen> {
                   ),
                 ],
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: EdgeInsets.symmetric(
+                horizontal: isDesktop ? 20 : 12,
+                vertical: 16,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -584,115 +595,133 @@ class _NotesScreenState extends State<NotesScreen> {
                   const SizedBox(height: 16),
 
                   // Bottom Action Bar: Palette + Cancel + Save Note
-                  Row(
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          final idx = _pastelColors.indexWhere(
-                            (c) => c['hex'] == _inlineColorHex,
-                          );
-                          final nextIdx = (idx + 1) % _pastelColors.length;
-                          setState(() {
-                            _inlineColorHex =
-                                _pastelColors[nextIdx]['hex'] as String;
-                          });
-                        },
-                        borderRadius: BorderRadius.circular(6),
-                        child: Padding(
-                          padding: const EdgeInsets.all(6),
-                          child: Icon(
-                            Icons.palette_outlined,
-                            size: 19,
-                            color: isDark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF64748B),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isNarrow = constraints.maxWidth < 420;
+                      final isVeryNarrow = constraints.maxWidth < 320;
+                      return Row(
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              final idx = _pastelColors.indexWhere(
+                                (c) => c['hex'] == _inlineColorHex,
+                              );
+                              final nextIdx = (idx + 1) % _pastelColors.length;
+                              setState(() {
+                                _inlineColorHex =
+                                    _pastelColors[nextIdx]['hex'] as String;
+                              });
+                            },
+                            borderRadius: BorderRadius.circular(6),
+                            child: Padding(
+                              padding: const EdgeInsets.all(6),
+                              child: Icon(
+                                Icons.palette_outlined,
+                                size: 19,
+                                color: isDark
+                                    ? const Color(0xFF94A3B8)
+                                    : const Color(0xFF64748B),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      InkWell(
-                        onTap: () {},
-                        borderRadius: BorderRadius.circular(6),
-                        child: Padding(
-                          padding: const EdgeInsets.all(6),
-                          child: Icon(
-                            Icons.check_box_outlined,
-                            size: 19,
-                            color: isDark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF64748B),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      InkWell(
-                        onTap: () {},
-                        borderRadius: BorderRadius.circular(6),
-                        child: Padding(
-                          padding: const EdgeInsets.all(6),
-                          child: Icon(
-                            Icons.image_outlined,
-                            size: 19,
-                            color: isDark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF64748B),
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: _isSavingInline ? null : _clearInlineNote,
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                        ),
-                        child: Text(
-                          'Cancel',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isDark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF64748B),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: _isSavingInline ? null : _saveInlineNote,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2563EB),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 18,
-                            vertical: 10,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: _isSavingInline
-                            ? const SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor:
-                                      AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              )
-                            : const Text(
-                                'Save Note',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
+                          if (!isVeryNarrow) ...[
+                            const SizedBox(width: 4),
+                            InkWell(
+                              onTap: () {},
+                              borderRadius: BorderRadius.circular(6),
+                              child: Padding(
+                                padding: const EdgeInsets.all(6),
+                                child: Icon(
+                                  Icons.check_box_outlined,
+                                  size: 19,
+                                  color: isDark
+                                      ? const Color(0xFF94A3B8)
+                                      : const Color(0xFF64748B),
                                 ),
                               ),
-                      ),
-                    ],
+                            ),
+                          ],
+                          if (!isNarrow) ...[
+                            const SizedBox(width: 4),
+                            InkWell(
+                              onTap: () {},
+                              borderRadius: BorderRadius.circular(6),
+                              child: Padding(
+                                padding: const EdgeInsets.all(6),
+                                child: Icon(
+                                  Icons.image_outlined,
+                                  size: 19,
+                                  color: isDark
+                                      ? const Color(0xFF94A3B8)
+                                      : const Color(0xFF64748B),
+                                ),
+                              ),
+                            ),
+                          ],
+                          const Spacer(),
+                          TextButton(
+                            onPressed: _isSavingInline ? null : _clearInlineNote,
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isVeryNarrow ? 6 : (isNarrow ? 8 : 14),
+                                vertical: 8,
+                              ),
+                              visualDensity: isNarrow ? VisualDensity.compact : null,
+                            ),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  fontSize: isNarrow ? 12 : 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark
+                                      ? const Color(0xFF94A3B8)
+                                      : const Color(0xFF64748B),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: isNarrow ? 4 : 8),
+                          ElevatedButton(
+                            onPressed: _isSavingInline ? null : _saveInlineNote,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2563EB),
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isVeryNarrow ? 8 : (isNarrow ? 12 : 18),
+                                vertical: isNarrow ? 8 : 10,
+                              ),
+                              visualDensity: isNarrow ? VisualDensity.compact : null,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: _isSavingInline
+                                ? const SizedBox(
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor:
+                                          AlwaysStoppedAnimation<Color>(Colors.white),
+                                    ),
+                                  )
+                                : FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      'Save Note',
+                                      style: TextStyle(
+                                        fontSize: isNarrow ? 12 : 13,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -875,12 +904,13 @@ class _NotesScreenState extends State<NotesScreen> {
 
   Widget _buildNoteCard(NoteModel note) {
     final bgColor = _parseColor(note.color);
+    final isDesktop = MediaQuery.of(context).size.width >= 768;
 
     return InkWell(
       onTap: () => _showNoteEditDialog(note),
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        width: 255,
+        width: isDesktop ? 255 : double.infinity,
         constraints: const BoxConstraints(minHeight: 175),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(

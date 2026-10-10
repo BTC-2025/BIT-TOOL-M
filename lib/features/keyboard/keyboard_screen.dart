@@ -752,70 +752,71 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
   }
 
   Widget _buildHeader(int textLength, int wordCount) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB),
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF2563EB).withValues(alpha: 0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.keyboard_alt_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 620;
+
+        final titleSection = Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFF2563EB),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Keyboard',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white
-                            : const Color(0xFF0F172A),
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Tactile on-screen virtual keyboard with smart input',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? const Color(0xFF94A3B8)
-                            : const Color(0xFF64748B),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
+              child: const Icon(
+                Icons.keyboard_alt_rounded,
+                color: Colors.white,
+                size: 24,
               ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 12),
-        Row(
-          mainAxisSize: MainAxisSize.min,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Keyboard',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : const Color(0xFF0F172A),
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Tactile on-screen virtual keyboard with smart input',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF64748B),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+
+        final actionControls = Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             // Sound Click Feedback Toggle
             IconButton(
@@ -831,7 +832,6 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
               onPressed: () => setState(() => _soundEnabled = !_soundEnabled),
               tooltip: _soundEnabled ? 'Audio Click: ON' : 'Audio Click: OFF',
             ),
-            const SizedBox(width: 4),
 
             // Theme Selector Menu
             PopupMenuButton<KeyboardTheme>(
@@ -895,14 +895,12 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                 ),
               ],
             ),
-            const SizedBox(width: 8),
             IconButton(
               onPressed: textLength > 0 ? _clearText : null,
               icon: const Icon(Icons.delete_outline_rounded, size: 20),
               color: const Color(0xFFEF4444),
               tooltip: 'Clear All',
             ),
-            const SizedBox(width: 4),
             ElevatedButton.icon(
               onPressed: _copyText,
               icon: const Icon(Icons.copy_rounded, size: 15),
@@ -925,8 +923,28 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
               ),
             ),
           ],
-        ),
-      ],
+        );
+
+        if (isCompact) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              titleSection,
+              const SizedBox(height: 12),
+              actionControls,
+            ],
+          );
+        }
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(child: titleSection),
+            const SizedBox(width: 12),
+            actionControls,
+          ],
+        );
+      },
     );
   }
 
@@ -961,7 +979,10 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
         children: [
           // Editor Window Header Toolbar
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width < 360 ? 10 : 16,
+              vertical: 10,
+            ),
             decoration: BoxDecoration(
               color: _selectedTheme == KeyboardTheme.cyberNeon
                   ? const Color(0xFF0F172A)
@@ -971,111 +992,125 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
               ),
               border: Border(bottom: BorderSide(color: colors.editorBorder)),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
+            child: LayoutBuilder(
+              builder: (context, toolbarConstraints) {
+                final isNarrow = toolbarConstraints.maxWidth < 460;
+                final isVeryNarrow = toolbarConstraints.maxWidth < 290;
+                final dotSize = isVeryNarrow ? 8.0 : 10.0;
+                final dotSpacing = isVeryNarrow ? 4.0 : 6.0;
+
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFEF4444),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF59E0B),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF10B981),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Live typing speed HUD
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colors.accentColor.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.speed_rounded,
-                            size: 13,
-                            color: colors.accentColor,
+                    Row(
+                      children: [
+                        Container(
+                          width: dotSize,
+                          height: dotSize,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFEF4444),
+                            shape: BoxShape.circle,
                           ),
-                          const SizedBox(width: 4),
+                        ),
+                        SizedBox(width: dotSpacing),
+                        Container(
+                          width: dotSize,
+                          height: dotSize,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFF59E0B),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        SizedBox(width: dotSpacing),
+                        Container(
+                          width: dotSize,
+                          height: dotSize,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF10B981),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        SizedBox(width: isVeryNarrow ? 6 : 12),
+                        // Live typing speed HUD
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isVeryNarrow ? 6 : 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colors.accentColor.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.speed_rounded,
+                                size: 13,
+                                color: colors.accentColor,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '$_currentWpm WPM',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: colors.accentColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (!isNarrow) ...[
+                          const SizedBox(width: 8),
                           Text(
-                            '$_currentWpm WPM',
-                            style: TextStyle(
+                            '${_textController.text.length} chars • $_keystrokes taps',
+                            style: const TextStyle(
                               fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: colors.accentColor,
+                              color: Color(0xFF94A3B8),
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
-                      ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${_textController.text.length} chars • $_keystrokes taps',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF94A3B8),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
 
-                // Text Transform Tools
-                Row(
-                  children: [
-                    _buildCaseButton(
-                      'AA',
-                      () => _transformText((t) => t.toUpperCase()),
-                      'UPPERCASE',
-                    ),
-                    const SizedBox(width: 4),
-                    _buildCaseButton(
-                      'aa',
-                      () => _transformText((t) => t.toLowerCase()),
-                      'lowercase',
-                    ),
-                    const SizedBox(width: 4),
-                    _buildCaseButton(
-                      'Aa',
-                      () => _transformText((t) {
-                        return t
-                            .split(' ')
-                            .map((word) {
-                              if (word.isEmpty) return word;
-                              return word[0].toUpperCase() +
-                                  word.substring(1).toLowerCase();
-                            })
-                            .join(' ');
-                      }),
-                      'Title Case',
+                    // Text Transform Tools
+                    Row(
+                      children: [
+                        _buildCaseButton(
+                          'AA',
+                          () => _transformText((t) => t.toUpperCase()),
+                          'UPPERCASE',
+                          compact: isVeryNarrow,
+                        ),
+                        SizedBox(width: isVeryNarrow ? 2 : 4),
+                        _buildCaseButton(
+                          'aa',
+                          () => _transformText((t) => t.toLowerCase()),
+                          'lowercase',
+                          compact: isVeryNarrow,
+                        ),
+                        SizedBox(width: isVeryNarrow ? 2 : 4),
+                        _buildCaseButton(
+                          'Aa',
+                          () => _transformText((t) {
+                            return t
+                                .split(' ')
+                                .map((word) {
+                                  if (word.isEmpty) return word;
+                                  return word[0].toUpperCase() +
+                                      word.substring(1).toLowerCase();
+                                })
+                                .join(' ');
+                          }),
+                          'Title Case',
+                          compact: isVeryNarrow,
+                        ),
+                      ],
                     ),
                   ],
-                ),
-              ],
+                );
+              },
             ),
           ),
 
@@ -1215,14 +1250,22 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
     );
   }
 
-  Widget _buildCaseButton(String label, VoidCallback onTap, String tooltip) {
+  Widget _buildCaseButton(
+    String label,
+    VoidCallback onTap,
+    String tooltip, {
+    bool compact = false,
+  }) {
     return Tooltip(
       message: tooltip,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(6),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 5 : 7,
+            vertical: 3,
+          ),
           decoration: BoxDecoration(
             color: const Color(0xFFF1F5F9),
             borderRadius: BorderRadius.circular(6),
@@ -1286,14 +1329,17 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                           ),
                         ],
                       ),
-                      Text(
-                        _isNumberMode
-                            ? 'Symbols & Numbers'
-                            : 'Tactile Mechanical Deck',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF94A3B8),
+                      Flexible(
+                        child: Text(
+                          _isNumberMode
+                              ? 'Symbols & Numbers'
+                              : 'Tactile Mechanical Deck',
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF94A3B8),
+                          ),
                         ),
                       ),
                     ],
@@ -1593,24 +1639,27 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                           activeTextColor: Colors.white,
                           shadowColor: colors.accentGradient.first,
                           glowColor: colors.glowColor,
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'return',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                          child: const FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'return',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(width: 4),
-                              Icon(
-                                Icons.keyboard_return_rounded,
-                                color: Colors.white,
-                                size: 15,
-                              ),
-                            ],
+                                SizedBox(width: 4),
+                                Icon(
+                                  Icons.keyboard_return_rounded,
+                                  color: Colors.white,
+                                  size: 15,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -1707,8 +1756,8 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
           ),
           child: GridView.builder(
             itemCount: emojis.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 10,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: MediaQuery.of(context).size.width < 500 ? 6 : 10,
               mainAxisSpacing: 6,
               crossAxisSpacing: 6,
             ),
