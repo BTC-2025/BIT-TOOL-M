@@ -1851,7 +1851,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                 ),
                 SizedBox(width: isWide ? 10 : 8),
                 Text(
-                  'Bit-tool',
+                  'Bit tool',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: isWide ? 18 : 16,

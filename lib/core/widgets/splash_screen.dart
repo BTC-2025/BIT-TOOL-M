@@ -196,7 +196,7 @@ class _SplashScreenState extends State<SplashScreen>
                       const SizedBox(height: 24),
                       // Title: BIT TOOL (Deep navy, clean letter spacing)
                       Text(
-                        'BIT TOOL',
+                        'Bit tool',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 23,
@@ -303,7 +303,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               const SizedBox(height: 28),
               const Text(
-                'BIT TOOL',
+                'Bit tool',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,

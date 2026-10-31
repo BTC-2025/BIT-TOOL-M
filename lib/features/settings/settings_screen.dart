@@ -801,7 +801,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         content: Text(
-          'Are you sure you want to sign out of this account on Bit Tool?',
+          'Are you sure you want to sign out of this account on Bit tool?',
           style: TextStyle(
             color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
             fontSize: 14,
@@ -1158,7 +1158,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'About Bit Tool',
+                      'About Bit tool',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -1182,7 +1182,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Bit Tool is a premium suite of productivity applications designed to help you work smarter and faster. '
+            'Bit tool is a premium suite of productivity applications designed to help you work smarter and faster. '
             'Built with modern web technologies, it offers a seamless and elegant experience across all your devices.',
             style: TextStyle(
               fontSize: 13.5,
