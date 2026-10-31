@@ -71,8 +71,9 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Completely preserve exact existing macOS desktop splash presentation
-    if (defaultTargetPlatform == TargetPlatform.macOS) {
+    if (defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux) {
       return _buildDesktopSplash(context);
     }
 
@@ -258,7 +259,10 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       backgroundColor: bgColor,
       body: Center(
-        child: AnimatedBuilder(
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          child: AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {
             return Opacity(
@@ -331,6 +335,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
             ],
           ),
+        ),
         ),
       ),
     );

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Bit tool
+Comment=Integrated Enterprise Suite
+Exec=bit_tools_backend
+Icon=bit_tool_logo
+Terminal=false
+Categories=Utility;
+

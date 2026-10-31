@@ -128,7 +128,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
     try {
       if (!kIsWeb &&
           (defaultTargetPlatform == TargetPlatform.android ||
-              defaultTargetPlatform == TargetPlatform.iOS)) {
+              defaultTargetPlatform == TargetPlatform.iOS ||
+              defaultTargetPlatform == TargetPlatform.windows)) {
         bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
         if (serviceEnabled) {
           LocationPermission permission = await Geolocator.checkPermission();

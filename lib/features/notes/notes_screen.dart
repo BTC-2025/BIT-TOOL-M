@@ -415,8 +415,10 @@ class _NotesScreenState extends State<NotesScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                alignment: WrapAlignment.center,
                 children: _pastelColors.map((c) {
                   return GestureDetector(
                     onTap: () async {

@@ -149,10 +149,11 @@ class _CalendarScreenState extends State<CalendarScreen>
                 constraints: const BoxConstraints(maxWidth: 420),
                 child: Padding(
                   padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                       // Header: Date + Close Button
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -304,6 +305,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                       ),
                     ],
                   ),
+                ),
                 ),
               ),
             );

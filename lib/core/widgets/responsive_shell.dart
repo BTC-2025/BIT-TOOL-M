@@ -822,15 +822,19 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
         barrierLabel: 'Notifications',
         barrierColor: Colors.black.withValues(alpha: 0.25),
         pageBuilder: (dialogContext, anim1, anim2) {
+          final dialogHeight = MediaQuery.of(dialogContext).size.height;
+          final dialogWidth = MediaQuery.of(dialogContext).size.width;
+          final maxPanelHeight = (dialogHeight - 90).clamp(240.0, 520.0);
+          final rightMargin = dialogWidth < 500 ? 16.0 : 64.0;
           return SafeArea(
             child: Align(
               alignment: Alignment.topRight,
               child: Material(
                 color: Colors.transparent,
                 child: Container(
-                  width: 380,
-                  constraints: const BoxConstraints(maxHeight: 520),
-                  margin: const EdgeInsets.only(top: 64, right: 64),
+                  width: dialogWidth < 420 ? (dialogWidth - 32) : 380,
+                  constraints: BoxConstraints(maxHeight: maxPanelHeight),
+                  margin: EdgeInsets.only(top: 64, right: rightMargin),
                   decoration: BoxDecoration(
                     color: isDark ? const Color(0xFF1E293B) : Colors.white,
                     borderRadius: BorderRadius.circular(24),
