@@ -63,9 +63,9 @@ void main() {
               },
               {
                 'id': 'note-2',
-                'title': 'Bit Tool Note',
+                'title': 'Bit tool Note',
                 'content': 'Personal note',
-                'applicationName': 'Bit Tool',
+                'applicationName': 'Bit tool',
                 'isPinned': false,
                 'color': '#FDE047',
                 'isArchived': false,
@@ -87,7 +87,7 @@ void main() {
       expect(notes[0].applicationName, 'Cliks');
       expect(notes[0].isPinned, isTrue);
       expect(notes[1].id, 'note-2');
-      expect(notes[1].applicationName, 'Bit Tool');
+      expect(notes[1].applicationName, 'Bit tool');
     });
 
     test('getNotes with allApps=false sends GET / without allApps parameter', () async {
@@ -141,7 +141,7 @@ void main() {
               'id': 'note-999',
               'title': 'Specific Note',
               'content': 'Detailed content',
-              'applicationName': 'Bit Tool',
+              'applicationName': 'Bit tool',
               'isPinned': false,
               'color': '#BAE6FD',
               'isArchived': false,
@@ -174,7 +174,7 @@ void main() {
         expect(body['content'], 'Testing creation flow');
         expect(body['color'], '#FBCFE8');
         expect(body['isPinned'], true);
-        expect(body['applicationName'], 'Bit Tool');
+        expect(body['applicationName'], 'Bit tool');
 
         return http.Response(
           jsonEncode({
@@ -203,7 +203,7 @@ void main() {
         content: 'Testing creation flow',
         color: '#FBCFE8',
         isPinned: true,
-        applicationName: 'Bit Tool',
+        applicationName: 'Bit tool',
       );
 
       expect(created.id, 'created-uuid-123');
@@ -232,7 +232,7 @@ void main() {
               'content': 'Existing content unchanged',
               'color': '#A7F3D0',
               'isPinned': false,
-              'applicationName': 'Bit Tool',
+              'applicationName': 'Bit tool',
               'isArchived': false,
             },
           }),

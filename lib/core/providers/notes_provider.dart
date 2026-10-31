@@ -287,7 +287,7 @@ class NotesProvider extends ChangeNotifier {
   Future<void> addNote({
     required String title,
     required String content,
-    String category = 'Bit Tool',
+    String category = 'Bit tool',
     String colorHex = '#A7F3D0',
     bool isPinned = false,
   }) async {

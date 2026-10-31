@@ -16,7 +16,7 @@ class CalendarCategory {
     required this.name,
     this.color = '#3B82F6',
     this.userEmail,
-    this.applicationName = 'Bit Tool',
+    this.applicationName = 'Bit tool',
     this.createdAt,
     this.updatedAt,
   });
@@ -37,7 +37,7 @@ class CalendarCategory {
       name: json['name']?.toString() ?? '',
       color: json['color']?.toString() ?? '#3B82F6',
       userEmail: json['userEmail']?.toString(),
-      applicationName: json['applicationName']?.toString() ?? 'Bit Tool',
+      applicationName: json['applicationName']?.toString() ?? 'Bit tool',
       createdAt: parseDate(json['createdAt']),
       updatedAt: parseDate(json['updatedAt']),
     );
@@ -121,7 +121,7 @@ class CalendarEvent {
     this.color,
     this.status = 'scheduled',
     this.userEmail,
-    this.applicationName = 'Bit Tool',
+    this.applicationName = 'Bit tool',
     this.createdAt,
     this.updatedAt,
   });
@@ -260,7 +260,7 @@ class CalendarEvent {
         json['application_name']?.toString() ??
         json['appName']?.toString() ??
         json['app_name']?.toString() ??
-        'Bit Tool';
+        'Bit tool';
 
     return CalendarEvent(
       id: eventId,
@@ -540,7 +540,7 @@ class CalendarReminder {
     this.categoryId,
     this.category,
     this.userEmail,
-    this.applicationName = 'Bit Tool',
+    this.applicationName = 'Bit tool',
     this.createdAt,
     this.updatedAt,
   });
@@ -581,7 +581,7 @@ class CalendarReminder {
       categoryId: json['categoryId']?.toString() ?? cat?.id,
       category: cat,
       userEmail: json['userEmail']?.toString(),
-      applicationName: json['applicationName']?.toString() ?? 'Bit Tool',
+      applicationName: json['applicationName']?.toString() ?? 'Bit tool',
       createdAt: parseNullableDate(json['createdAt']),
       updatedAt: parseNullableDate(json['updatedAt']),
     );
@@ -674,7 +674,7 @@ class CalendarDateNote {
     this.categoryId,
     this.category,
     this.userEmail,
-    this.applicationName = 'Bit Tool',
+    this.applicationName = 'Bit tool',
     this.createdAt,
     this.updatedAt,
   });
@@ -710,7 +710,7 @@ class CalendarDateNote {
       categoryId: json['categoryId']?.toString() ?? cat?.id,
       category: cat,
       userEmail: json['userEmail']?.toString(),
-      applicationName: json['applicationName']?.toString() ?? 'Bit Tool',
+      applicationName: json['applicationName']?.toString() ?? 'Bit tool',
       createdAt: parseNullableDate(json['createdAt']),
       updatedAt: parseNullableDate(json['updatedAt']),
     );

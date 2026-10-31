@@ -50,7 +50,7 @@ void main() {
     [
       {
         "id": "notif-1",
-        "title": "Welcome to Bit Tool",
+        "title": "Welcome to Bit tool",
         "message": "Your workspace is ready.",
         "isRead": false,
         "type": "system"

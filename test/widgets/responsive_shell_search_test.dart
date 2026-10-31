@@ -39,7 +39,7 @@ Widget _createTestWidget() {
               id: 'n1',
               title: 'Personal note',
               content: 'Test content',
-              applicationName: 'Bit Tool',
+              applicationName: 'Bit tool',
             ),
           ],
         ),

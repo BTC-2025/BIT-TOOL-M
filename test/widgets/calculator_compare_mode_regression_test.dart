@@ -38,7 +38,7 @@ class FakeCalculatorApiService implements CalculatorApiService {
       title: title,
       mode: mode,
       currency: currency,
-      applicationName: applicationName ?? 'Bit Tool',
+      applicationName: applicationName ?? 'Bit tool',
       totalAmount: 0.0,
       items: [],
       createdAt: DateTime.now(),

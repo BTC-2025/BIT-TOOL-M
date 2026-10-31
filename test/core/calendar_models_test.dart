@@ -63,7 +63,7 @@ void main() {
         'color': 'FF2563EB',
         'status': 'scheduled',
         'userEmail': 'test@bnxmail.com',
-        'applicationName': 'Bit Tool',
+        'applicationName': 'Bit tool',
         'category': {
           'id': 'cat-work',
           'name': 'Corporate Strategy',
@@ -83,7 +83,7 @@ void main() {
       expect(event.color, 'FF2563EB');
       expect(event.status, 'scheduled');
       expect(event.userEmail, 'test@bnxmail.com');
-      expect(event.applicationName, 'Bit Tool');
+      expect(event.applicationName, 'Bit tool');
       expect(event.category, 'Corporate Strategy');
       expect(event.categoryObj?.id, 'cat-work');
       expect(event.colorHex, 'FF2563EB');
@@ -168,9 +168,9 @@ void main() {
       expect(event.matchesDay(2026, 10, 14), isTrue);
       expect(event.matchesDay(2026, 10, 9), isFalse);
 
-      // Verify matchesApp correctly matches Bit Tool and All Apps filter
+      // Verify matchesApp correctly matches Bit tool and All Apps filter
       expect(event.matchesApp('All Apps'), isTrue);
-      expect(event.matchesApp('Bit Tool'), isTrue);
+      expect(event.matchesApp('Bit tool'), isTrue);
     });
 
     test('fromJson parses 12-hour AM/PM and seconds time strings from web inputs', () {
@@ -250,7 +250,7 @@ void main() {
         'title': 'Daily Standup Notes',
         'date': '2026-10-09',
         'content': 'Discussed release blockers',
-        'applicationName': 'Bit Tool',
+        'applicationName': 'Bit tool',
         'userEmail': 'dev@bnxmail.com',
       };
 
@@ -260,7 +260,7 @@ void main() {
       expect(note.title, 'Daily Standup Notes');
       expect(note.date, '2026-10-09');
       expect(note.content, 'Discussed release blockers');
-      expect(note.applicationName, 'Bit Tool');
+      expect(note.applicationName, 'Bit tool');
       expect(note.userEmail, 'dev@bnxmail.com');
     });
 

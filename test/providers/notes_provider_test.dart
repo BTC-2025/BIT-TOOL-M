@@ -47,7 +47,7 @@ class FakeNoteApiService implements NoteApiService {
       content: content,
       color: color ?? '#A7F3D0',
       isPinned: isPinned,
-      applicationName: applicationName ?? 'Bit Tool',
+      applicationName: applicationName ?? 'Bit tool',
     );
     mockNotes.add(created);
     return created;
@@ -149,7 +149,7 @@ void main() {
           id: 'note-1',
           title: 'Backend Note',
           content: 'Verified body',
-          applicationName: 'Bit Tool',
+          applicationName: 'Bit tool',
           isPinned: false,
         ),
       ];
@@ -190,13 +190,13 @@ void main() {
           id: '1',
           title: 'Grocery List',
           content: 'Milk, bread, eggs',
-          applicationName: 'Bit Tool',
+          applicationName: 'Bit tool',
         ),
         const NoteModel(
           id: '2',
           title: 'Flutter Architecture',
           content: 'Implement clean separation of providers and services',
-          applicationName: 'Bit Tool',
+          applicationName: 'Bit tool',
         ),
       ];
 
@@ -221,8 +221,8 @@ void main() {
       fakeService.mockNotes = [
         const NoteModel(
           id: '1',
-          title: 'Bit Tool Note',
-          applicationName: 'Bit Tool',
+          title: 'Bit tool Note',
+          applicationName: 'Bit tool',
           isArchived: false,
         ),
         const NoteModel(
@@ -234,7 +234,7 @@ void main() {
         const NoteModel(
           id: '3',
           title: 'Archived Note',
-          applicationName: 'Bit Tool',
+          applicationName: 'Bit tool',
           isArchived: true,
         ),
       ];
@@ -246,8 +246,8 @@ void main() {
       expect(provider.filteredNotes.length, 2);
       expect(provider.filteredNotes.map((n) => n.id), containsAll(['1', '2']));
 
-      // 'Bit Tool' tab shows only Bit Tool non-archived notes
-      provider.setSelectedFilter('Bit Tool');
+      // 'Bit tool' tab shows only Bit tool non-archived notes
+      provider.setSelectedFilter('Bit tool');
       expect(provider.filteredNotes.length, 1);
       expect(provider.filteredNotes.first.id, '1');
 
@@ -293,7 +293,7 @@ void main() {
         content: 'Clean architecture',
         color: '#10B981',
         isPinned: true,
-        applicationName: 'Bit Tool',
+        applicationName: 'Bit tool',
       );
 
       expect(fakeService.createCalls, 1);

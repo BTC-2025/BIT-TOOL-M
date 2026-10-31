@@ -50,7 +50,7 @@ void main() {
                 'title': 'Tape - 10:15',
                 'mode': 'standard',
                 'currency': 'INR',
-                'applicationName': 'Bit Tool',
+                'applicationName': 'Bit tool',
                 'totalAmount': 500.0,
                 'items': [
                   {
@@ -102,7 +102,7 @@ void main() {
               'title': 'Tape - 11:00',
               'mode': 'business',
               'currency': 'INR',
-              'applicationName': 'Bit Tool',
+              'applicationName': 'Bit tool',
               'items': [],
             }
           }),
@@ -469,7 +469,7 @@ void main() {
                 {
                   'id': 'bit-1',
                   'title': 'Tape - 10:06:05',
-                  'applicationName': 'Bit Tool',
+                  'applicationName': 'Bit tool',
                   'totalAmount': 7553.0,
                   'items': [],
                 },
@@ -496,7 +496,7 @@ void main() {
       expect(sessions.length, 3);
       expect(sessions[0].applicationName, 'BNX Mail');
       expect(sessions[0].items.length, 2);
-      expect(sessions[1].applicationName, 'Bit Tool');
+      expect(sessions[1].applicationName, 'Bit tool');
       expect(sessions[2].applicationName, 'Cliks');
     });
 

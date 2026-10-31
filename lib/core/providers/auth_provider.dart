@@ -125,7 +125,7 @@ class AuthProvider extends ChangeNotifier {
       _errorMessage = e.message;
     } catch (_) {
       _status = AuthStatus.authenticationError;
-      _errorMessage = 'Unable to connect to Bit Tool services right now.';
+      _errorMessage = 'Unable to connect to Bit tool services right now.';
     } finally {
       _pendingFetch = null;
       notifyListeners();

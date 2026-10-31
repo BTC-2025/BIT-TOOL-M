@@ -381,7 +381,7 @@ class CalculatorSession {
     required this.title,
     this.mode = 'business',
     this.currency = 'INR',
-    this.applicationName = 'Bit Tool',
+    this.applicationName = 'Bit tool',
     this.createdAt,
     this.updatedAt,
     this.totalAmount,
@@ -436,7 +436,7 @@ class CalculatorSession {
       } else if (lower.contains('[cliks]') || lower.contains('cliks')) {
         app = 'Cliks';
       } else {
-        app = 'Bit Tool';
+        app = 'Bit tool';
       }
     }
 

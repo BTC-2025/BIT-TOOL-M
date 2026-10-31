@@ -18,7 +18,7 @@ class _NotesScreenState extends State<NotesScreen> {
   final TextEditingController _inlineTitleController = TextEditingController();
   final TextEditingController _inlineContentController = TextEditingController();
   bool _inlineIsPinned = false;
-  String _inlineCategory = 'Bit Tool';
+  String _inlineCategory = 'Bit tool';
   String _inlineColorHex = '#A7F3D0';
 
   final List<String> _filterTabs = [
@@ -27,7 +27,7 @@ class _NotesScreenState extends State<NotesScreen> {
     'Cliks',
     'BNX Mail',
     'Cliks Business',
-    'Bit Tool',
+    'Bit tool',
   ];
 
   final List<Map<String, dynamic>> _pastelColors = [
@@ -122,7 +122,7 @@ class _NotesScreenState extends State<NotesScreen> {
       setState(() {
         _inlineIsPinned = false;
         _inlineColorHex = '#A7F3D0';
-        _inlineCategory = 'Bit Tool';
+        _inlineCategory = 'Bit tool';
       });
 
       if (mounted) {

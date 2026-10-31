@@ -19,7 +19,7 @@ class _CalendarScreenState extends State<CalendarScreen>
 
   final List<String> _appFilters = [
     'All Apps',
-    'Bit Tool',
+    'Bit tool',
     'Cliks',
     'Cliks Business',
     'BNX Mail',

@@ -81,7 +81,7 @@ Widget _createTestApp({Widget? child, AuthProvider? authProvider}) {
               id: 'n1',
               title: 'Mobile responsive note',
               content: 'Testing responsive layout on narrow viewports',
-              applicationName: 'Bit Tool',
+              applicationName: 'Bit tool',
             ),
           ],
         ),

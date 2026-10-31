@@ -48,7 +48,7 @@ void main() {
         CalculatorSession(
           id: 'sess-bit-1',
           title: 'Tape - 11:00',
-          applicationName: 'Bit Tool',
+          applicationName: 'Bit tool',
           totalAmount: 300.0,
           createdAt: DateTime.now(),
         ),
@@ -64,12 +64,12 @@ void main() {
 
       // Verify app titles exist
       expect(find.text('BNX Mail'), findsOneWidget);
-      expect(find.text('Bit Tool'), findsOneWidget);
+      expect(find.text('Bit tool'), findsOneWidget);
       expect(find.text('Cliks'), findsOneWidget);
       expect(find.text('Cliks Business'), findsOneWidget);
 
       // Verify counts
-      expect(find.text('1 Tape saved'), findsNWidgets(2)); // BNX Mail and Bit Tool each have 1
+      expect(find.text('1 Tape saved'), findsNWidgets(2)); // BNX Mail and Bit tool each have 1
       expect(find.text('0 Tapes saved'), findsNWidgets(2)); // Cliks and Cliks Business each have 0
     });
 
@@ -162,7 +162,7 @@ void main() {
         CalculatorSession(
           id: 'sess-bit-del',
           title: 'Tape to Delete',
-          applicationName: 'Bit Tool',
+          applicationName: 'Bit tool',
           totalAmount: 50.0,
           createdAt: DateTime.now(),
         ),
@@ -173,8 +173,8 @@ void main() {
       await tester.pumpWidget(_buildTestApp(calculatorProvider: provider));
       await tester.pumpAndSettle();
 
-      // Open Bit Tool tapes
-      await tester.tap(find.text('Bit Tool'));
+      // Open Bit tool tapes
+      await tester.tap(find.text('Bit tool'));
       await tester.pumpAndSettle();
 
       expect(find.text('Tape to Delete'), findsOneWidget);
@@ -195,7 +195,7 @@ void main() {
 
       expect(fakeApi.deleteSessionCalls, 1);
       expect(find.text('Tape to Delete'), findsNothing);
-      expect(find.text('No saved tapes for Bit Tool'), findsOneWidget);
+      expect(find.text('No saved tapes for Bit tool'), findsOneWidget);
     });
   });
 }

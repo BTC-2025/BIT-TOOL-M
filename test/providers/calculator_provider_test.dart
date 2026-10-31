@@ -56,7 +56,7 @@ class FakeCalculatorApiService implements CalculatorApiService {
       title: title,
       mode: mode,
       currency: currency,
-      applicationName: applicationName ?? 'Bit Tool',
+      applicationName: applicationName ?? 'Bit tool',
       totalAmount: 0.0,
       createdAt: DateTime.now(),
       items: [],
@@ -339,7 +339,7 @@ void main() {
         CalculatorSession(
           id: 'sess-2',
           title: 'Tape - 11:00',
-          applicationName: 'Bit Tool',
+          applicationName: 'Bit tool',
           totalAmount: 300.0,
           createdAt: DateTime.now(),
           items: [],
@@ -384,7 +384,7 @@ void main() {
       // 2. Save tape session
       final saved = await provider.saveTapeSession(
         title: 'Tape - Test',
-        applicationName: 'Bit Tool',
+        applicationName: 'Bit tool',
       );
 
       expect(saved, isNotNull);

@@ -70,7 +70,7 @@ void main() {
         'title': 'Tape - 12:30',
         'mode': 'business',
         'currency': 'INR',
-        'applicationName': 'Bit Tool',
+        'applicationName': 'Bit tool',
         'totalAmount': 250.0,
         'createdAt': '2026-10-09T12:30:00.000Z',
         'items': [
@@ -97,7 +97,7 @@ void main() {
       expect(session.title, 'Tape - 12:30');
       expect(session.mode, 'business');
       expect(session.currency, 'INR');
-      expect(session.applicationName, 'Bit Tool');
+      expect(session.applicationName, 'Bit tool');
       expect(session.totalAmount, 250.0);
       expect(session.items.length, 2);
       expect(session.items[0].sequence, 1);

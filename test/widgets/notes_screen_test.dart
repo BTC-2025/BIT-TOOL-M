@@ -43,7 +43,7 @@ class MockTestNoteApiService implements NoteApiService {
       content: content,
       color: color ?? '#A7F3D0',
       isPinned: isPinned,
-      applicationName: applicationName ?? 'Bit Tool',
+      applicationName: applicationName ?? 'Bit tool',
     );
     mockNotes.add(created);
     return created;
@@ -157,7 +157,7 @@ void main() {
           id: 'note-1',
           title: 'Quarterly Planning',
           content: 'Discuss OKRs and resource allocation',
-          applicationName: 'Bit Tool',
+          applicationName: 'Bit tool',
           isPinned: true,
         ),
         const NoteModel(
@@ -202,7 +202,7 @@ void main() {
           id: 'del-me',
           title: 'Disposable Note',
           content: 'Should be removed',
-          applicationName: 'Bit Tool',
+          applicationName: 'Bit tool',
         ),
       ];
 

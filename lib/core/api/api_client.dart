@@ -293,7 +293,7 @@ class ApiClient {
       throw ServerException(
         backendMsg != null && backendMsg.isNotEmpty
             ? backendMsg
-            : 'Unable to connect to Bit Tool services right now.',
+            : 'Unable to connect to Bit tool services right now.',
         statusCode,
         bodyString,
         correlationId,

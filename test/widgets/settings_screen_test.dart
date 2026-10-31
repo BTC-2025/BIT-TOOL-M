@@ -203,7 +203,7 @@ void main() {
     });
 
     testWidgets(
-      'renders About Bit Tool card with version 1.0.0 and description',
+      'renders About Bit tool card with version 1.0.0 and description',
       (WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(home: Scaffold(body: SettingsScreen())),
@@ -211,11 +211,11 @@ void main() {
         await tester.pumpAndSettle();
 
         // Verify About card content
-        expect(find.text('About Bit Tool'), findsOneWidget);
+        expect(find.text('About Bit tool'), findsOneWidget);
         expect(find.text('Version 1.0.0'), findsOneWidget);
         expect(
           find.textContaining(
-            'Bit Tool is a premium suite of productivity applications',
+            'Bit tool is a premium suite of productivity applications',
           ),
           findsOneWidget,
         );

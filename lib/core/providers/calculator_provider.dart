@@ -196,7 +196,7 @@ class CalculatorProvider extends ChangeNotifier {
 
     final Map<String, String> appNameMap = {
       'bnx_mail': 'BNX Mail',
-      'bit_tool': 'Bit Tool',
+      'bit_tool': 'Bit tool',
       'cliks': 'Cliks',
       'cliks_business': 'Cliks Business',
     };
@@ -366,7 +366,7 @@ class CalculatorProvider extends ChangeNotifier {
           '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
       final defaultTitle = 'Tape - $timeStr';
       final finalTitle = title?.trim().isNotEmpty == true ? title!.trim() : defaultTitle;
-      final finalAppName = applicationName ?? 'Bit Tool';
+      final finalAppName = applicationName ?? 'Bit tool';
 
       // 1. Create the session
       final createdSession = await _apiService.createSession(

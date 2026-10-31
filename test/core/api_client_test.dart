@@ -107,7 +107,7 @@ void main() {
             isA<ServerException>().having(
               (e) => e.message,
               'message',
-              'Unable to connect to Bit Tool services right now.',
+              'Unable to connect to Bit tool services right now.',
             ),
           ),
         );

@@ -7,7 +7,7 @@ void main() {
       final json = {
         'id': '6fa85f64-5717-4562-b3fc-2c963f66afa6',
         'userEmail': 'ravinew2004@bnxmail.com',
-        'applicationName': 'Bit Tool',
+        'applicationName': 'Bit tool',
         'title': 'Production Note',
         'content': 'Test content body',
         'isPinned': true,
@@ -23,8 +23,8 @@ void main() {
 
       expect(note.id, '6fa85f64-5717-4562-b3fc-2c963f66afa6');
       expect(note.userEmail, 'ravinew2004@bnxmail.com');
-      expect(note.applicationName, 'Bit Tool');
-      expect(note.category, 'Bit Tool');
+      expect(note.applicationName, 'Bit tool');
+      expect(note.category, 'Bit tool');
       expect(note.title, 'Production Note');
       expect(note.content, 'Test content body');
       expect(note.isPinned, isTrue);
@@ -46,7 +46,7 @@ void main() {
 
       expect(note.id, 'note-1');
       expect(note.userEmail, isNull);
-      expect(note.applicationName, 'Bit Tool');
+      expect(note.applicationName, 'Bit tool');
       expect(note.title, '');
       expect(note.content, '');
       expect(note.isPinned, isFalse);
@@ -121,7 +121,7 @@ void main() {
         content: 'New content body',
         color: '#BAE6FD',
         isPinned: true,
-        applicationName: 'Bit Tool',
+        applicationName: 'Bit tool',
       );
 
       expect(body, {
@@ -129,7 +129,7 @@ void main() {
         'content': 'New content body',
         'color': '#BAE6FD',
         'isPinned': true,
-        'applicationName': 'Bit Tool',
+        'applicationName': 'Bit tool',
       });
     });
 
@@ -175,7 +175,7 @@ void main() {
         content: 'Original Content',
         isPinned: false,
         color: '#A7F3D0',
-        applicationName: 'Bit Tool',
+        applicationName: 'Bit tool',
       );
 
       final updated = original.copyWith(
@@ -188,7 +188,7 @@ void main() {
       expect(updated.content, 'Original Content');
       expect(updated.isPinned, isTrue);
       expect(updated.color, '#A7F3D0');
-      expect(updated.applicationName, 'Bit Tool');
+      expect(updated.applicationName, 'Bit tool');
     });
 
     test('equality and hashCode compare note identity accurately', () {
@@ -196,21 +196,21 @@ void main() {
         id: '1',
         title: 'Title',
         content: 'Content',
-        applicationName: 'Bit Tool',
+        applicationName: 'Bit tool',
       );
 
       const note2 = NoteModel(
         id: '1',
         title: 'Title',
         content: 'Content',
-        applicationName: 'Bit Tool',
+        applicationName: 'Bit tool',
       );
 
       const note3 = NoteModel(
         id: '2',
         title: 'Different Title',
         content: 'Content',
-        applicationName: 'Bit Tool',
+        applicationName: 'Bit tool',
       );
 
       expect(note1, equals(note2));

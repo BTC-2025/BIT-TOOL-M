@@ -72,7 +72,7 @@ class CrossAppHistoryData {
       ),
       CrossAppItem(
         id: 'bit_tool',
-        name: 'Bit Tool',
+        name: 'Bit tool',
         iconKey: 'bit_tool',
         tapes: [],
       ),

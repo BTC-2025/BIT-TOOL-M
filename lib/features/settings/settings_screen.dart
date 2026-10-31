@@ -85,7 +85,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               const SizedBox(height: 20),
 
-              // ── Bottom Card: About Bit Tool ──────────────────────────────
+              // ── Bottom Card: About Bit tool ──────────────────────────────
               _buildAboutCard(isDark),
               const SizedBox(height: 24),
             ],
@@ -1109,7 +1109,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ── About Bit Tool Card ───────────────────────────────────────────────────
+  // ── About Bit tool Card ───────────────────────────────────────────────────
   Widget _buildAboutCard(bool isDark) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),

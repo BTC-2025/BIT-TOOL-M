@@ -27,13 +27,13 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Bit Tool needs access to the camera to take photos and attach images to your notes and profile.</string>
+	<string>Bit tool needs access to the camera to take photos and attach images to your notes and profile.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Bit Tool needs access to your location to deliver relevant local weather information and updates.</string>
+	<string>Bit tool needs access to your location to deliver relevant local weather information and updates.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Bit Tool needs access to your location to provide accurate local weather forecasts and regional updates.</string>
+	<string>Bit tool needs access to your location to provide accurate local weather forecasts and regional updates.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Bit Tool needs access to the microphone for recording audio notes and video.</string>
+	<string>Bit tool needs access to the microphone for recording audio notes and video.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -223,7 +223,7 @@ void main() {
         expect(authProvider.status, AuthStatus.authenticationError);
         expect(
           authProvider.errorMessage,
-          'Unable to connect to Bit Tool services right now.',
+          'Unable to connect to Bit tool services right now.',
         );
 
         return500 = false;

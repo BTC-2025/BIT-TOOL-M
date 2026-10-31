@@ -49,7 +49,7 @@ class ServerException extends ApiException {
   final String? correlationId;
 
   const ServerException([
-    super.message = 'Unable to connect to Bit Tool services right now.',
+    super.message = 'Unable to connect to Bit tool services right now.',
     int? statusCode,
     this.responseBody,
     this.correlationId,

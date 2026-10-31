@@ -19,7 +19,7 @@ class NoteModel {
   const NoteModel({
     required this.id,
     this.userEmail,
-    this.applicationName = 'Bit Tool',
+    this.applicationName = 'Bit tool',
     this.title = '',
     this.content = '',
     this.isPinned = false,
@@ -57,7 +57,7 @@ class NoteModel {
     final appName = json['applicationName']?.toString() ??
         json['appName']?.toString() ??
         json['category']?.toString() ??
-        'Bit Tool';
+        'Bit tool';
     final title = json['title']?.toString() ?? '';
     final content = json['content']?.toString() ?? '';
     final isPinned = json['isPinned'] == true ||
