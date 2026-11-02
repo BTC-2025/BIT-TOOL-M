@@ -62,10 +62,12 @@ static void my_application_activate(GApplication* application) {
     g_autofree gchar* icon_path = g_build_filename(dir, "data", "flutter_assets", "assets", "bit_tool_logo.png", nullptr);
     if (g_file_test(icon_path, G_FILE_TEST_EXISTS)) {
       gtk_window_set_icon_from_file(window, icon_path, nullptr);
+      gtk_window_set_default_icon_from_file(icon_path, nullptr);
     } else {
       g_autofree gchar* bundle_icon = g_build_filename(dir, "data", "bit_tool_logo.png", nullptr);
       if (g_file_test(bundle_icon, G_FILE_TEST_EXISTS)) {
         gtk_window_set_icon_from_file(window, bundle_icon, nullptr);
+        gtk_window_set_default_icon_from_file(bundle_icon, nullptr);
       }
     }
   }

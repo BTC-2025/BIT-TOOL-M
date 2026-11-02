@@ -6,5 +6,6 @@ Comment=Integrated Enterprise Suite
 Exec=bit_tools_backend
 Icon=bit_tool_logo
 Terminal=false
+StartupWMClass=com.bit-tool.com
 Categories=Utility;
 

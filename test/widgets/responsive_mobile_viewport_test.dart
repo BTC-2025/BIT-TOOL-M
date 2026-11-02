@@ -138,7 +138,7 @@ void main() {
         expect(tester.takeException(), isNull);
 
         // Verify top nav bar elements render properly
-        expect(find.text('Bit-tool'), findsOneWidget);
+        expect(find.text('Bit tool'), findsOneWidget);
 
         // Verify mobile mode does not render the wide desktop search box
         expect(find.byKey(const ValueKey('HeaderSearchField')), findsNothing);
@@ -312,7 +312,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Starts on Calculator
-      expect(find.text('Bit-tool'), findsOneWidget);
+      expect(find.text('Bit tool'), findsOneWidget);
 
       // Tap on the top-right profile avatar
       final avatarFinder = find.byType(UserAvatar).first;
@@ -334,7 +334,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Returns to Calculator!
-      expect(find.text('Bit-tool'), findsOneWidget);
+      expect(find.text('Bit tool'), findsOneWidget);
     });
   });
 }

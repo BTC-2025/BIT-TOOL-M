@@ -17,8 +17,8 @@ void main() {
     );
     await tester.pump();
 
-    // Verify BIT TOOL branding is shown initially
-    expect(find.text('BIT TOOL'), findsOneWidget);
+    // Verify Bit tool branding is shown initially
+    expect(find.text('Bit tool'), findsOneWidget);
     expect(find.byType(Image), findsOneWidget);
   });
 
@@ -35,7 +35,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('BIT TOOL'), findsOneWidget);
+    expect(find.text('Bit tool'), findsOneWidget);
     expect(find.text('Integrated Enterprise Suite'), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     expect(find.byType(Image), findsOneWidget);
@@ -62,7 +62,7 @@ void main() {
     await tester.pump();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('BIT TOOL'), findsOneWidget);
+    expect(find.text('Bit tool'), findsOneWidget);
     expect(find.text('Integrated Enterprise Suite'), findsOneWidget);
   });
 
@@ -90,7 +90,7 @@ void main() {
     await tester.pump();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('BIT TOOL'), findsOneWidget);
+    expect(find.text('Bit tool'), findsOneWidget);
   });
 
   testWidgets('SplashScreen transitions to nextScreen after duration', (
@@ -105,7 +105,7 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('BIT TOOL'), findsOneWidget);
+    expect(find.text('Bit tool'), findsOneWidget);
 
     await tester.pump(const Duration(milliseconds: 550));
     await tester.pumpAndSettle();
@@ -128,7 +128,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('BIT TOOL'), findsOneWidget);
+      expect(find.text('Bit tool'), findsOneWidget);
       expect(find.text('Integrated Enterprise Suite'), findsOneWidget);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.byType(Image), findsOneWidget);

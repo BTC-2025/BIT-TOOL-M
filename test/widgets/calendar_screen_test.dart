@@ -41,6 +41,7 @@ void main() {
         fakeService,
         fakeAuth,
       );
+      provider.selectDate(DateTime(2026, 10, 14));
     });
 
     testWidgets('renders month header, day labels, and dynamic calendar leaves',
