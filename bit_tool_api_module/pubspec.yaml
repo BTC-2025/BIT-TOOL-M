@@ -1,0 +1,19 @@
+name: bit_tool_api_module
+description: Standalone API module for Bit Tool features (Contacts, Notes, Calendar, Calculator, Notifications, Weather, Currency, User Profile). Excludes authentication/login APIs for seamless embedding into host applications.
+version: 1.0.0
+homepage: https://bit-tool.com
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+

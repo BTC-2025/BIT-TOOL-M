@@ -1,0 +1,482 @@
+{
+  "moduleName": "bit_tool_api_module",
+  "version": "1.0.0",
+  "description": "Catalog of all Bit Tool module APIs for side-feature integration in host applications (e.g. Cliks Business). Login APIs are excluded.",
+  "authentication": {
+    "type": "Bearer Token",
+    "header": "Authorization: Bearer <token>",
+    "source": "Supplied directly by host application auth session"
+  },
+  "modules": [
+    {
+      "name": "Contacts",
+      "baseUrl": "https://api.bit-tool.com/api/contacts",
+      "endpoints": [
+        {
+          "name": "Get Paginated Contacts",
+          "method": "GET",
+          "path": "/get",
+          "queryParams": ["page", "limit", "search"],
+          "requiresAuth": true,
+          "description": "Retrieves paginated contacts with optional keyword search."
+        },
+        {
+          "name": "Get All Contacts",
+          "method": "GET",
+          "path": "/get-all",
+          "queryParams": ["offset", "limit"],
+          "requiresAuth": true,
+          "description": "Retrieves complete contacts collection across integrated workspaces."
+        },
+        {
+          "name": "Get Contact by ID",
+          "method": "GET",
+          "path": "/get/:id",
+          "requiresAuth": true,
+          "description": "Retrieves single contact details by ID."
+        },
+        {
+          "name": "Create Contact",
+          "method": "POST",
+          "path": "/add",
+          "requiresAuth": true,
+          "requestBody": {
+            "firstName": "string",
+            "lastName": "string",
+            "email": "string?",
+            "phone": "string?",
+            "company": "string?",
+            "role": "string?",
+            "notes": "string?"
+          },
+          "description": "Creates a new contact record."
+        },
+        {
+          "name": "Update Contact",
+          "method": "PUT",
+          "path": "/update/:id",
+          "requiresAuth": true,
+          "requestBody": {
+            "firstName": "string?",
+            "lastName": "string?",
+            "email": "string?",
+            "phone": "string?",
+            "company": "string?",
+            "role": "string?",
+            "notes": "string?"
+          },
+          "description": "Updates contact record fields."
+        },
+        {
+          "name": "Delete Contact",
+          "method": "DELETE",
+          "path": "/delete/:id",
+          "requiresAuth": true,
+          "description": "Deletes contact record by ID."
+        }
+      ]
+    },
+    {
+      "name": "Notes",
+      "baseUrl": "https://api.bit-tool.com/api/notes",
+      "endpoints": [
+        {
+          "name": "Get Notes",
+          "method": "GET",
+          "path": "/",
+          "queryParams": ["allApps"],
+          "requiresAuth": true,
+          "description": "Retrieves user notes, including notes created across other apps."
+        },
+        {
+          "name": "Get Note by ID",
+          "method": "GET",
+          "path": "/:id",
+          "requiresAuth": true,
+          "description": "Retrieves full note content by ID."
+        },
+        {
+          "name": "Create Note",
+          "method": "POST",
+          "path": "/create",
+          "requiresAuth": true,
+          "requestBody": {
+            "title": "string",
+            "content": "string",
+            "color": "string?",
+            "isPinned": "boolean?",
+            "applicationName": "string?"
+          },
+          "description": "Creates a new note."
+        },
+        {
+          "name": "Update Note",
+          "method": "PUT",
+          "path": "/update/:id",
+          "requiresAuth": true,
+          "requestBody": {
+            "title": "string?",
+            "content": "string?",
+            "color": "string?",
+            "isPinned": "boolean?",
+            "isArchived": "boolean?"
+          },
+          "description": "Updates note title, body, pinned, or archive state."
+        },
+        {
+          "name": "Delete Note",
+          "method": "DELETE",
+          "path": "/delete/:id",
+          "requiresAuth": true,
+          "description": "Deletes note record by ID."
+        }
+      ]
+    },
+    {
+      "name": "Calendar",
+      "baseUrl": "https://api.bit-tool.com/api/calendar",
+      "endpoints": [
+        {
+          "name": "Get Categories",
+          "method": "GET",
+          "path": "/categories",
+          "requiresAuth": true,
+          "description": "Lists all event categories and colors."
+        },
+        {
+          "name": "Create Category",
+          "method": "POST",
+          "path": "/categories",
+          "requiresAuth": true,
+          "requestBody": {
+            "name": "string",
+            "color": "hex string"
+          },
+          "description": "Creates a new category for calendar events."
+        },
+        {
+          "name": "Get Month Events",
+          "method": "GET",
+          "path": "/events/month",
+          "queryParams": ["year", "month"],
+          "requiresAuth": true,
+          "description": "Fetches events for the specified month and year."
+        },
+        {
+          "name": "Create Event",
+          "method": "POST",
+          "path": "/events",
+          "requiresAuth": true,
+          "requestBody": {
+            "title": "string",
+            "startTime": "ISO 8601 string",
+            "endTime": "ISO 8601 string",
+            "categoryId": "string",
+            "description": "string?",
+            "location": "string?"
+          },
+          "description": "Schedules a new calendar event."
+        },
+        {
+          "name": "Update Event",
+          "method": "PUT",
+          "path": "/events/:id",
+          "requiresAuth": true,
+          "description": "Updates calendar event details or timings."
+        },
+        {
+          "name": "Delete Event",
+          "method": "DELETE",
+          "path": "/events/:id",
+          "requiresAuth": true,
+          "description": "Deletes a calendar event."
+        },
+        {
+          "name": "Get Reminders",
+          "method": "GET",
+          "path": "/reminders",
+          "queryParams": ["date"],
+          "requiresAuth": true,
+          "description": "Fetches reminders for a specific date (YYYY-MM-DD)."
+        },
+        {
+          "name": "Create Reminder",
+          "method": "POST",
+          "path": "/reminders",
+          "requiresAuth": true,
+          "requestBody": {
+            "title": "string",
+            "date": "YYYY-MM-DD",
+            "time": "HH:mm",
+            "description": "string?"
+          },
+          "description": "Creates a new reminder."
+        },
+        {
+          "name": "Update Reminder",
+          "method": "PUT",
+          "path": "/reminders/:id",
+          "requiresAuth": true,
+          "description": "Updates reminder details."
+        },
+        {
+          "name": "Complete Reminder",
+          "method": "PUT",
+          "path": "/reminders/:id/complete",
+          "requiresAuth": true,
+          "description": "Marks a reminder as completed."
+        },
+        {
+          "name": "Delete Reminder",
+          "method": "DELETE",
+          "path": "/reminders/:id",
+          "requiresAuth": true,
+          "description": "Deletes a reminder."
+        },
+        {
+          "name": "Get Date Notes",
+          "method": "GET",
+          "path": "/notes",
+          "queryParams": ["date"],
+          "requiresAuth": true,
+          "description": "Fetches date-linked notes for a date."
+        },
+        {
+          "name": "Create Date Note",
+          "method": "POST",
+          "path": "/notes",
+          "requiresAuth": true,
+          "requestBody": {
+            "title": "string",
+            "date": "YYYY-MM-DD",
+            "content": "string"
+          },
+          "description": "Creates a date-linked note."
+        },
+        {
+          "name": "Update Date Note",
+          "method": "PUT",
+          "path": "/notes/:id",
+          "requiresAuth": true,
+          "description": "Updates date-linked note content."
+        },
+        {
+          "name": "Delete Date Note",
+          "method": "DELETE",
+          "path": "/notes/:id",
+          "requiresAuth": true,
+          "description": "Deletes date-linked note."
+        },
+        {
+          "name": "Search Calendar",
+          "method": "GET",
+          "path": "/search",
+          "queryParams": ["query"],
+          "requiresAuth": true,
+          "description": "Global search across events, reminders, and date notes."
+        }
+      ]
+    },
+    {
+      "name": "Calculator",
+      "baseUrl": "https://api.bit-tool.com/api/calculator",
+      "endpoints": [
+        {
+          "name": "Get Calculator History",
+          "method": "GET",
+          "path": "/history",
+          "requiresAuth": true,
+          "description": "Fetches saved calculation tape sessions."
+        },
+        {
+          "name": "Get Cross-App History",
+          "method": "GET",
+          "path": "/history/all",
+          "requiresAuth": true,
+          "description": "Fetches calculation sessions from all integrated apps."
+        },
+        {
+          "name": "Get Session by ID",
+          "method": "GET",
+          "path": "/sessions/:id",
+          "requiresAuth": true,
+          "description": "Retrieves calculation session with full tape item list."
+        },
+        {
+          "name": "Create Session",
+          "method": "POST",
+          "path": "/sessions",
+          "requiresAuth": true,
+          "requestBody": {
+            "title": "string",
+            "mode": "string?",
+            "currency": "string?",
+            "applicationName": "string?"
+          },
+          "description": "Creates a new calculation tape session."
+        },
+        {
+          "name": "Add Tape Item",
+          "method": "POST",
+          "path": "/sessions/:sessionId/items",
+          "requiresAuth": true,
+          "requestBody": {
+            "sequence": "int",
+            "value": "double",
+            "operator": "string",
+            "runningTotal": "double",
+            "label": "string?"
+          },
+          "description": "Appends a tape operation to a calculation session."
+        },
+        {
+          "name": "Delete Session",
+          "method": "DELETE",
+          "path": "/sessions/:id",
+          "requiresAuth": true,
+          "description": "Deletes calculation session by ID."
+        },
+        {
+          "name": "Clear All Sessions",
+          "method": "DELETE",
+          "path": "/sessions",
+          "requiresAuth": true,
+          "description": "Clears all standard calculator sessions."
+        },
+        {
+          "name": "Get Compare History",
+          "method": "GET",
+          "path": "/compare/history",
+          "requiresAuth": true,
+          "description": "Fetches comparison sessions."
+        },
+        {
+          "name": "Create Compare Session",
+          "method": "POST",
+          "path": "/compare/sessions",
+          "requiresAuth": true,
+          "description": "Creates a new price comparison session."
+        },
+        {
+          "name": "Add Compare Item",
+          "method": "POST",
+          "path": "/compare/sessions/:sessionId/items",
+          "requiresAuth": true,
+          "description": "Adds a comparison row between Side A and Side B."
+        },
+        {
+          "name": "Update Compare Item",
+          "method": "PUT",
+          "path": "/compare/sessions/:sessionId/items/:itemId",
+          "requiresAuth": true,
+          "description": "Updates row values, quantities, or discounts."
+        },
+        {
+          "name": "Delete Compare Item",
+          "method": "DELETE",
+          "path": "/compare/sessions/:sessionId/items/:itemId",
+          "requiresAuth": true,
+          "description": "Deletes comparison row."
+        },
+        {
+          "name": "Delete Compare Session",
+          "method": "DELETE",
+          "path": "/compare/sessions/:id",
+          "requiresAuth": true,
+          "description": "Deletes compare session."
+        },
+        {
+          "name": "Clear All Compare History",
+          "method": "DELETE",
+          "path": "/compare/history",
+          "requiresAuth": true,
+          "description": "Clears all price comparison sessions."
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "baseUrl": "https://api.bit-tool.com/api",
+      "endpoints": [
+        {
+          "name": "Get Notifications",
+          "method": "GET",
+          "path": "/notifications",
+          "requiresAuth": true,
+          "description": "Fetches all notifications for the authenticated user."
+        },
+        {
+          "name": "Mark One Notification Read",
+          "method": "PUT",
+          "path": "/notifications/:id/read",
+          "requiresAuth": true,
+          "description": "Marks a single notification as read."
+        },
+        {
+          "name": "Mark All Notifications Read",
+          "method": "PUT",
+          "path": "/notifications/read-all",
+          "requiresAuth": true,
+          "description": "Marks all notifications as read."
+        }
+      ]
+    },
+    {
+      "name": "Weather",
+      "baseUrl": "https://api.open-meteo.com/v1",
+      "endpoints": [
+        {
+          "name": "Get Weather Forecast",
+          "method": "GET",
+          "path": "/forecast",
+          "queryParams": ["latitude", "longitude", "daily", "hourly", "current", "timezone"],
+          "requiresAuth": false,
+          "description": "Live weather conditions and multi-day forecast."
+        },
+        {
+          "name": "Reverse Geocoding",
+          "method": "GET",
+          "path": "https://api.bigdatacloud.net/data/reverse-geocode-client",
+          "queryParams": ["latitude", "longitude", "localityLanguage"],
+          "requiresAuth": false,
+          "description": "Resolves GPS coordinates to city name and country."
+        }
+      ]
+    },
+    {
+      "name": "Currency",
+      "baseUrl": "https://api.frankfurter.dev/v2",
+      "endpoints": [
+        {
+          "name": "Get Supported Currencies",
+          "method": "GET",
+          "path": "/currencies",
+          "requiresAuth": false,
+          "description": "Lists all supported global currencies."
+        },
+        {
+          "name": "Get Live Exchange Rate",
+          "method": "GET",
+          "path": "/rates",
+          "queryParams": ["base", "quotes"],
+          "requiresAuth": false,
+          "description": "Fetches current exchange rate between currencies."
+        }
+      ]
+    },
+    {
+      "name": "User Profile",
+      "baseUrl": "https://api.bnxmail.com/api",
+      "endpoints": [
+        {
+          "name": "Get Authenticated User Profile",
+          "method": "GET",
+          "path": "/users/me",
+          "requiresAuth": true,
+          "description": "Fetches current user profile, role, and organization context using the host app's bearer token. (Login API excluded)."
+        }
+      ]
+    }
+  ]
+}
+
