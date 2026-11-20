@@ -1,0 +1,30 @@
+name: bnx_storage_standalone_bundle
+description: Self-contained enterprise macOS desktop storage & quota management suite with live backend APIs.
+version: 1.0.0
+homepage: https://bnxmail.com
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.5.1
+  google_fonts: ^6.2.1
+  lucide_icons_flutter: ^1.1.0
+  flutter_secure_storage: ^9.0.0
+  file_picker: ^8.0.0
+  http: ^1.2.1
+  go_router: ^14.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  assets:
+    - assets/
+    - lib/assets/

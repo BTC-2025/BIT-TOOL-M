@@ -1,0 +1,108 @@
+================================================================================
+PROMPT FOR SHIFTING BNX STORAGE MANAGEMENT SUITE TO ANOTHER PROJECT
+================================================================================
+
+Copy and paste the prompt below into your AI Agent or development task in the target project:
+
+---
+
+# Task: Integrate Standalone BNX Storage & Quota Management Suite
+
+I want to integrate the complete "Storage" section into this project using the self-contained bundle located at:
+`/Users/btrldev004/Desktop/bnx_storage_standalone_bundle`
+
+Please follow these instructions step-by-step:
+
+### 1. Copy the Storage Module
+Copy the entire `bnx_storage_standalone_bundle/lib/` contents into this project under:
+`lib/storage/` (or `lib/standalone_macos_storage/`)
+
+And copy the `assets/` folder to `assets/storage/` (or register the bundled assets).
+
+### 2. Add Required Dependencies in `pubspec.yaml`
+Ensure `pubspec.yaml` includes:
+```yaml
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.5.1
+  google_fonts: ^6.2.1
+  lucide_icons_flutter: ^1.1.0
+  flutter_secure_storage: ^9.0.0
+  file_picker: ^8.0.0
+  http: ^1.2.1
+
+flutter:
+  assets:
+    - assets/storage/
+    - lib/storage/assets/
+```
+
+### 3. Connect Authentication & API Base URL
+The storage suite automatically communicates with the live backend (`https://api.bnxmail.com` by default).
+
+To pass the authenticated user's session token:
+```dart
+import 'package:your_project/storage/standalone_macos_storage.dart';
+
+// When user logs in or at app launch:
+await TokenService.saveTokens(
+  accessToken: currentUserToken,
+);
+await TokenService.saveUserEmail('user@bnxmail.com');
+await TokenService.saveUserName('User Name');
+```
+
+If your backend is running on a different domain or port, set it once:
+```dart
+ApiClient.setBaseUrl('https://api.yourdomain.com');
+```
+
+### 4. Integration Options
+
+#### Option A: Full Page / Route
+```dart
+import 'package:flutter/material.dart';
+import 'package:your_project/storage/standalone_macos_storage.dart';
+
+// Push as a MaterialPageRoute or GoRoute:
+Navigator.of(context).push(
+  MaterialPageRoute(
+    builder: (context) => MacOsStoragePage(
+      onBack: () => Navigator.of(context).pop(),
+      backButtonTooltip: 'Back to Dashboard',
+    ),
+  ),
+);
+```
+
+#### Option B: Modal Dialog Launcher
+```dart
+import 'package:your_project/storage/standalone_macos_storage.dart';
+
+MacOsStorageBreakdownDialog.show(context);
+```
+
+#### Option C: Sidebar Storage Card Widget
+```dart
+import 'package:your_project/storage/standalone_macos_storage.dart';
+
+// Place inside your sidebar / navigation drawer:
+SidebarStorageCard(
+  title: 'Storage',
+  usageText: '0.01 GB of 5.00 GB used',
+  progress: 0.02,
+)
+```
+
+### 5. APIs Included & Working Endpoints
+- `GET /api/mail/storage-quota` (Real-time quota: limit, used, percentage, status)
+- `GET /api/vault` (List backed-up archives and data vault files)
+- `POST /api/vault/upload` (Multipart upload for backups)
+- `DELETE /api/vault/{id}` (Delete backup archive)
+- `GET /api/vault/{id}/download` (Download backup file stream)
+- `POST /api/mail/restore/{id}` (Restore deleted file from Recycle Bin)
+- `DELETE /api/mail/permanent/{id}` (Permanently purge file from Recycle Bin)
+
+Run `flutter pub get` and `flutter analyze` to verify clean compilation with 0 errors!
+================================================================================

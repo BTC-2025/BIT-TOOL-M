@@ -27,11 +27,10 @@ class MockTestAuthStorage implements AuthStorage {
 
 class TestAuthProvider extends AuthProvider {
   final bit.UserModel? _testUser;
-  final AuthStorage _storage;
+  final AuthStorage storage;
 
-  TestAuthProvider({required bit.UserModel user, required AuthStorage storage})
-      : _testUser = user,
-        _storage = storage;
+  TestAuthProvider({required bit.UserModel user, required this.storage})
+      : _testUser = user;
 
   @override
   bit.UserModel? get user => _testUser;
@@ -46,7 +45,7 @@ class TestAuthProvider extends AuthProvider {
   bool get hasError => false;
 
   @override
-  AuthStorage get authStorage => _storage;
+  AuthStorage get authStorage => storage;
 }
 
 void main() {

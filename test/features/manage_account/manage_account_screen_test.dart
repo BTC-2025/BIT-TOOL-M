@@ -111,8 +111,19 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 200));
 
-        // Verify storage header appears
-        expect(find.textContaining('Account storage'), findsWidgets);
+        // Verify storage appears in full page
+        expect(find.textContaining('Storage'), findsWidgets);
+
+        // Pop back to continue testing other tabs
+        final backBtn = find.byTooltip('Back to Account');
+        if (backBtn.evaluate().isNotEmpty) {
+          await tester.tap(backBtn.first);
+        } else {
+          final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+          navigator.pop();
+        }
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
 
         // Tap on 'B2Auth' tab
         await tester.tap(find.text('B2Auth').first);

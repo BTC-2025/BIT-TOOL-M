@@ -15,6 +15,7 @@ import '../data/providers/settings_provider.dart';
 import '../models/account_model.dart';
 import '../models/two_factor_model.dart';
 import '../../auth/sign_in_screen.dart';
+import '../../storage/pages/macos_storage_page.dart';
 
 class ManageAccountScreen extends ConsumerStatefulWidget {
   final int initialTab;
@@ -1290,7 +1291,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
               _buildTopAppBar(account, isDark, isMobile),
 
               // Mobile Horizontal Tab Bar (For responsive screens)
-              if (isMobile) _buildMobileTabBar(isDark),
+              if (isMobile) _buildMobileTabBar(account, isDark),
 
               // Content Area (Split Sidebar + Body on Desktop)
               Expanded(
@@ -1300,7 +1301,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Left Sidebar
-                          _buildDesktopSidebar(isDark),
+                          _buildDesktopSidebar(account, isDark),
 
                           // Vertical Divider
                           VerticalDivider(
@@ -1735,7 +1736,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
   // ═══════════════════════════════════════════════════════════════════════════
   // DESKTOP LEFT SIDEBAR (Exact match to Screenshots 1-5)
   // ═══════════════════════════════════════════════════════════════════════════
-  Widget _buildDesktopSidebar(bool isDark) {
+  Widget _buildDesktopSidebar(AccountModel account, bool isDark) {
     return Container(
       width: 250,
       color: isDark ? const Color(0xFF1E2022) : Colors.white,
@@ -1752,10 +1753,25 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
               padding: const EdgeInsets.only(bottom: 6),
               child: InkWell(
                 onTap: () {
-                  setState(() {
-                    _selectedTab = index;
-                    if (index == 0) _homeSubPage = 0;
-                  });
+                  if (index == 4) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => MacOsStoragePage(
+                          initialEmail: account.email,
+                          initialName: account.name,
+                          initialAvatarUrl: account.avatarUrl,
+                          onBack: () => Navigator.pop(context),
+                          backButtonTooltip: 'Back to Account',
+                        ),
+                      ),
+                    );
+                  } else {
+                    setState(() {
+                      _selectedTab = index;
+                      if (index == 0) _homeSubPage = 0;
+                    });
+                  }
                 },
                 borderRadius: BorderRadius.circular(24),
                 child: Container(
@@ -1852,7 +1868,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
   // ═══════════════════════════════════════════════════════════════════════════
   // MOBILE TAB BAR
   // ═══════════════════════════════════════════════════════════════════════════
-  Widget _buildMobileTabBar(bool isDark) {
+  Widget _buildMobileTabBar(AccountModel account, bool isDark) {
     return Container(
       height: 52,
       decoration: BoxDecoration(
@@ -1877,10 +1893,25 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
             padding: const EdgeInsets.only(right: 8),
             child: InkWell(
               onTap: () {
-                setState(() {
-                  _selectedTab = index;
-                  if (index == 0) _homeSubPage = 0;
-                });
+                if (index == 4) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MacOsStoragePage(
+                        initialEmail: account.email,
+                        initialName: account.name,
+                        initialAvatarUrl: account.avatarUrl,
+                        onBack: () => Navigator.pop(context),
+                        backButtonTooltip: 'Back to Account',
+                      ),
+                    ),
+                  );
+                } else {
+                  setState(() {
+                    _selectedTab = index;
+                    if (index == 0) _homeSubPage = 0;
+                  });
+                }
               },
               borderRadius: BorderRadius.circular(20),
               child: Container(
@@ -1946,6 +1977,15 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
   ) {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_selectedTab == 4) {
+      return MacOsStoragePage(
+        initialEmail: account.email,
+        initialName: account.name,
+        initialAvatarUrl: account.avatarUrl,
+        onBack: () => setState(() => _selectedTab = 0),
+      );
     }
 
     return SingleChildScrollView(
@@ -2147,7 +2187,20 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
         ],
       ),
       actionLabel: 'Manage storage',
-      onAction: () => setState(() => _selectedTab = 4),
+      onAction: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MacOsStoragePage(
+              initialEmail: account.email,
+              initialName: account.name,
+              initialAvatarUrl: account.avatarUrl,
+              onBack: () => Navigator.pop(context),
+              backButtonTooltip: 'Back to Account',
+            ),
+          ),
+        );
+      },
     );
 
     return Column(
@@ -4732,121 +4785,18 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 5. ACCOUNT STORAGE TAB
+  // 5. ACCOUNT STORAGE TAB (MacOsStoragePage Suite from standalone_macos_storage)
   // ═══════════════════════════════════════════════════════════════════════════
   Widget _buildAccountStorageTab(
     AccountModel account,
     bool isDark,
     bool isMobile,
   ) {
-    final quota = _storageQuota;
-    final fraction = quota != null ? quota.fraction : 0.0;
-    final usedText = quota != null
-        ? '${quota.usedFormatted} of ${quota.limitFormatted} used (${quota.percentageFormatted})'
-        : (_isLoadingStorageQuota ? 'Loading storage quota...' : 'Storage details unavailable');
-    final mailValue = quota != null ? quota.usedFormatted : '0 MB';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildInfoCard(
-          isDark: isDark,
-          title: 'Account storage',
-          subtitle:
-              'Storage used across BNX services like Mail, Drive, and Media.',
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: _isLoadingStorageQuota ? null : fraction,
-                      minHeight: 8,
-                      backgroundColor: isDark
-                          ? const Color(0xFF3C4043)
-                          : const Color(0xFFE8EAED),
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        quota != null ? quota.statusColor : const Color(0xFF1A73E8),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        usedText,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white : const Color(0xFF202124),
-                        ),
-                      ),
-                      if (quota != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: quota.statusColor.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            quota.status,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: quota.statusColor,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const Divider(),
-            _SettingRow(
-              isDark: isDark,
-              icon: Icons.mail_outline_rounded,
-              label: 'Bnx mail',
-              value: mailValue,
-            ),
-            _SettingRow(
-              isDark: isDark,
-              icon: Icons.cloud_outlined,
-              label: 'BNX DRIVE',
-              value: '0 MB',
-            ),
-            _SettingRow(
-              isDark: isDark,
-              icon: Icons.perm_media_outlined,
-              label: 'MEDIA & BACKUPS',
-              value: '0 MB',
-              showDivider: false,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: () => setState(() => _selectedTab = 4),
-              icon: const Icon(Icons.storage_rounded, size: 18),
-              label: const Text('Open Storage Manager'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1A73E8),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 40),
-      ],
+    return MacOsStoragePage(
+      initialEmail: account.email,
+      initialName: account.name,
+      initialAvatarUrl: account.avatarUrl,
+      onBack: () => setState(() => _selectedTab = 0),
     );
   }
 
