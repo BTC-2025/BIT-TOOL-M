@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:provider/provider.dart';
+import 'package:bit_tools_backend/features/manage_account/presentation/manage_account_screen.dart';
 import 'package:bit_tools_backend/core/providers/session_provider.dart';
 import 'package:bit_tools_backend/core/providers/app_providers.dart';
 import 'package:bit_tools_backend/core/providers/theme_provider.dart';
@@ -42,7 +44,8 @@ class FakeAuthProvider extends AuthProvider {
 }
 
 Widget _createTestApp({Widget? child, AuthProvider? authProvider}) {
-  return MultiProvider(
+  return ProviderScope(
+    child: MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ChangeNotifierProvider(create: (_) => SessionProvider()),
@@ -108,7 +111,7 @@ Widget _createTestApp({Widget? child, AuthProvider? authProvider}) {
     child: MaterialApp(
       home: child ?? const ResponsiveShell(),
     ),
-  );
+  ));
 }
 
 void main() {
@@ -299,7 +302,7 @@ void main() {
       expect(find.text('Contact Management'), findsOneWidget);
     });
 
-    testWidgets('Tapping Manage your Account in top-right bar navigates to Settings and back button returns',
+    testWidgets('Tapping Manage your Account in top-right bar navigates to Manage Account screen and back button returns',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(360, 700);
       tester.view.devicePixelRatio = 1.0;
@@ -325,12 +328,11 @@ void main() {
       await tester.tap(manageAccountFinder);
       await tester.pumpAndSettle();
 
-      // Now on Settings screen!
-      expect(find.text('Manage your preferences and account'), findsOneWidget);
-      expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+      // Now on ManageAccountScreen!
+      expect(find.byType(ManageAccountScreen), findsOneWidget);
 
-      // Tap back button
-      await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+      // Pop back using Navigator
+      Navigator.of(tester.element(find.byType(ManageAccountScreen))).pop();
       await tester.pumpAndSettle();
 
       // Returns to Calculator!

@@ -5,6 +5,9 @@ import '../../core/providers/theme_provider.dart';
 import '../../core/providers/auth_provider.dart';
 import '../../core/widgets/user_avatar.dart';
 import '../auth/sign_in_screen.dart';
+import '../../core/auth/auth_storage.dart';
+import '../manage_account/core/network/token_service.dart';
+import '../manage_account/presentation/manage_account_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -431,8 +434,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     : const Color(0xFF64748B),
               ),
             ),
-            onSelected: (value) {
-              if (value == 'switch') {
+            onSelected: (value) async {
+              if (value == 'manage') {
+                final authStorage = authProvider?.authStorage ?? AuthStorage();
+                final token = await authStorage.getToken() ?? '';
+                if (token.isNotEmpty) {
+                  await TokenService.syncWithAuth(
+                    token: token,
+                    email: user.email,
+                    name: user.displayName,
+                    avatarUrl: user.profilePictureUrl,
+                  );
+                }
+                if (!mounted) return;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ManageAccountScreen(
+                      initialEmail: user.email,
+                      initialName: user.displayName,
+                      initialAvatarUrl: user.profilePictureUrl,
+                      initialAccountType: user.accountType,
+                    ),
+                  ),
+                );
+              } else if (value == 'switch') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const SignInScreen()),
@@ -442,6 +468,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
               }
             },
             itemBuilder: (context) => [
+              PopupMenuItem<String>(
+                value: 'manage',
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.manage_accounts_outlined,
+                      size: 18,
+                      color: isDark
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF64748B),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Manage Account',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
               PopupMenuItem<String>(
                 value: 'switch',
                 child: Row(

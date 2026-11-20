@@ -1,0 +1,119 @@
+class UserModel {
+  final String name;
+  final String email;
+  final String? avatarUrl;
+  final String? firstName;
+  final String? lastName;
+  final String? username;
+  final String? jobTitle;
+  final String? location;
+  final String? phone;
+  final String? recoveryEmail;
+  final String? backupPhone;
+  final String? accountType;
+
+  const UserModel({
+    required this.name,
+    required this.email,
+    this.avatarUrl,
+    this.firstName,
+    this.lastName,
+    this.username,
+    this.jobTitle,
+    this.location,
+    this.phone,
+    this.recoveryEmail,
+    this.backupPhone,
+    this.accountType,
+  });
+
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    final firstName = json['firstName']?.toString() ?? '';
+    final lastName = json['lastName']?.toString() ?? '';
+    final fullName =
+        json['name']?.toString() ??
+        json['fullName']?.toString() ??
+        [firstName, lastName].where((s) => s.isNotEmpty).join(' ');
+
+    final email =
+        json['email']?.toString() ?? json['emailAddress']?.toString() ?? '';
+
+    return UserModel(
+      name: fullName.isNotEmpty
+          ? fullName
+          : (json['username']?.toString() ?? email),
+      email: email,
+      avatarUrl: () {
+        final ppUrl = json['profilePictureUrl']?.toString();
+        if (ppUrl != null && ppUrl.isNotEmpty && ppUrl != 'null') {
+          return ppUrl;
+        }
+        final pp = json['profilePicture']?.toString();
+        if (pp != null && pp.isNotEmpty && pp != 'null') {
+          if (pp.startsWith('/') || pp.startsWith('http')) return pp;
+          final userOrEmail = email.isNotEmpty ? email : (json['username']?.toString() ?? '');
+          return userOrEmail.isNotEmpty ? '/api/users/profile-picture/$userOrEmail' : pp;
+        }
+        final av = json['avatarUrl']?.toString() ?? json['avatar']?.toString();
+        if (av != null && av.isNotEmpty && av != 'null') {
+          return av;
+        }
+        return null;
+      }(),
+      firstName: firstName.isNotEmpty ? firstName : null,
+      lastName: lastName.isNotEmpty ? lastName : null,
+      username: json['username']?.toString(),
+      jobTitle: json['jobTitle']?.toString() ?? json['designation']?.toString() ?? json['title']?.toString(),
+      location: json['location']?.toString() ?? json['city']?.toString(),
+      phone: json['phone']?.toString() ?? json['phoneNumber']?.toString() ?? json['contact']?.toString(),
+      recoveryEmail: json['recoveryEmail']?.toString() ?? json['backupEmail']?.toString(),
+      backupPhone: json['backupPhone']?.toString() ?? json['recoveryPhone']?.toString(),
+      accountType: json['accountType']?.toString() ?? json['mode']?.toString() ?? json['type']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    'email': email,
+    if (avatarUrl != null) 'avatarUrl': avatarUrl,
+    if (firstName != null) 'firstName': firstName,
+    if (lastName != null) 'lastName': lastName,
+    if (username != null) 'username': username,
+    if (jobTitle != null) 'jobTitle': jobTitle,
+    if (location != null) 'location': location,
+    if (phone != null) 'phone': phone,
+    if (recoveryEmail != null) 'recoveryEmail': recoveryEmail,
+    if (backupPhone != null) 'backupPhone': backupPhone,
+    if (accountType != null) 'accountType': accountType,
+  };
+
+  UserModel copyWith({
+    String? name,
+    String? email,
+    String? avatarUrl,
+    String? firstName,
+    String? lastName,
+    String? username,
+    String? jobTitle,
+    String? location,
+    String? phone,
+    String? recoveryEmail,
+    String? backupPhone,
+    String? accountType,
+  }) {
+    return UserModel(
+      name: name ?? this.name,
+      email: email ?? this.email,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      username: username ?? this.username,
+      jobTitle: jobTitle ?? this.jobTitle,
+      location: location ?? this.location,
+      phone: phone ?? this.phone,
+      recoveryEmail: recoveryEmail ?? this.recoveryEmail,
+      backupPhone: backupPhone ?? this.backupPhone,
+      accountType: accountType ?? this.accountType,
+    );
+  }
+}

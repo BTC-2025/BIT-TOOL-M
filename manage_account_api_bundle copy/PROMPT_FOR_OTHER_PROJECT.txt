@@ -1,0 +1,254 @@
+# ════════════════════════════════════════════════════════════════════════════════
+# MASTER INSTRUCTION PROMPT: CONNECT "MANAGE YOUR ACCOUNT" APIs TO FRONTEND
+# ════════════════════════════════════════════════════════════════════════════════
+# Copy everything below this line and paste it into your target project's AI assistant / developer prompt:
+
+You are tasked with connecting the backend APIs for the "Manage Your Account" pages in this Flutter project. 
+The UI screens and pages have already been designed and built in this project.
+We have copied the complete API bundle into the project folder under `manage_account_api_bundle/` (or merge the files into your `lib/` directory).
+
+Here is the exact step-by-step implementation guide:
+
+---
+
+### STEP 1: Verify / Add Required Dependencies in `pubspec.yaml`
+Ensure these dependencies exist in your `pubspec.yaml`:
+```yaml
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.6.1
+  http: ^1.2.2
+  flutter_secure_storage: ^9.2.2
+  flutter_dotenv: ^5.2.1
+  file_picker: ^8.0.3
+  http_parser: any
+```
+Run `flutter pub get`.
+
+---
+
+### STEP 2: Configure Environment & Base URL
+1. Ensure `.env` contains:
+```env
+BASE_URL=https://api.bnxmail.com
+```
+2. In `main()`, ensure dotenv is loaded before runApp:
+```dart
+await dotenv.load(fileName: ".env");
+```
+(If no `.env` file exists, `ApiClient` safely defaults to `https://api.bnxmail.com`).
+
+3. Make sure the root widget is wrapped in `ProviderScope`:
+```dart
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
+  runApp(const ProviderScope(child: MyApp()));
+}
+```
+
+---
+
+### STEP 3: File Structure of the Provided API Bundle
+The following files provide all data contracts, network clients, repositories, and state managers:
+- `core/network/api_client.dart` -> Centralized HTTP client (auth header injection, retry, 401 refresh)
+- `core/network/api_exception.dart` -> Uniform API exception wrapper
+- `core/network/token_service.dart` -> Token persistence and multi-account cache
+- `core/widgets/avatar_widget.dart` -> Dynamic letter/network avatar renderer
+- `models/account_model.dart` -> Account data model
+- `models/user_model.dart` -> User profile data model
+- `models/user_settings_model.dart` -> Settings & 2FA status data model
+- `models/two_factor_model.dart` -> 2FA setup QR & secret model
+- `data/repositories/user_repository.dart` -> Profile, Connected Emails, Sub-IDs, Password APIs
+- `data/repositories/storage_repository.dart` -> Mailbox Storage Quota API (`StorageQuota` model)
+- `data/repositories/subscription_repository.dart` -> Cliks Business subscription API
+- `data/repositories/settings_repository.dart` -> 2FA (Setup, Verify, Disable) & Settings APIs
+- `data/repositories/auth_repository.dart` -> Login, Logout, Session handling
+- `data/providers/account_provider.dart` -> Riverpod `accountsProvider` and `activeAccountProvider`
+- `data/providers/settings_provider.dart` -> Riverpod `settingsProvider` for 2FA and app settings
+- `reference_ui/manage_account_screen_reference.dart` -> Full reference UI showing exact state bindings
+
+---
+
+### STEP 4: Initial Data Loading in your Account Page / Controller
+On page mount (e.g., in `initState` or inside a controller), trigger the following data fetches for the active user:
+
+```dart
+Future<void> loadAccountData(String email) async {
+  // 1. Storage Quota (used on Home card & Storage tab)
+  final quota = await StorageRepository.fetchStorageQuota();
+
+  // 2. Profile Details (used on Personal info tab)
+  final profileData = await UserRepository.getProfileData(email: email);
+
+  // 3. Connected Mail Accounts (used on Emails & Identities subpage)
+  final connectedEmails = await UserRepository.getConnectedEmails();
+
+  // 4. Sub-IDs (used on Team & Sub-IDs tab)
+  final subIds = await UserRepository.listSubIds();
+
+  // 5. Cliks Business Subscription (used on Payment & Subscription tab)
+  final subscription = await SubscriptionRepository.getBusinessSubscription(email);
+
+  // 6. Settings & 2FA Status (used on B2Auth tab & Signing in to BNX subpage)
+  await ref.read(settingsProvider.notifier).loadAllSettings();
+}
+```
+
+---
+
+### STEP 5: Wire Up Each Tab & Action to Backend APIs
+
+#### 1. Home Tab & Storage Quota
+- **API**: `GET /api/mail/storage-quota`
+- **Method**: `StorageRepository.fetchStorageQuota()`
+- **UI Binding**:
+  - `quota.usedFormatted` (e.g. `8.88 MB`)
+  - `quota.limitFormatted` (e.g. `5 GB`)
+  - `quota.fraction` (e.g. `0.0017` for `LinearProgressIndicator`)
+  - `quota.status` (`Normal`, `Warning`, `High`, `Critical`)
+  - `quota.statusColor` (Green, Amber, Orange, Red)
+
+#### 2. Emails & Identities Subpage (Manage Your Emails)
+- **List emails**: `UserRepository.getConnectedEmails()` -> `GET /api/emails/list`
+- **Switch primary email**:
+  ```dart
+  final success = await UserRepository.switchPrimaryMailbox(emailId);
+  // Reload list on success:
+  if (success) await loadConnectedEmails();
+  ```
+- **Create mailbox / alias**:
+  ```dart
+  await UserRepository.createMailbox(
+    emailName: emailNameController.text.trim(),
+    password: passwordController.text,
+  );
+  // Reload list on success
+  ```
+- **Initiate Email Verification**:
+  ```dart
+  final success = await UserRepository.initiateEmailVerification(emailId);
+  ```
+
+#### 3. Personal Info Tab (Basic Info & Contact Details)
+- **Fetch profile details**: `UserRepository.getProfileData(email: email)` -> populates `nickname`, `displayName`, `gender`, `homeAddress`, `workAddress`, `occupation`, `bio`.
+- **Save field updates**: `UserRepository.updateProfile(fields, email: email)` -> `PATCH /api/users/profile`
+  - Name: `updateProfile({'firstName': first, 'lastName': last, 'name': newName, 'fullName': newName})`
+  - Nickname: `updateProfile({'nickname': newNickname})`
+  - Display Name: `updateProfile({'displayName': newDisplayName})`
+  - Birthday: `updateProfile({'dob': pickedDate.toIso8601String(), 'birthday': pickedDate.toIso8601String()})`
+  - Gender: `updateProfile({'gender': 'Male'})` (`'Female'`, `'Male'`, `'Non-binary'`, `'Rather not say'`)
+  - Recovery Email: `updateProfile({'recoveryEmail': newEmail})`
+  - Phone: `updateProfile({'phoneNumber': newPhone, 'phone': newPhone})`
+  - Home/Work Address: `updateProfile({'homeAddress': address})` or `updateProfile({'workAddress': address})`
+  - Occupation: `updateProfile({'occupation': occupation})`
+  - Bio: `updateProfile({'bio': bio})`
+- **Upload Profile Photo**:
+  ```dart
+  final result = await FilePicker.platform.pickFiles(type: FileType.image, withData: true);
+  if (result != null) {
+    final file = result.files.first;
+    await ref.read(accountsProvider.notifier).updateAvatar(
+      account.id,
+      localPreviewUri,
+      bytes: file.bytes,
+      filePath: file.path,
+      filename: file.name,
+    );
+  }
+  ```
+- **Remove Profile Photo**:
+  ```dart
+  await ref.read(accountsProvider.notifier).removeAvatar(account.id);
+  ```
+
+#### 4. Payment & Subscription Tab
+- **API**: `GET https://cliks.beta-softnet.com/api/v1/business/subscription/{userEmail}`
+- **Method**: `SubscriptionRepository.getBusinessSubscription(email)`
+- **UI Binding**:
+  - `data['plan_name']` -> Plan Name
+  - `data['subscription_days_remaining']` -> Remaining Days
+  - `data['when_subscribed']` -> Subscribed Date
+  - `data['next_due_date']` -> Next Billing Due Date
+
+#### 5. Team & Sub-IDs Tab
+- **List Sub-IDs**: `UserRepository.listSubIds()` -> `GET /api/subid/list`
+- **Create Sub-ID**:
+  ```dart
+  await UserRepository.createSubId(
+    prefix: prefixController.text.trim(),
+    password: passwordController.text,
+    firstName: firstNameController.text.trim(),
+    lastName: lastNameController.text.trim(),
+    accountType: isPersonal ? 'PERSONAL' : 'BUSINESS',
+    permissions: selectedPermissionsList, // List<int> e.g. [1, 2, 3]
+  );
+  ```
+- **Delete Sub-ID**:
+  ```dart
+  await UserRepository.deleteSubId(subId);
+  ```
+- **Approve Child Account**:
+  ```dart
+  await UserRepository.approveChildAccount(childUserId);
+  ```
+
+#### 6. B2Auth Tab & Signing in to BNX
+- **2FA Status**:
+  ```dart
+  final is2Fa = ref.watch(settingsProvider).settings?.twoFactorEnabled ?? false;
+  ```
+- **Setup 2FA**:
+  ```dart
+  final res = await ref.read(settingsProvider.notifier).setup2FA();
+  if (res.success && res.data != null) {
+    // res.data.secret -> secret key
+    // res.data.qrCode -> QR code base64 or url
+    // Display QR dialog to user
+  }
+  ```
+- **Verify 2FA TOTP Code**:
+  ```dart
+  final res = await ref.read(settingsProvider.notifier).verify2FA(sixDigitCode);
+  if (res.success) {
+    // 2FA is now active!
+  }
+  ```
+- **Disable 2FA**:
+  ```dart
+  final res = await ref.read(settingsProvider.notifier).disable2FA();
+  ```
+- **Change Password**:
+  ```dart
+  await UserRepository.changePassword(currentPassword, newPassword);
+  ```
+
+#### 7. Sign Out
+- **Method**:
+  ```dart
+  await ref.read(accountsProvider.notifier).signOutSingleAccount(
+    targetEmail: activeAccount.email,
+    ref: ref,
+    context: context,
+  );
+  // or simple logout:
+  await AuthRepository.logout();
+  ```
+
+---
+
+### STEP 6: Error Handling Convention
+Always wrap calls in `try/catch` and inspect `ApiException` for user-friendly error messages:
+```dart
+try {
+  // api call
+} catch (e) {
+  final message = e is ApiException ? e.message : e.toString();
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
+  );
+}
+```
+
+Please proceed to hook up the frontend pages to these repositories and methods now.

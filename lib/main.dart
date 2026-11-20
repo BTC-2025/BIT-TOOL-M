@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:provider/provider.dart';
 
 // Themes
@@ -14,8 +16,12 @@ import 'core/providers/theme_provider.dart';
 // Shell
 import 'core/widgets/splash_screen.dart';
 
-void main() {
-  runApp(const BITToolApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (_) {}
+  runApp(const ProviderScope(child: BITToolApp()));
 }
 
 class BITToolApp extends StatelessWidget {

@@ -13,6 +13,9 @@ import '../../features/weather/weather_screen.dart';
 import '../../features/keyboard/keyboard_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/auth/sign_in_screen.dart';
+import '../../features/manage_account/core/network/token_service.dart';
+import '../../features/manage_account/presentation/manage_account_screen.dart';
+import '../auth/auth_storage.dart';
 
 class _SearchResultItem {
   final String title;
@@ -1517,10 +1520,36 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                       OutlinedButton(
                         onPressed: () {
                           Navigator.pop(dialogContext);
-                          if (_currentIndex != 6) {
-                            _previousIndex = _currentIndex;
-                          }
-                          setState(() => _currentIndex = 6);
+                          final email = user.email;
+                          final name = user.displayName;
+                          final avatar = user.profilePictureUrl;
+                          final accountType = user.accountType;
+
+                          try {
+                            final authStorage = auth?.authStorage ?? AuthStorage();
+                            authStorage.getToken().then((token) {
+                              if (token != null && token.isNotEmpty) {
+                                TokenService.syncWithAuth(
+                                  token: token,
+                                  email: email,
+                                  name: name,
+                                  avatarUrl: avatar,
+                                );
+                              }
+                            }).catchError((_) {});
+                          } catch (_) {}
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ManageAccountScreen(
+                                initialEmail: email,
+                                initialName: name,
+                                initialAvatarUrl: avatar,
+                                initialAccountType: accountType,
+                              ),
+                            ),
+                          );
                         },
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(
@@ -1659,6 +1688,105 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                           _previousIndex = _currentIndex;
                         }
                         setState(() => _currentIndex = 6);
+                      },
+                    ),
+                    FutureBuilder<List<Map<String, dynamic>>>(
+                      future: TokenService.getSavedAccountsFromRegistry(),
+                      builder: (context, snapshot) {
+                        final list = snapshot.data ?? [];
+                        final curEmail = user?.email.trim().toLowerCase() ?? '';
+                        final others = list.where((a) {
+                          final aEmail = a['email']?.toString().trim().toLowerCase() ?? '';
+                          return aEmail.isNotEmpty && aEmail != curEmail;
+                        }).toList();
+
+                        if (others.isEmpty) return const SizedBox.shrink();
+
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Divider(
+                              color: isDark
+                                  ? const Color(0xFF334155)
+                                  : const Color(0xFFF1F5F9),
+                              height: 1,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 16, top: 12, bottom: 4),
+                              child: Text(
+                                'Other accounts',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                            ),
+                            for (final acc in others) ...[
+                              ListTile(
+                                leading: CircleAvatar(
+                                  radius: 14,
+                                  backgroundColor: const Color(0xFF195BAC),
+                                  child: Text(
+                                    (acc['name']?.toString() ?? acc['email']?.toString() ?? '?')
+                                        .substring(0, 1)
+                                        .toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                title: Text(
+                                  acc['name']?.toString() ?? acc['email']?.toString() ?? '',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark
+                                        ? const Color(0xFFE2E8F0)
+                                        : const Color(0xFF334155),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                subtitle: Text(
+                                  acc['email']?.toString() ?? '',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: isDark
+                                        ? const Color(0xFF64748B)
+                                        : const Color(0xFF94A3B8),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                dense: true,
+                                onTap: () async {
+                                  Navigator.pop(dialogContext);
+                                  final email = acc['email']?.toString() ?? '';
+                                  final token = acc['accessToken']?.toString() ?? '';
+                                  if (email.isNotEmpty) {
+                                    await TokenService.switchActiveAccountSession(email);
+                                    if (token.isNotEmpty) {
+                                      final authStorage = auth?.authStorage ?? AuthStorage();
+                                      await authStorage.saveToken(token);
+                                    }
+                                    await auth?.fetchCurrentUser();
+                                  }
+                                },
+                              ),
+                            ],
+                            Divider(
+                              color: isDark
+                                  ? const Color(0xFF334155)
+                                  : const Color(0xFFF1F5F9),
+                              height: 1,
+                            ),
+                          ],
+                        );
                       },
                     ),
                     ListTile(
