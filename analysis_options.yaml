@@ -10,4 +10,9 @@ analyzer:
     - "manage_account_api_bundle copy/**"
     - standalone_macos_storage/**
     - bit_tool_api_module/**
+
 include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    avoid_print: false
