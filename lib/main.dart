@@ -16,10 +16,16 @@ import 'core/providers/theme_provider.dart';
 // Shell
 import 'core/widgets/splash_screen.dart';
 
+// Manage account token service for clean desktop state
+import 'features/manage_account/core/network/token_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await dotenv.load(fileName: ".env");
+  } catch (_) {}
+  try {
+    await TokenService.clearAll();
   } catch (_) {}
   runApp(const ProviderScope(child: BITToolApp()));
 }

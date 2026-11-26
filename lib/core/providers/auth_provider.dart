@@ -45,11 +45,12 @@ class AuthProvider extends ChangeNotifier {
       _status == AuthStatus.tokenExpired;
 
   /// Main initialization flow executed when Bit Tool starts:
-  /// 1. Inspect URL for ?token=...
-  /// 2. If found, save to AuthStorage and remove from visible URL.
-  /// 3. If token exists in storage, call GET /api/users/me.
-  /// 4. If no token, set unauthenticated state.
-  Future<void> initializeAuth() async {
+  /// 1. Inspect URL for ?token=... (SSO redirect flow)
+  /// 2. If SSO token found, save to AuthStorage and fetch profile.
+  /// 3. By default, do NOT auto-login any account on app startup. Clear any stale stored token
+  ///    and remain in the unauthenticated state until the user explicitly signs in.
+  /// 4. If [autoLogin] is true (e.g. for specific test scenarios), inspect AuthStorage for a persisted token.
+  Future<void> initializeAuth({bool autoLogin = false}) async {
     if (_isInitializing) return;
     _isInitializing = true;
 
@@ -58,20 +59,25 @@ class AuthProvider extends ChangeNotifier {
       final urlToken = UrlTokenHelper.extractAndClearToken();
       if (urlToken != null && urlToken.trim().isNotEmpty) {
         await _authStorage.saveToken(urlToken.trim());
-      }
-
-      // 2. Check for persisted token
-      final storedToken = await _authStorage.getToken();
-      if (storedToken == null || storedToken.trim().isEmpty) {
-        _status = AuthStatus.unauthenticated;
-        _user = null;
-        _errorMessage = null;
-        notifyListeners();
+        await fetchCurrentUser();
         return;
       }
 
-      // 3. Fetch authenticated user profile
-      await fetchCurrentUser();
+      if (autoLogin) {
+        final storedToken = await _authStorage.getToken();
+        if (storedToken != null && storedToken.trim().isNotEmpty) {
+          await fetchCurrentUser();
+          return;
+        }
+      }
+
+      // Do NOT auto-login any account on app startup.
+      // Clear any stored token so no account is auto-authenticated on launch.
+      await _authStorage.removeToken();
+      _status = AuthStatus.unauthenticated;
+      _user = null;
+      _errorMessage = null;
+      notifyListeners();
     } finally {
       _isInitializing = false;
     }

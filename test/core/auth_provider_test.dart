@@ -42,7 +42,38 @@ void main() {
     });
 
     test(
-      'TEST 1: Valid token -> fetches profile and sets Authenticated state',
+      'Default initializeAuth (autoLogin: false) does NOT auto-login and clears stored token',
+      () async {
+        await storage.saveToken('PERSISTED_TOKEN');
+
+        var apiCalled = false;
+        final mockClient = MockClient((request) async {
+          apiCalled = true;
+          return http.Response(validUserJson, 200);
+        });
+
+        final userApiService = UserApiService(
+          apiClient: ApiClient(client: mockClient),
+          authStorage: storage,
+        );
+
+        final authProvider = AuthProvider(
+          authStorage: storage,
+          userApiService: userApiService,
+        );
+
+        await authProvider.initializeAuth(); // default autoLogin: false
+
+        expect(authProvider.status, AuthStatus.unauthenticated);
+        expect(authProvider.isAuthenticated, false);
+        expect(authProvider.user, isNull);
+        expect(apiCalled, false);
+        expect(await storage.hasToken(), false);
+      },
+    );
+
+    test(
+      'TEST 1: Valid token -> fetches profile when autoLogin is true',
       () async {
         await storage.saveToken('VALID_TOKEN');
 
@@ -62,7 +93,7 @@ void main() {
 
         expect(authProvider.status, AuthStatus.unauthenticated);
 
-        await authProvider.initializeAuth();
+        await authProvider.initializeAuth(autoLogin: true);
 
         expect(authProvider.status, AuthStatus.authenticated);
         expect(authProvider.isAuthenticated, true);
@@ -121,7 +152,7 @@ void main() {
           userApiService: userApiService,
         );
 
-        await authProvider.initializeAuth();
+        await authProvider.initializeAuth(autoLogin: true);
 
         expect(authProvider.status, AuthStatus.tokenExpired);
         expect(authProvider.isAuthenticated, false);
@@ -150,7 +181,7 @@ void main() {
           ),
         );
 
-        await freshAuthProvider.initializeAuth();
+        await freshAuthProvider.initializeAuth(autoLogin: true);
 
         expect(freshAuthProvider.status, AuthStatus.authenticated);
         expect(freshAuthProvider.user?.email, 'user@example.com');
@@ -181,7 +212,7 @@ void main() {
           userApiService: userApiService,
         );
 
-        await authProvider.initializeAuth();
+        await authProvider.initializeAuth(autoLogin: true);
 
         expect(authProvider.status, AuthStatus.authenticationError);
         expect(authProvider.errorMessage, contains('internet connection'));
@@ -218,7 +249,7 @@ void main() {
           ),
         );
 
-        await authProvider.initializeAuth();
+        await authProvider.initializeAuth(autoLogin: true);
 
         expect(authProvider.status, AuthStatus.authenticationError);
         expect(
@@ -249,7 +280,7 @@ void main() {
         ),
       );
 
-      await authProvider.initializeAuth();
+      await authProvider.initializeAuth(autoLogin: true);
       expect(authProvider.isAuthenticated, true);
 
       await authProvider.signOut();

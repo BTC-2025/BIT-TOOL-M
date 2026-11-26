@@ -237,7 +237,7 @@ void main() {
             authStorage: storage,
           ),
         );
-        await authProvider.initializeAuth();
+        await authProvider.initializeAuth(autoLogin: true);
 
         final apiService = NotificationApiService(
           apiClient: ApiClient(client: mockClient),
@@ -281,7 +281,7 @@ void main() {
             authStorage: storage,
           ),
         );
-        await authProvider.initializeAuth();
+        await authProvider.initializeAuth(autoLogin: true);
 
         final apiService = NotificationApiService(
           apiClient: ApiClient(client: mockClient),
@@ -370,7 +370,7 @@ void main() {
             authStorage: storage,
           ),
         );
-        await authProvider.initializeAuth();
+        await authProvider.initializeAuth(autoLogin: true);
 
         final apiService = NotificationApiService(
           apiClient: ApiClient(client: mockClient),
